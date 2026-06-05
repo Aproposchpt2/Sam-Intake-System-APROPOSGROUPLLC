@@ -69,26 +69,9 @@ function buildHtml(r) {
   </div></body></html>`;
 }
 
-// ---- PDF render: Chromium (default) or Adobe (PDF_RENDERER=adobe) ---------
+// ---- PDF render: Adobe only (PDF_RENDERER=adobe is set in netlify.toml) ----
 async function renderPdf(html) {
-  return process.env.PDF_RENDERER === "adobe" ? renderViaAdobe(html) : renderViaChromium(html);
-}
-
-// Self-contained: serverless Chromium prints the same HTML to PDF. No vendor, no creds.
-async function renderViaChromium(html) {
-  const chromium = (await import("@sparticuz/chromium")).default;
-  const puppeteer = (await import("puppeteer-core")).default;
-  const browser = await puppeteer.launch({
-    args: chromium.args,
-    executablePath: await chromium.executablePath(),
-    headless: chromium.headless,
-  });
-  try {
-    const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: "networkidle0" });
-    const pdf = await page.pdf({ printBackground: true, preferCSSPageSize: true });
-    return Buffer.from(pdf);
-  } finally { await browser.close(); }
+  return renderViaAdobe(html);
 }
 
 // Optional vendor path (Adobe HTML->PDF). Only used if PDF_RENDERER=adobe.
