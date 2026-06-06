@@ -288,11 +288,9 @@ async function load() {
   document.getElementById(id).addEventListener('change', applyFilters));
 document.getElementById('searchInput').addEventListener('input', applyFilters);
 
-// Auth starts the pipeline on success
-authReady().then(authed => { if (authed) load(); });
 </script>
 
-<!-- Supabase auth -->
+<!-- Supabase auth — must load before authReady() is called -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
 const SUPA_URL = "https://judislfknmhofcgzyozc.supabase.co";
@@ -364,6 +362,9 @@ sb2.auth.onAuthStateChange((event, session) => {
     load();
   }
 });
+
+// Start auth check — Supabase is now loaded
+authReady().then(authed => { if (authed) load(); });
 </script>
 </body>
 </html>
