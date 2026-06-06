@@ -1,4 +1,4 @@
-'use strict';
+﻿'use strict';
 // pipeline-otp-verify.js
 // POST { email, code } → verifies code, returns session token.
 
@@ -11,6 +11,7 @@ const headers = {
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SERVICE_KEY  = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+const ANON_KEY     = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp1ZGlzbGZrbm1ob2ZjZ3p5b3pjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMDI3ODAsImV4cCI6MjA5Mjc3ODc4MH0.Kxpe0kJt0k7ZchYu70BOwm4KdT0C5aSsyeR1ov6NlQ0';
 
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers, body: '' };
@@ -27,7 +28,7 @@ exports.handler = async (event) => {
   // Look up the code
   const res = await fetch(
     `${SUPABASE_URL}/rest/v1/pipeline_otp?email=eq.${encodeURIComponent(email)}&code=eq.${encodeURIComponent(code)}&used=eq.false&order=created_at.desc&limit=1`,
-    { headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` } }
+    { headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` } }
   );
   const rows = await res.json();
 
@@ -45,7 +46,7 @@ exports.handler = async (event) => {
   // Mark used
   await fetch(`${SUPABASE_URL}/rest/v1/pipeline_otp?id=eq.${row.id}`, {
     method: 'PATCH',
-    headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}`, 'Content-Type': 'application/json' },
+    headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ used: true }),
   });
 
@@ -54,3 +55,4 @@ exports.handler = async (event) => {
 
   return { statusCode: 200, headers, body: JSON.stringify({ ok: true, token, email }) };
 };
+

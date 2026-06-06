@@ -1,4 +1,4 @@
-'use strict';
+﻿'use strict';
 // pipeline-otp-send.js
 // POST { email } → generates 6-digit code, stores in Supabase, emails via Resend.
 
@@ -11,6 +11,8 @@ const headers = {
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SERVICE_KEY  = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+// Anon key used for pipeline_otp table (RLS allows anon access)
+const ANON_KEY     = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp1ZGlzbGZrbm1ob2ZjZ3p5b3pjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMDI3ODAsImV4cCI6MjA5Mjc3ODc4MH0.Kxpe0kJt0k7ZchYu70BOwm4KdT0C5aSsyeR1ov6NlQ0';
 const RESEND_KEY   = process.env.RESEND_API_KEY;
 const FROM_EMAIL   = process.env.RESEND_FROM_EMAIL || 'alerts@aproposgroupllc.com';
 const OTP_MINUTES  = 15;
@@ -53,12 +55,12 @@ exports.handler = async (event) => {
   // Store code — delete any existing unused codes for this email first
   await fetch(`${SUPABASE_URL}/rest/v1/pipeline_otp?email=eq.${encodeURIComponent(email)}&used=eq.false`, {
     method: 'DELETE',
-    headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` },
+    headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` },
   });
 
   const saveRes = await fetch(`${SUPABASE_URL}/rest/v1/pipeline_otp`, {
     method: 'POST',
-    headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}`, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+    headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}`, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
     body: JSON.stringify({ email, code, expires_at: expires }),
   });
   if (!saveRes.ok) return { statusCode: 500, headers, body: JSON.stringify({ error: 'Could not generate code. Try again.' }) };
@@ -99,3 +101,4 @@ exports.handler = async (event) => {
 
   return { statusCode: 200, headers, body: JSON.stringify({ ok: true }) };
 };
+
