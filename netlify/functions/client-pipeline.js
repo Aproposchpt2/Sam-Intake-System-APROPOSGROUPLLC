@@ -28,11 +28,12 @@ function mmddyyyy(d) {
 function daysUntil(deadline) {
   if (!deadline) return null;
   const ms = new Date(deadline) - new Date();
-  return Math.ceil(ms / (1000 * 60 * 60 * 24));
+  // Use floor so a deadline expiring today at 8am (negative ms by afternoon) returns 0 or negative
+  return Math.floor(ms / (1000 * 60 * 60 * 24));
 }
 
 function urgencyClass(days) {
-  if (days === null) return 'none';
+  if (days === null || days < 1) return 'none';
   if (days <= 7)  return 'hot';
   if (days <= 30) return 'warm';
   return 'ok';
@@ -104,10 +105,10 @@ exports.handler = async (event) => {
     };
   });
 
-  // Active = has a deadline AND that deadline is today or future.
-  // Pass ?include_closed=1 to see everything including expired/no-deadline.
+  // Active = has a deadline with at least 1 full day remaining.
+  // Pass ?include_closed=1 to see everything.
   const results = mapped
-    .filter(o => includeClosed || (o.days_left !== null && o.days_left >= 0))
+    .filter(o => includeClosed || (o.days_left !== null && o.days_left >= 1))
     .sort((a, b) => {
       if (!a.deadline && !b.deadline) return 0;
       if (!a.deadline) return 1;
