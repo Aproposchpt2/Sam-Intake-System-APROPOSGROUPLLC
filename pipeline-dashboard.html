@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Opportunity Pipeline — Custom IT Services LLC</title>
+<style>
+:root{
+  --bg:#0A1A3A;--surface:#0f2244;--panel:#132954;--line:rgba(91,175,255,.15);
+  --line2:rgba(91,175,255,.28);--text:#f0f6ff;--muted:#8facd0;--soft:#5a7899;
+  --gold:#d9a45b;--green:#2ecc8a;--amber:#f0a500;--red:#e05555;--cyan:#5BD3FF;
+  font-family:Arial,Helvetica,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.6}
+
+header{background:var(--surface);border-bottom:1px solid var(--line);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-mark{width:40px;height:40px;border-radius:10px;background:var(--bg);border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;color:var(--cyan)}
+.brand-name{font-size:1rem;font-weight:700;color:var(--text)}
+.brand-sub{font-size:.72rem;color:var(--muted);letter-spacing:.04em}
+.header-right{display:flex;align-items:center;gap:12px}
+.badge-wosb{background:rgba(91,211,255,.12);border:1px solid rgba(91,211,255,.3);color:var(--cyan);padding:4px 10px;border-radius:20px;font-size:.68rem;font-weight:700;letter-spacing:.04em}
+
+.page{max-width:1240px;margin:0 auto;padding:28px 20px}
+
+.entity-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin-bottom:22px;display:flex;flex-wrap:wrap;gap:20px;align-items:center}
+.entity-field{min-width:120px}
+.ef-label{font-size:.64rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);margin-bottom:3px}
+.ef-value{font-size:.92rem;font-weight:700;color:var(--text)}
+.ef-value.active{color:var(--green)}
+
+.controls{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px;align-items:center}
+.controls select,.controls input{background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:8px;color:var(--text);padding:8px 12px;font-size:.84rem;outline:none}
+.controls select:focus,.controls input:focus{border-color:var(--cyan)}
+.count-badge{font-size:.8rem;color:var(--muted);margin-left:auto}
+
+.opp-table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.opp-table th{font-size:.64rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);padding:11px 14px;text-align:left;border-bottom:1px solid var(--line);background:rgba(255,255,255,.03)}
+.opp-table td{padding:13px 14px;border-bottom:1px solid rgba(91,175,255,.07);vertical-align:top}
+.opp-table tr:last-child td{border-bottom:none}
+.opp-table tr:hover td{background:rgba(91,175,255,.05)}
+
+.title-cell a{color:var(--text);text-decoration:none;font-weight:600;font-size:.88rem;line-height:1.35;display:block}
+.title-cell a:hover{color:var(--cyan)}
+.agency-cell{font-size:.76rem;color:var(--muted);line-height:1.5}
+.naics-chip{display:inline-block;background:rgba(91,211,255,.1);border:1px solid rgba(91,211,255,.22);color:var(--cyan);padding:2px 7px;border-radius:4px;font-size:.68rem;font-weight:700;margin-top:3px}
+.type-chip{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.66rem;font-weight:700}
+.type-rfp{background:rgba(91,175,255,.15);color:#82b8ff}
+.type-rfq{background:rgba(144,238,144,.12);color:#90ee90}
+.type-ss{background:rgba(240,165,0,.12);color:var(--amber)}
+.type-rfi{background:rgba(169,147,255,.14);color:#c0a8ff}
+.type-other{background:rgba(255,255,255,.07);color:var(--muted)}
+.setaside-cell{font-size:.75rem;color:var(--muted)}
+
+.deadline-cell{text-align:center;white-space:nowrap}
+.days-badge{display:inline-block;padding:4px 9px;border-radius:6px;font-size:.72rem;font-weight:700}
+.days-hot{background:rgba(224,85,85,.2);color:#ff9999;border:1px solid rgba(224,85,85,.35)}
+.days-warm{background:rgba(240,165,0,.15);color:#ffc96b;border:1px solid rgba(240,165,0,.3)}
+.days-ok{background:rgba(46,204,138,.12);color:#7eedc0;border:1px solid rgba(46,204,138,.28)}
+.days-none{background:rgba(255,255,255,.05);color:var(--soft);border:1px solid var(--line)}
+
+.capgen-btn{background:rgba(91,211,255,.12);border:1px solid rgba(91,211,255,.3);color:var(--cyan);padding:5px 11px;border-radius:7px;font-size:.72rem;font-weight:700;cursor:pointer;white-space:nowrap;text-decoration:none;display:inline-block;transition:.18s}
+.capgen-btn:hover{background:rgba(91,211,255,.22);border-color:var(--cyan)}
+
+.empty{text-align:center;padding:52px;color:var(--soft)}
+.loading{text-align:center;padding:52px;color:var(--muted)}
+.stat-bar{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:20px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 18px;min-width:110px}
+.stat-val{font-size:1.6rem;font-weight:900;line-height:1;color:var(--text)}
+.stat-val.red{color:var(--red)}.stat-val.amber{color:var(--amber)}.stat-val.green{color:var(--green)}
+.stat-label{font-size:.64rem;text-transform:uppercase;letter-spacing:.08em;color:var(--soft);margin-top:4px}
+
+@media(max-width:800px){.opp-table th:nth-child(3),.opp-table td:nth-child(3),.opp-table th:nth-child(5),.opp-table td:nth-child(5){display:none}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="brand-mark">CI</div>
+    <div>
+      <div class="brand-name">CUSTOM IT SERVICES LLC</div>
+      <div class="brand-sub">SAM.gov Opportunity Pipeline · CapGen by AI4 Businesses</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="badge-wosb">WOSB Certified</span>
+    <span style="font-size:.72rem;color:var(--soft)">UEI: C13JZV6AY6L4 · CAGE: 79M55</span>
+  </div>
+</header>
+
+<div class="page">
+
+  <!-- Entity summary -->
+  <div class="entity-card">
+    <div class="entity-field"><div class="ef-label">SAM Status</div><div class="ef-value active">● Active</div></div>
+    <div class="entity-field"><div class="ef-label">Business Type</div><div class="ef-value">Small Business</div></div>
+    <div class="entity-field"><div class="ef-label">Location</div><div class="ef-value">Henderson, NV</div></div>
+    <div class="entity-field"><div class="ef-label">Primary NAICS</div><div class="ef-value">541519</div></div>
+    <div class="entity-field"><div class="ef-label">NAICS Monitored</div><div class="ef-value" id="naicsCount">—</div></div>
+    <div class="entity-field"><div class="ef-label">Last Refreshed</div><div class="ef-value" id="lastRefresh">—</div></div>
+    <div style="margin-left:auto"><button onclick="load()" style="background:var(--cyan);color:#0A1A3A;border:none;border-radius:8px;padding:9px 18px;font-weight:700;cursor:pointer;font-size:.82rem">Refresh Pipeline</button></div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stat-bar" id="statBar">
+    <div class="stat"><div class="stat-val" id="s-total">—</div><div class="stat-label">Total Opps</div></div>
+    <div class="stat"><div class="stat-val red" id="s-hot">—</div><div class="stat-label">Due &lt; 7 days</div></div>
+    <div class="stat"><div class="stat-val amber" id="s-warm">—</div><div class="stat-label">Due 7–30 days</div></div>
+    <div class="stat"><div class="stat-val green" id="s-ok">—</div><div class="stat-label">Due 30+ days</div></div>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <select id="naicsFilter"><option value="">All NAICS</option></select>
+    <select id="typeFilter">
+      <option value="">All types</option>
+      <option value="Solicitation">Solicitation</option>
+      <option value="Sources Sought">Sources Sought</option>
+      <option value="RFQ">RFQ</option>
+      <option value="RFI">RFI</option>
+    </select>
+    <select id="urgencyFilter">
+      <option value="">All deadlines</option>
+      <option value="hot">Due &lt; 7 days</option>
+      <option value="warm">Due 7–30 days</option>
+      <option value="ok">Due 30+ days</option>
+    </select>
+    <input type="search" id="searchInput" placeholder="Search title or agency…" style="min-width:220px"/>
+    <span class="count-badge" id="countBadge"></span>
+  </div>
+
+  <!-- Table -->
+  <table class="opp-table">
+    <thead>
+      <tr>
+        <th>Opportunity</th>
+        <th>Agency</th>
+        <th>Type</th>
+        <th>Set-Aside</th>
+        <th>NAICS</th>
+        <th style="text-align:center">Deadline</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="tbody"><tr><td colspan="7" class="loading">Loading pipeline…</td></tr></tbody>
+  </table>
+
+</div>
+
+<script>
+const UEI = 'C13JZV6AY6L4';
+let allOpps = [];
+let naicsClient = [];
+
+function typeClass(t) {
+  const tl = (t||'').toLowerCase();
+  if (tl.includes('solicitation')) return 'type-rfp';
+  if (tl.includes('rfq'))          return 'type-rfq';
+  if (tl.includes('sources'))      return 'type-ss';
+  if (tl.includes('rfi'))          return 'type-rfi';
+  return 'type-other';
+}
+
+function fmtDeadline(d) {
+  if (!d) return '—';
+  const dt = new Date(d);
+  return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function render(opps) {
+  const tbody = document.getElementById('tbody');
+  document.getElementById('countBadge').textContent = opps.length + ' opportunities';
+  if (!opps.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty">No opportunities match the current filters.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = opps.map(o => {
+    const daysCls = o.urgency === 'hot' ? 'days-hot' : o.urgency === 'warm' ? 'days-warm' : o.urgency === 'ok' ? 'days-ok' : 'days-none';
+    const daysLabel = o.days_left !== null ? (o.days_left <= 0 ? 'Closed' : o.days_left + 'd left') : 'No deadline';
+    const capgenUrl = `/capability-generator.html?uei=${UEI}`;
+    return `<tr>
+      <td class="title-cell">
+        <a href="${o.url}" target="_blank" rel="noopener">${o.title || 'Untitled'}</a>
+      </td>
+      <td class="agency-cell">${o.agency || '—'}</td>
+      <td><span class="type-chip ${typeClass(o.type)}">${o.type || '—'}</span></td>
+      <td class="setaside-cell">${o.set_aside || 'Unrestricted'}</td>
+      <td><span class="naics-chip">${o.naics || '—'}</span></td>
+      <td class="deadline-cell">
+        <div><span class="days-badge ${daysCls}">${daysLabel}</span></div>
+        <div style="font-size:.68rem;color:var(--soft);margin-top:3px">${fmtDeadline(o.deadline)}</div>
+      </td>
+      <td><a class="capgen-btn" href="${capgenUrl}" title="Generate capability statement">CapGen ↗</a></td>
+    </tr>`;
+  }).join('');
+}
+
+function applyFilters() {
+  const naics   = document.getElementById('naicsFilter').value;
+  const type    = document.getElementById('typeFilter').value;
+  const urgency = document.getElementById('urgencyFilter').value;
+  const search  = document.getElementById('searchInput').value.toLowerCase();
+
+  let filtered = allOpps;
+  if (naics)   filtered = filtered.filter(o => o.naics === naics);
+  if (type)    filtered = filtered.filter(o => (o.type||'').includes(type));
+  if (urgency) filtered = filtered.filter(o => o.urgency === urgency);
+  if (search)  filtered = filtered.filter(o =>
+    (o.title||'').toLowerCase().includes(search) ||
+    (o.agency||'').toLowerCase().includes(search)
+  );
+  render(filtered);
+}
+
+async function load() {
+  document.getElementById('tbody').innerHTML = '<tr><td colspan="7" class="loading">Fetching live opportunities from SAM.gov…</td></tr>';
+  try {
+    const res  = await fetch(`/.netlify/functions/client-pipeline?uei=${UEI}&days=90`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Load failed');
+
+    allOpps      = data.opportunities || [];
+    naicsClient  = data.client.naics  || [];
+
+    // Stats
+    document.getElementById('naicsCount').textContent = naicsClient.length;
+    document.getElementById('lastRefresh').textContent = new Date().toLocaleTimeString();
+    document.getElementById('s-total').textContent = allOpps.length;
+    document.getElementById('s-hot').textContent   = allOpps.filter(o => o.urgency === 'hot').length;
+    document.getElementById('s-warm').textContent  = allOpps.filter(o => o.urgency === 'warm').length;
+    document.getElementById('s-ok').textContent    = allOpps.filter(o => o.urgency === 'ok').length;
+
+    // Populate NAICS filter
+    const sel = document.getElementById('naicsFilter');
+    sel.innerHTML = '<option value="">All NAICS</option>' +
+      [...new Set(allOpps.map(o => o.naics).filter(Boolean))].sort()
+        .map(n => `<option value="${n}">${n}</option>`).join('');
+
+    applyFilters();
+  } catch (e) {
+    document.getElementById('tbody').innerHTML = `<tr><td colspan="7" class="empty" style="color:var(--red)">${e.message}</td></tr>`;
+  }
+}
+
+['naicsFilter','typeFilter','urgencyFilter'].forEach(id =>
+  document.getElementById(id).addEventListener('change', applyFilters));
+document.getElementById('searchInput').addEventListener('input', applyFilters);
+
+load();
+</script>
+</body>
+</html>
