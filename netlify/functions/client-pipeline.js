@@ -11,7 +11,7 @@ const PAGE_LIMIT = 100;
 const CLIENT_NAICS = {
   'C13JZV6AY6L4': {              // Custom IT Services LLC
     name: 'CUSTOM IT SERVICES LLC',
-    naics: ['541519','541511','541512','541513','541990','541690','541370'],
+    naics: ['541519','541511','541512','541513','541990','541690','541370','541330','517919'],
   },
   'YVNXN3XBUSD5': {              // Apropos Group LLC
     name: 'Apropos Group LLC',
