@@ -11,7 +11,7 @@ const SERVICE_KEY   = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_S
 const RESEND_KEY    = process.env.RESEND_API_KEY;
 const FROM_EMAIL    = process.env.RESEND_FROM_EMAIL || 'alerts@aproposgroupllc.com';
 const SAM_API_KEY   = process.env.SAM_API_KEY;
-const SITE_URL      = 'https://sam.aproposgroupllc.com';
+const SITE_URL      = 'https://capgen.aproposgroupllc.com';
 
 const headers = {
   'Access-Control-Allow-Origin': '*',
