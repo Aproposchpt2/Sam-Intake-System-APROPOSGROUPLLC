@@ -60,8 +60,11 @@ exports.handler = async (event) => {
   };
 
   const uei           = (event.queryStringParameters || {}).uei || 'C13JZV6AY6L4';
-  const days          = parseInt((event.queryStringParameters || {}).days || '30', 10);
   const includeClosed = (event.queryStringParameters || {}).include_closed === '1';
+  // days=0 means "All Open" — use 365-day window to capture everything still active.
+  // days=30 means "Posted within 30 days".
+  const rawDays = parseInt((event.queryStringParameters || {}).days || '0', 10);
+  const days    = rawDays === 0 ? 365 : rawDays;
 
   const client = CLIENT_NAICS[uei];
   if (!client) return { statusCode: 404, headers, body: JSON.stringify({ error: 'Client not found' }) };

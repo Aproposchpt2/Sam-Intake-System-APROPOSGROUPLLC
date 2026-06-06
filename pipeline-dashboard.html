@@ -160,17 +160,17 @@ header{background:var(--surface);border-bottom:1px solid var(--line);padding:14p
       <option value="RFQ">RFQ</option>
       <option value="RFI">RFI</option>
     </select>
+    <select id="windowFilter">
+      <option value="0" selected>All Open (no date limit)</option>
+      <option value="30">Posted within 30 days</option>
+    </select>
     <select id="urgencyFilter">
-      <option value="active" selected>Open contracts only</option>
+      <option value="active" selected>Any open deadline</option>
       <option value="hot">Due &lt; 7 days</option>
       <option value="warm">Due 7–30 days</option>
       <option value="ok">Due 30+ days</option>
-      <option value="">All (including closed)</option>
     </select>
     <input type="search" id="searchInput" placeholder="Search title or agency…" style="min-width:220px"/>
-    <label style="display:flex;align-items:center;gap:6px;font-size:.8rem;color:var(--muted);cursor:pointer;white-space:nowrap">
-      <input type="checkbox" id="showClosed" style="accent-color:var(--cyan);width:15px;height:15px"/> Show closed
-    </label>
     <span class="count-badge" id="countBadge"></span>
   </div>
 
@@ -262,8 +262,8 @@ function applyFilters() {
 async function load() {
   document.getElementById('tbody').innerHTML = '<tr><td colspan="7" class="loading">Fetching live opportunities from SAM.gov…</td></tr>';
   try {
-    const closed = document.getElementById('showClosed').checked ? '&include_closed=1' : '';
-    const res  = await fetch(`/.netlify/functions/client-pipeline?uei=${UEI}&days=30${closed}`);
+    const window = document.getElementById('windowFilter').value;
+    const res  = await fetch(`/.netlify/functions/client-pipeline?uei=${UEI}&days=${window}`);
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Load failed');
 
@@ -292,7 +292,7 @@ async function load() {
 
 ['naicsFilter','typeFilter','urgencyFilter'].forEach(id =>
   document.getElementById(id).addEventListener('change', applyFilters));
-document.getElementById('showClosed').addEventListener('change', () => { currentPage = 0; load(); });
+document.getElementById('windowFilter').addEventListener('change', () => { currentPage = 0; load(); });
 document.getElementById('searchInput').addEventListener('input', applyFilters);
 
 </script>
