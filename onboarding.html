@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CapGen Pro — Access Your Dashboard</title>
+<style>
+:root{--bg:#0A1A3A;--surface:#0f2244;--line:rgba(91,175,255,.15);--line2:rgba(91,175,255,.32);--text:#f0f6ff;--muted:#8facd0;--soft:#5a7899;--cyan:#5BD3FF;--green:#2ecc8a;font-family:Arial,Helvetica,sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 20px}
+.card{background:var(--surface);border:1px solid var(--line2);border-radius:24px;padding:48px 44px;max-width:440px;width:100%;box-shadow:0 40px 100px rgba(0,0,0,.5)}
+.logo{display:flex;align-items:center;gap:10px;margin-bottom:28px}
+.logo-mark{background:var(--bg);border:1px solid var(--line2);border-radius:8px;padding:7px 11px;font-weight:900;color:var(--cyan);font-family:monospace;font-size:14px}
+.logo-name{font-weight:700;font-size:.95rem}
+.step-label{font-size:.68rem;text-transform:uppercase;letter-spacing:.14em;color:var(--cyan);font-weight:700;margin-bottom:10px}
+h1{font-size:1.5rem;font-weight:900;line-height:1.1;letter-spacing:-.02em;margin-bottom:8px}
+.sub{font-size:.88rem;color:var(--muted);line-height:1.7;margin-bottom:28px}
+input{width:100%;background:rgba(255,255,255,.07);border:1px solid var(--line2);border-radius:10px;color:var(--text);padding:13px 14px;font-size:.95rem;outline:none;transition:.18s;margin-bottom:12px}
+input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(91,211,255,.1)}
+input::placeholder{color:var(--soft)}
+.code-input{font-size:2rem;letter-spacing:.3em;text-align:center;font-weight:900}
+.btn{width:100%;background:var(--cyan);color:#0A1A3A;border:none;border-radius:10px;padding:14px;font-weight:700;font-size:.95rem;cursor:pointer;transition:.18s}
+.btn:hover:not(:disabled){opacity:.88}
+.btn:disabled{opacity:.5;cursor:wait}
+.err{font-size:.82rem;color:#ff9999;margin-top:10px;display:none}
+.resend{font-size:.78rem;color:var(--soft);margin-top:14px;text-align:center;display:none}
+.resend button{background:none;border:none;color:var(--cyan);cursor:pointer;font-size:.78rem;text-decoration:underline}
+
+/* OTP popup overlay */
+.otp-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(4px)}
+.otp-popup{background:var(--surface);border:1px solid var(--line2);border-radius:20px;padding:40px 36px;max-width:380px;width:90%;text-align:center;box-shadow:0 40px 100px rgba(0,0,0,.7)}
+.otp-icon{font-size:2.4rem;margin-bottom:16px;display:block}
+.otp-popup h2{font-size:1.2rem;font-weight:900;margin-bottom:8px}
+.otp-popup p{font-size:.86rem;color:var(--muted);line-height:1.65;margin-bottom:22px}
+.otp-popup .email-highlight{color:var(--cyan);font-weight:700}
+
+footer{position:fixed;bottom:0;width:100%;text-align:center;padding:14px;font-size:.72rem;color:var(--soft)}
+@media(max-width:480px){.card{padding:32px 20px}}
+</style>
+</head>
+<body>
+
+<div class="card" id="step1-card">
+  <div class="logo"><div class="logo-mark">CG</div><div class="logo-name">CapGen Pro</div></div>
+  <div class="step-label">Verify Your Email Account</div>
+  <h1>Access Your Dashboard</h1>
+  <p class="sub">Enter the email address you used when signing up. We'll send you a 6-digit access code — no password needed.</p>
+  <input type="email" id="emailInput" placeholder="you@yourbusiness.com" autocomplete="email"/>
+  <button class="btn" id="sendBtn">Submit →</button>
+  <div class="err" id="step1Err"></div>
+</div>
+
+<!-- OTP Overlay — appears simultaneously with email send -->
+<div class="otp-overlay" id="otpOverlay">
+  <div class="otp-popup">
+    <span class="otp-icon">📬</span>
+    <h2>Check Your Inbox</h2>
+    <p>An access code was sent to<br/><span class="otp-email email-highlight" id="otpEmail"></span></p>
+    <input type="text" id="codeInput" class="code-input" placeholder="000000" maxlength="6" autocomplete="one-time-code"/>
+    <button class="btn" id="verifyBtn">Access My Dashboard →</button>
+    <div class="err" id="otpErr"></div>
+    <div class="resend" id="resendWrap">
+      Didn't receive it? <button id="resendBtn">Resend code</button>
+    </div>
+  </div>
+</div>
+
+<footer>CapGen Pro · AI4 Businesses · Apropos Group LLC</footer>
+
+<script>
+'use strict';
+let currentEmail = '';
+
+// Step 1 — send OTP
+document.getElementById('sendBtn').addEventListener('click', async function() {
+  const email = document.getElementById('emailInput').value.trim();
+  const err   = document.getElementById('step1Err');
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    err.textContent = 'Please enter a valid email address.'; err.style.display = 'block'; return;
+  }
+  this.disabled = true; this.textContent = 'Sending…'; err.style.display = 'none';
+  try {
+    const res  = await fetch('/.netlify/functions/pipeline-otp-send', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Could not send code.');
+    currentEmail = email;
+    // Show OTP popup simultaneously
+    document.getElementById('otpEmail').textContent = email;
+    document.getElementById('otpOverlay').style.display = 'flex';
+    document.getElementById('codeInput').focus();
+    setTimeout(() => document.getElementById('resendWrap').style.display = 'block', 30000);
+  } catch(e) {
+    err.textContent = e.message; err.style.display = 'block';
+    this.disabled = false; this.textContent = 'Submit →';
+  }
+});
+
+// Enter key on email
+document.getElementById('emailInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('sendBtn').click();
+});
+
+// Step 2 — verify OTP
+document.getElementById('verifyBtn').addEventListener('click', async function() {
+  const code = document.getElementById('codeInput').value.trim();
+  const err  = document.getElementById('otpErr');
+  if (code.length < 6) { err.textContent = 'Enter the 6-digit code from your email.'; err.style.display = 'block'; return; }
+  this.disabled = true; this.textContent = 'Verifying…'; err.style.display = 'none';
+  try {
+    const res  = await fetch('/.netlify/functions/pipeline-otp-verify', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: currentEmail, code }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Invalid code.');
+    // Store session
+    sessionStorage.setItem('pipeline_session', data.token);
+    sessionStorage.setItem('capgen_email', currentEmail);
+    // Fetch client UEI from Supabase and redirect
+    await loadClientAndRedirect(currentEmail, data.token);
+  } catch(e) {
+    err.textContent = e.message; err.style.display = 'block';
+    this.disabled = false; this.textContent = 'Access My Dashboard →';
+  }
+});
+
+// Enter key on code
+document.getElementById('codeInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('verifyBtn').click();
+});
+
+// Resend
+document.getElementById('resendBtn').addEventListener('click', async function() {
+  if (!currentEmail) return;
+  this.textContent = 'Sending…'; this.disabled = true;
+  await fetch('/.netlify/functions/pipeline-otp-send', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: currentEmail }),
+  }).catch(() => {});
+  this.textContent = 'Sent!';
+  setTimeout(() => { this.textContent = 'Resend code'; this.disabled = false; }, 5000);
+});
+
+async function loadClientAndRedirect(email, token) {
+  try {
+    const anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp1ZGlzbGZrbm1ob2ZjZ3p5b3pjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMDI3ODAsImV4cCI6MjA5Mjc3ODc4MH0.Kxpe0kJt0k7ZchYu70BOwm4KdT0C5aSsyeR1ov6NlQ0';
+    const res = await fetch(`https://judislfknmhofcgzyozc.supabase.co/rest/v1/capgen_subscriptions?email=eq.${encodeURIComponent(email)}&select=uei,business_name,naics`, {
+      headers: { apikey: anonKey, Authorization: `Bearer ${anonKey}` }
+    });
+    const data = await res.json();
+    if (Array.isArray(data) && data[0] && data[0].uei) {
+      sessionStorage.setItem('capgen_uei', data[0].uei);
+      sessionStorage.setItem('capgen_biz', data[0].business_name || '');
+    }
+  } catch(e) { console.warn('Client lookup:', e.message); }
+  window.location.href = '/pipeline';
+}
+
+// Check existing session on load
+(function() {
+  const s = sessionStorage.getItem('pipeline_session');
+  if (s) { try { const d = JSON.parse(atob(s)); if (d.email && (Date.now()-d.ts)<8*60*60*1000) { window.location.href='/pipeline'; } } catch(_) {} }
+})();
+</script>
+</body>
+</html>

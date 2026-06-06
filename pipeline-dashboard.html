@@ -272,7 +272,10 @@ header{background:var(--surface);border-bottom:1px solid var(--line);padding:14p
 </div><!-- end #auth-app -->
 
 <script>
-const UEI = 'C13JZV6AY6L4';
+// Use client's UEI from session (set after OTP verify), fallback to demo
+const UEI = sessionStorage.getItem('capgen_uei') || 'C13JZV6AY6L4';
+// Update header with client's business name if available
+(function(){const biz=sessionStorage.getItem('capgen_biz');if(biz){const t=document.querySelector('.dash-mock-title em');if(t)t.textContent=biz;}})();
 let allOpps = [];
 let naicsClient = [];
 

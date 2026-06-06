@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CapGen Pro — Choose Your Plan</title>
+<style>
+:root{--bg:#0A1A3A;--surface:#0f2244;--line:rgba(91,175,255,.15);--line2:rgba(91,175,255,.32);--text:#f0f6ff;--muted:#8facd0;--soft:#5a7899;--cyan:#5BD3FF;--gold:#d9a45b;--green:#2ecc8a;font-family:Arial,Helvetica,sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);min-height:100vh}
+nav{display:flex;align-items:center;justify-content:space-between;padding:16px 5vw;border-bottom:1px solid var(--line)}
+.nav-brand{display:flex;align-items:center;gap:10px}
+.nav-mark{background:var(--surface);border:1px solid var(--line2);border-radius:8px;padding:6px 10px;font-weight:900;color:var(--cyan);font-family:monospace;font-size:13px}
+.nav-name{font-weight:700;font-size:.95rem}
+.nav-back{font-size:.82rem;color:var(--muted);text-decoration:none}
+.nav-back:hover{color:var(--cyan)}
+.page{max-width:1100px;margin:0 auto;padding:60px 5vw}
+.eyebrow{font-size:.7rem;text-transform:uppercase;letter-spacing:.14em;color:var(--cyan);font-weight:700;text-align:center;margin-bottom:12px}
+h1{font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:900;text-align:center;letter-spacing:-.02em;margin-bottom:10px}
+.sub{text-align:center;color:var(--muted);font-size:1rem;line-height:1.7;margin-bottom:52px}
+.plans{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-bottom:20px}
+.plan{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:36px 32px;display:flex;flex-direction:column}
+.plan.featured{border-color:var(--cyan);box-shadow:0 0 40px rgba(91,211,255,.1)}
+.plan-badge{font-size:.65rem;text-transform:uppercase;letter-spacing:.12em;font-weight:700;background:rgba(91,211,255,.15);color:var(--cyan);border:1px solid rgba(91,211,255,.3);border-radius:20px;padding:4px 12px;display:inline-block;margin-bottom:16px;align-self:flex-start}
+.plan-badge.gold{background:rgba(217,164,91,.15);color:var(--gold);border-color:rgba(217,164,91,.3)}
+.plan-name{font-size:1.1rem;font-weight:700;margin-bottom:6px}
+.plan-desc{font-size:.84rem;color:var(--muted);line-height:1.6;margin-bottom:24px}
+.plan-price{margin-bottom:24px}
+.plan-amount{font-size:2.8rem;font-weight:900;line-height:1;letter-spacing:-.03em}
+.plan-period{font-size:.88rem;color:var(--muted);margin-top:4px}
+.plan-save{font-size:.78rem;color:var(--green);font-weight:700;margin-top:4px}
+.plan-features{flex:1;display:flex;flex-direction:column;gap:10px;margin-bottom:28px}
+.pf{display:flex;align-items:center;gap:9px;font-size:.88rem;color:var(--muted)}
+.pf-check{color:var(--green);font-weight:900;flex-shrink:0}
+.plan-cta{display:block;text-align:center;padding:14px;border-radius:10px;font-weight:700;font-size:.95rem;text-decoration:none;transition:.18s}
+.plan-cta.primary{background:var(--cyan);color:#0A1A3A}
+.plan-cta.primary:hover{opacity:.88}
+.plan-cta.outline{border:1px solid var(--line2);color:var(--text)}
+.plan-cta.outline:hover{border-color:var(--cyan);color:var(--cyan)}
+.plan-cta.gold-btn{background:var(--gold);color:#0A1A3A}
+.plan-cta.gold-btn:hover{opacity:.88}
+footer{border-top:1px solid var(--line);padding:24px 5vw;text-align:center;font-size:.76rem;color:var(--soft)}
+@media(max-width:700px){.plans{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-brand"><div class="nav-mark">CG</div><div class="nav-name">CapGen Pro</div></div>
+  <a href="/pro" class="nav-back">← Back</a>
+</nav>
+<div class="page">
+  <div class="eyebrow">Simple Pricing</div>
+  <h1>Choose your plan</h1>
+  <p class="sub">All plans include live SAM.gov pipeline, capability statement generation,<br/>and setup within 24 hours. No contracts. Cancel anytime.</p>
+
+  <div class="plans">
+    <!-- Monthly -->
+    <div class="plan">
+      <span class="plan-badge">Individual</span>
+      <div class="plan-name">Monthly</div>
+      <div class="plan-desc">Full access to your live SAM.gov pipeline and unlimited CapGen statements. Billed monthly, cancel anytime.</div>
+      <div class="plan-price">
+        <div class="plan-amount">$39<span style="font-size:1.4rem;font-weight:400;color:var(--muted)">.99</span></div>
+        <div class="plan-period">per month</div>
+      </div>
+      <div class="plan-features">
+        <div class="pf"><span class="pf-check">✓</span>Live SAM.gov opportunity pipeline</div>
+        <div class="pf"><span class="pf-check">✓</span>All NAICS codes from your SAM registration</div>
+        <div class="pf"><span class="pf-check">✓</span>Unlimited capability statements</div>
+        <div class="pf"><span class="pf-check">✓</span>Desktop + mobile dashboard</div>
+        <div class="pf"><span class="pf-check">✓</span>Setup within 24 hours</div>
+      </div>
+      <a href="STRIPE_MONTHLY" class="plan-cta outline">Get Started Monthly →</a>
+    </div>
+
+    <!-- Yearly -->
+    <div class="plan featured">
+      <span class="plan-badge">Best Value</span>
+      <div class="plan-name">Yearly</div>
+      <div class="plan-desc">Everything in Monthly, billed annually. Save $180 a year — two months free.</div>
+      <div class="plan-price">
+        <div class="plan-amount">$300</div>
+        <div class="plan-period">per year · $25/month</div>
+        <div class="plan-save">Save $179.88 vs monthly</div>
+      </div>
+      <div class="plan-features">
+        <div class="pf"><span class="pf-check">✓</span>Everything in Monthly</div>
+        <div class="pf"><span class="pf-check">✓</span>Priority onboarding</div>
+        <div class="pf"><span class="pf-check">✓</span>Two months free</div>
+        <div class="pf"><span class="pf-check">✓</span>Annual renewal reminder</div>
+        <div class="pf"><span class="pf-check">✓</span>Lock in current pricing</div>
+      </div>
+      <a href="STRIPE_YEARLY" class="plan-cta primary">Get Started Yearly →</a>
+    </div>
+
+    <!-- White Label Monthly -->
+    <div class="plan">
+      <span class="plan-badge gold">White Label</span>
+      <div class="plan-name">Agency Monthly</div>
+      <div class="plan-desc">Offer CapGen Pro to your clients under your brand. Includes 5–10 client pipelines managed through your agency admin.</div>
+      <div class="plan-price">
+        <div class="plan-amount">$500</div>
+        <div class="plan-period">per month · up to 10 clients</div>
+      </div>
+      <div class="plan-features">
+        <div class="pf"><span class="pf-check">✓</span>5–10 branded client pipelines</div>
+        <div class="pf"><span class="pf-check">✓</span>Agency admin onboarding panel</div>
+        <div class="pf"><span class="pf-check">✓</span>Your branding on client dashboards</div>
+        <div class="pf"><span class="pf-check">✓</span>Unlimited capability statements</div>
+        <div class="pf"><span class="pf-check">✓</span>Agency reseller support</div>
+      </div>
+      <a href="STRIPE_WL_MONTHLY" class="plan-cta outline">Start Agency Monthly →</a>
+    </div>
+
+    <!-- White Label Yearly -->
+    <div class="plan">
+      <span class="plan-badge gold">White Label · Best Value</span>
+      <div class="plan-name">Agency Yearly</div>
+      <div class="plan-desc">Everything in Agency Monthly, billed annually. Save $1,000 per year — two months free for your entire agency.</div>
+      <div class="plan-price">
+        <div class="plan-amount">$5,000</div>
+        <div class="plan-period">per year · $416/month</div>
+        <div class="plan-save">Save $1,000 vs monthly</div>
+      </div>
+      <div class="plan-features">
+        <div class="pf"><span class="pf-check">✓</span>Everything in Agency Monthly</div>
+        <div class="pf"><span class="pf-check">✓</span>Priority agency setup</div>
+        <div class="pf"><span class="pf-check">✓</span>Two months free</div>
+        <div class="pf"><span class="pf-check">✓</span>Dedicated onboarding call</div>
+        <div class="pf"><span class="pf-check">✓</span>Lock in agency pricing</div>
+      </div>
+      <a href="STRIPE_WL_YEARLY" class="plan-cta gold-btn">Start Agency Yearly →</a>
+    </div>
+  </div>
+</div>
+<footer>CapGen Pro · AI4 Businesses · Apropos Group LLC · © 2026</footer>
+</body>
+</html>

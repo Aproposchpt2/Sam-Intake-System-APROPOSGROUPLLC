@@ -49,6 +49,31 @@
   to = "/capgen-pro-thankyou.html"
   status = 200
 
+[[redirects]]
+  from = "/offer"
+  to = "/offer.html"
+  status = 200
+
+[[redirects]]
+  from = "/welcome"
+  to = "/welcome.html"
+  status = 200
+
+[[redirects]]
+  from = "/onboarding"
+  to = "/onboarding.html"
+  status = 200
+
+[[redirects]]
+  from = "/signin"
+  to = "/onboarding.html"
+  status = 200
+
+[[redirects]]
+  from = "/signup"
+  to = "/offer.html"
+  status = 200
+
 [[headers]]
   for = "/*"
   [headers.values]
