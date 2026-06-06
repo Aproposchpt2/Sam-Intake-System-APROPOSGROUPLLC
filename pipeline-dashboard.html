@@ -272,8 +272,8 @@ header{background:var(--surface);border-bottom:1px solid var(--line);padding:14p
 </div><!-- end #auth-app -->
 
 <script>
-// Use client's UEI from session (set after OTP verify), fallback to demo
-const UEI = sessionStorage.getItem('capgen_uei') || 'C13JZV6AY6L4';
+// UEI resolved after auth — see resolveUEI()
+let UEI = null;
 // Update header with client's business name if available
 (function(){const biz=sessionStorage.getItem('capgen_biz');if(biz){const t=document.querySelector('.dash-mock-title em');if(t)t.textContent=biz;}})();
 let allOpps = [];
@@ -422,6 +422,28 @@ document.getElementById('searchInput').addEventListener('input', applyFilters);
 
 <!-- OTP Auth -->
 <script>
+async function resolveUEI(email) {
+  // Check sessionStorage first
+  const cached = sessionStorage.getItem('capgen_uei');
+  if (cached) { UEI = cached; return; }
+  // Fetch from capgen_subscriptions by email
+  try {
+    const res = await fetch(
+      ${supabaseUrl}/rest/v1/capgen_subscriptions?email=eq. + encodeURIComponent(email) + '&select=uei&limit=1',
+      { headers: { apikey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp1ZGlzbGZrbm1ob2ZjZ3p5b3pjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMDI3ODAsImV4cCI6MjA5Mjc3ODc4MH0.Kxpe0kJt0k7ZchYu70BOwm4KdT0C5aSsyeR1ov6NlQ0', Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp1ZGlzbGZrbm1ob2ZjZ3p5b3pjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMDI3ODAsImV4cCI6MjA5Mjc3ODc4MH0.Kxpe0kJt0k7ZchYu70BOwm4KdT0C5aSsyeR1ov6NlQ0' } }
+    );
+    const rows = await res.json();
+    if (Array.isArray(rows) && rows[0] && rows[0].uei) {
+      UEI = rows[0].uei;
+      sessionStorage.setItem('capgen_uei', UEI);
+    }
+  } catch(e) { console.warn('UEI lookup error:', e.message); }
+  // Fallback — show generic demo pipeline
+  if (!UEI) UEI = 'C13JZV6AY6L4';
+}
+
+</script>
+<script>
 // Check existing session
 (function() {
   const stored = sessionStorage.getItem('pipeline_session');
@@ -429,8 +451,7 @@ document.getElementById('searchInput').addEventListener('input', applyFilters);
     try {
       const s = JSON.parse(atob(stored));
       if (s.email && (Date.now() - s.ts) < 8 * 60 * 60 * 1000) {
-        showApp(s.email);
-        load();
+        resolveUEI(s.email).then(() => { showApp(s.email); load(); });
         return;
       }
     } catch(_) {}
@@ -496,6 +517,7 @@ document.getElementById('auth-verify-btn').addEventListener('click', async funct
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Invalid code.');
     sessionStorage.setItem('pipeline_session', data.token);
+    await resolveUEI(data.email);
     showApp(data.email);
     load();
   } catch(e) {
