@@ -5,6 +5,7 @@
   [build.environment]
     NODE_VERSION = "18"
     PDF_RENDERER = "adobe"
+    SECRETS_SCAN_OMIT_KEYS = "SUPABASE_URL"
 
 [functions]
   node_bundler = "esbuild"
