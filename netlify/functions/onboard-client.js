@@ -61,13 +61,26 @@ function buildWelcomeEmail(firstName, businessName, pipelineUrl) {
 
       <!-- How to log in -->
       <div style="background:#132954;border:1px solid rgba(91,175,255,.15);border-radius:10px;padding:18px 20px;margin-bottom:24px;">
-        <p style="margin:0 0 10px;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#5a7899;font-weight:700;">How to Access</p>
-        <p style="margin:0;font-size:14px;color:#8facd0;line-height:1.7;">
-          1. Click <strong style="color:#f0f6ff;">Open My Pipeline</strong> above<br/>
-          2. Enter <strong style="color:#5BD3FF;">${firstName.toLowerCase()}@${businessName.toLowerCase().replace(/[^a-z0-9]/g,'')}.com</strong> — or any email you prefer<br/>
-          3. Check your inbox for a secure login link — click it, you're in<br/>
-          4. No password. Ever.
-        </p>
+        <p style="margin:0 0 12px;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#5a7899;font-weight:700;">How to Access Your Dashboard</p>
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr><td style="padding:6px 0;font-size:14px;color:#8facd0;line-height:1.6;">
+            <span style="color:#5BD3FF;font-weight:700;">Step 1</span> &nbsp;
+            Click <strong style="color:#f0f6ff;">Open My Pipeline</strong> above.
+          </td></tr>
+          <tr><td style="padding:6px 0;font-size:14px;color:#8facd0;line-height:1.6;">
+            <span style="color:#5BD3FF;font-weight:700;">Step 2</span> &nbsp;
+            Enter your email address and click <strong style="color:#f0f6ff;">Submit</strong>.
+          </td></tr>
+          <tr><td style="padding:6px 0;font-size:14px;color:#8facd0;line-height:1.6;">
+            <span style="color:#5BD3FF;font-weight:700;">Step 3</span> &nbsp;
+            Check your inbox — a link to access your dashboard will be emailed to you.
+          </td></tr>
+          <tr><td style="padding:6px 0;font-size:14px;color:#8facd0;line-height:1.6;">
+            <span style="color:#5BD3FF;font-weight:700;">Step 4</span> &nbsp;
+            Click <strong style="color:#f0f6ff;">Confirm your email</strong> in that message — your dashboard opens immediately.
+          </td></tr>
+        </table>
+        <p style="margin:14px 0 0;font-size:12px;color:#3a5470;">No password required. Your email is your key.</p>
       </div>
 
       <!-- What's inside -->
