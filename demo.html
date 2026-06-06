@@ -128,9 +128,9 @@ tr:hover td{background:rgba(91,211,255,.04)}
 
     <!-- Step 1: Enter business name -->
     <div id="step-input">
-      <div class="modal-title">See your live pipeline</div>
-      <p class="modal-sub">Enter your business name. We'll search SAM.gov and build your personalized federal contract dashboard — live, in seconds.</p>
-      <input class="modal-input" type="text" id="bizInput" placeholder="e.g. Custom IT Services LLC" autocomplete="organization"/>
+      <div class="modal-title">Build Your Federal Contract Dashboard</div>
+      <p class="modal-sub">Enter your business name. We'll build your very own personalized federal contract dashboard — live, in seconds.</p>
+      <input class="modal-input" type="text" id="bizInput" placeholder="e.g. Apex Solutions Group LLC" autocomplete="organization"/>
       <button class="modal-btn" id="buildBtn">Build My Dashboard →</button>
       <div class="modal-err" id="buildErr"></div>
     </div>
@@ -140,8 +140,8 @@ tr:hover td{background:rgba(91,211,255,.04)}
       <div class="progress-biz" id="progressBiz"></div>
       <div class="progress-label">Building your personalized pipeline…</div>
       <div class="steps">
-        <div class="step-row"><div class="step-icon waiting" id="si1">1</div><div class="step-text" id="st1">Searching SAM.gov…</div></div>
-        <div class="step-row"><div class="step-icon waiting" id="si2">2</div><div class="step-text" id="st2">Pulling your NAICS codes…</div></div>
+        <div class="step-row"><div class="step-icon waiting" id="si1">1</div><div class="step-text" id="st1">Scanning federal contract databases…</div></div>
+        <div class="step-row"><div class="step-icon waiting" id="si2">2</div><div class="step-text" id="st2">Identifying your contract categories…</div></div>
         <div class="step-row"><div class="step-icon waiting" id="si3">3</div><div class="step-text" id="st3">Loading active contracts…</div></div>
         <div class="step-row"><div class="step-icon waiting" id="si4">4</div><div class="step-text" id="st4">Building your dashboard…</div></div>
       </div>
@@ -237,8 +237,8 @@ async function startDemo() {
     result = { entity: { found: false, legal_name: name, sam_status: 'Demo Mode', naics: ['541519','541511','541512'], certs: [] }, opportunities: [], total: 0 };
   }
 
-  stepDone(1, result.entity.found ? `Found in SAM.gov — ${result.entity.uei}` : 'SAM.gov searched — demo mode');
-  stepDone(2, `${(result.entity.naics||[]).length || 3} NAICS codes identified`);
+  stepDone(1, result.entity.found ? `Business verified — ready` : 'Demo mode active');
+  stepDone(2, `Contract categories matched`);
   setProgress(70);
   await new Promise(r => setTimeout(r, 500));
 
@@ -262,14 +262,14 @@ function renderDashboard(entity, opps) {
 
   // Entity banner
   const initials = entity.legal_name.split(/\s+/).filter(w => /[A-Z]/i.test(w)).slice(0,2).map(w=>w[0].toUpperCase()).join('') || 'CO';
-  const samBadge = entity.found ? `<span class="e-badge sam">● SAM Active</span>` : `<span class="e-badge demo">Demo Mode</span>`;
+  const samBadge = entity.found ? `<span class="e-badge sam">● Verified Active</span>` : `<span class="e-badge demo">Demo Mode</span>`;
   const certBadges = (entity.certs || []).slice(0,3).map(c => `<span class="e-badge">${c}</span>`).join('');
   document.getElementById('entityBanner').innerHTML = `
     <div class="entity-left">
       <div class="entity-mark">${initials}</div>
       <div>
         <div class="entity-name">${entity.legal_name}</div>
-        <div class="entity-meta">${entity.uei ? `UEI: ${entity.uei}` : 'SAM.gov Demo'} ${entity.cage ? `· CAGE: ${entity.cage}` : ''}</div>
+        <div class="entity-meta">${entity.uei ? `UEI: ${entity.uei}` : 'Demo Mode'} ${entity.cage ? `· CAGE: ${entity.cage}` : ''}</div>
       </div>
     </div>
     <div class="entity-badges">${samBadge}${certBadges}</div>`;
