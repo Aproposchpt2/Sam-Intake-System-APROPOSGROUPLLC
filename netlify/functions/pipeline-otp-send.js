@@ -1,4 +1,4 @@
-﻿'use strict';
+﻿﻿'use strict';
 // pipeline-otp-send.js
 // POST { email } → generates 6-digit code, stores in Supabase, emails via Resend.
 
@@ -17,15 +17,8 @@ const RESEND_KEY   = process.env.RESEND_API_KEY;
 const FROM_EMAIL   = process.env.RESEND_FROM_EMAIL || 'alerts@aproposgroupllc.com';
 const OTP_MINUTES  = 15;
 
-// Allowed emails — add clients here or check against Supabase auth.users
-async function isAllowed(email) {
-  const res = await fetch(
-    `${SUPABASE_URL}/auth/v1/admin/users?email=${encodeURIComponent(email)}`,
-    { headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` } }
-  );
-  const data = await res.json();
-  return Array.isArray(data.users) && data.users.length > 0;
-}
+// OTP code is the security — anyone who receives the code at the email gets in
+function isAllowed(email) { return !!email; }
 
 function generateOTP() {
   return String(Math.floor(100000 + Math.random() * 900000));
@@ -101,4 +94,5 @@ exports.handler = async (event) => {
 
   return { statusCode: 200, headers, body: JSON.stringify({ ok: true }) };
 };
+
 
