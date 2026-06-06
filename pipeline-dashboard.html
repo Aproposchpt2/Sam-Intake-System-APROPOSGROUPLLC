@@ -133,21 +133,32 @@ header{background:var(--surface);border-bottom:1px solid var(--line);padding:14p
 </head>
 <body>
 
-<!-- Auth gate (shown when not logged in) -->
+<!-- Auth gate — OTP flow -->
 <div id="auth-gate">
   <div class="auth-card">
     <div class="auth-logo">CI</div>
     <h2>Custom IT Services LLC</h2>
-    <p>Enter your email to receive a secure login link for your opportunity pipeline.</p>
-    <div id="auth-form-wrap">
+
+    <!-- Step 1: Email -->
+    <div id="auth-step1">
+      <p>Enter your email address to receive a 6-digit access code.</p>
       <input class="auth-input" type="email" id="auth-email" placeholder="lori@customitservices-llc.com" autocomplete="email"/>
-      <button class="auth-btn" id="auth-btn">Send Login Link →</button>
+      <button class="auth-btn" id="auth-send-btn">Send Access Code →</button>
       <div class="auth-notice" id="auth-err"></div>
     </div>
-    <div class="auth-sent" id="auth-sent">
+
+    <!-- Step 2: Code entry -->
+    <div id="auth-step2" style="display:none">
       <div class="auth-sent-icon">📬</div>
-      <strong style="color:var(--text)">Check your inbox</strong>
-      <p style="margin-top:8px;color:var(--muted);font-size:.84rem">A secure login link was sent. It expires in 60 minutes.</p>
+      <strong style="color:var(--text);display:block;margin-bottom:8px">Check your email</strong>
+      <p style="margin-bottom:20px">Enter the 6-digit code we sent to <strong id="auth-email-display" style="color:var(--cyan)"></strong></p>
+      <input class="auth-input" type="text" id="auth-code" placeholder="000000" maxlength="6"
+             style="font-size:1.6rem;letter-spacing:.3em;text-align:center;font-weight:900" autocomplete="one-time-code"/>
+      <button class="auth-btn" id="auth-verify-btn">Access My Dashboard →</button>
+      <div class="auth-notice" id="auth-code-err"></div>
+      <div style="margin-top:14px">
+        <button onclick="resetOtp()" style="background:none;border:none;color:var(--soft);cursor:pointer;font-size:.8rem;text-decoration:underline">Use a different email</button>
+      </div>
     </div>
   </div>
 </div>
@@ -411,80 +422,94 @@ document.getElementById('searchInput').addEventListener('input', applyFilters);
 
 </script>
 
-<!-- Supabase auth — must load before authReady() is called -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<!-- OTP Auth -->
 <script>
-const SUPA_URL = "https://judislfknmhofcgzyozc.supabase.co";
-const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp1ZGlzbGZrbm1ob2ZjZ3p5b3pjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMDI3ODAsImV4cCI6MjA5Mjc3ODc4MH0.Kxpe0kJt0k7ZchYu70BOwm4KdT0C5aSsyeR1ov6NlQ0";
-const sb2 = supabase.createClient(SUPA_URL, SUPA_KEY);
-
-async function authReady() {
-  // Handle magic link token in URL hash
-  const hash = window.location.hash;
-  if (hash.includes('access_token')) {
-    await sb2.auth.getSession(); // supabase picks up the token automatically
-    window.location.hash = '';
+// Check existing session
+(function() {
+  const stored = sessionStorage.getItem('pipeline_session');
+  if (stored) {
+    try {
+      const s = JSON.parse(atob(stored));
+      if (s.email && (Date.now() - s.ts) < 8 * 60 * 60 * 1000) {
+        showApp(s.email);
+        load();
+        return;
+      }
+    } catch(_) {}
   }
-
-  const { data: { session } } = await sb2.auth.getSession();
-
-  if (session) {
-    showApp(session.user.email);
-    return true;
-  } else {
-    document.getElementById('auth-gate').style.display = 'flex';
-    wireAuthForm();
-    return false;
-  }
-}
+  document.getElementById('auth-gate').style.display = 'flex';
+})();
 
 function showApp(email) {
   document.getElementById('auth-gate').style.display = 'none';
   document.getElementById('auth-app').style.display  = 'block';
-  // Add sign-out button to header
   const hdr = document.querySelector('.header-right');
-  if (hdr) {
+  if (hdr && !document.getElementById('signout-btn')) {
     const btn = document.createElement('button');
     btn.id = 'signout-btn';
     btn.textContent = 'Sign out';
-    btn.addEventListener('click', async () => {
-      await sb2.auth.signOut();
-      window.location.reload();
-    });
+    btn.addEventListener('click', () => { sessionStorage.removeItem('pipeline_session'); window.location.reload(); });
     hdr.appendChild(btn);
   }
 }
 
-function wireAuthForm() {
-  const btn = document.getElementById('auth-btn');
-  btn.addEventListener('click', async () => {
-    const email = document.getElementById('auth-email').value.trim();
-    if (!email) return;
-    btn.disabled = true;
-    btn.textContent = 'Sending…';
-    const { error } = await sb2.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: window.location.href }
-    });
-    if (error) {
-      document.getElementById('auth-err').textContent = error.message;
-      btn.disabled = false;
-      btn.textContent = 'Send Login Link →';
-    } else {
-      document.getElementById('auth-form-wrap').style.display = 'none';
-      document.getElementById('auth-sent').style.display = 'block';
-    }
-  });
+function resetOtp() {
+  document.getElementById('auth-step2').style.display = 'none';
+  document.getElementById('auth-step1').style.display = 'block';
+  document.getElementById('auth-email').value = '';
+  document.getElementById('auth-err').textContent = '';
 }
 
-sb2.auth.onAuthStateChange((event, session) => {
-  if (event === 'SIGNED_IN' && session) {
-    showApp(session.user.email);
-    load();
+// Step 1 — send code
+document.getElementById('auth-send-btn').addEventListener('click', async function() {
+  const email = document.getElementById('auth-email').value.trim();
+  const err   = document.getElementById('auth-err');
+  if (!email) { err.textContent = 'Please enter your email address.'; return; }
+  this.disabled = true; this.textContent = 'Sending code…';
+  err.textContent = '';
+  try {
+    const res  = await fetch('/.netlify/functions/pipeline-otp-send', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to send code.');
+    document.getElementById('auth-email-display').textContent = email;
+    document.getElementById('auth-step1').style.display = 'none';
+    document.getElementById('auth-step2').style.display = 'block';
+    document.getElementById('auth-code').focus();
+  } catch(e) {
+    err.textContent = e.message;
+    this.disabled = false; this.textContent = 'Send Access Code →';
   }
 });
 
-authReady().then(authed => { if (authed) load(); });
+// Step 2 — verify code
+document.getElementById('auth-verify-btn').addEventListener('click', async function() {
+  const email = document.getElementById('auth-email').value.trim();
+  const code  = document.getElementById('auth-code').value.trim();
+  const err   = document.getElementById('auth-code-err');
+  if (code.length < 6) { err.textContent = 'Enter the 6-digit code from your email.'; return; }
+  this.disabled = true; this.textContent = 'Verifying…';
+  err.textContent = '';
+  try {
+    const res  = await fetch('/.netlify/functions/pipeline-otp-verify', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, code })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Invalid code.');
+    sessionStorage.setItem('pipeline_session', data.token);
+    showApp(data.email);
+    load();
+  } catch(e) {
+    err.textContent = e.message;
+    this.disabled = false; this.textContent = 'Access My Dashboard →';
+  }
+});
+
+// Allow Enter key on code input
+document.getElementById('auth-code').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') document.getElementById('auth-verify-btn').click();
+});
 </script>
 </body>
 </html>
