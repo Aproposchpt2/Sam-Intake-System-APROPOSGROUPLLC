@@ -61,10 +61,8 @@ exports.handler = async (event) => {
 
   const uei           = (event.queryStringParameters || {}).uei || 'C13JZV6AY6L4';
   const includeClosed = (event.queryStringParameters || {}).include_closed === '1';
-  // days=0 means "All Open" — SAM.gov caps at ~90 days so we use 90.
-  // days=30 means "Posted within 30 days".
-  const rawDays = parseInt((event.queryStringParameters || {}).days || '0', 10);
-  const days    = rawDays === 0 ? 90 : rawDays;
+  // Default 60 days. Options: 60, 30, 7. SAM.gov caps at ~90 days.
+  const days = Math.min(90, Math.max(1, parseInt((event.queryStringParameters || {}).days || '60', 10)));
 
   const client = CLIENT_NAICS[uei];
   if (!client) return { statusCode: 404, headers, body: JSON.stringify({ error: 'Client not found' }) };
