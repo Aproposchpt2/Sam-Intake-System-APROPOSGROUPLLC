@@ -34,6 +34,11 @@
   to = "/capability-generator.html"
   status = 200
 
+[[redirects]]
+  from = "/apropos"
+  to = "/ag-dashboard.html"
+  status = 200
+
 [[headers]]
   for = "/*"
   [headers.values]
