@@ -435,7 +435,7 @@ async function resolveUEI(email) {
   // Fetch from capgen_subscriptions by email
   try {
     const res = await fetch(
-      ${supabaseUrl}/rest/v1/capgen_subscriptions?email=eq. + encodeURIComponent(email) + '&select=uei&limit=1',
+      'https://judislfknmhofcgzyozc.supabase.co/rest/v1/capgen_subscriptions?email=eq.' + encodeURIComponent(email) + '&select=uei&limit=1',
       { headers: { apikey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp1ZGlzbGZrbm1ob2ZjZ3p5b3pjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMDI3ODAsImV4cCI6MjA5Mjc3ODc4MH0.Kxpe0kJt0k7ZchYu70BOwm4KdT0C5aSsyeR1ov6NlQ0', Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp1ZGlzbGZrbm1ob2ZjZ3p5b3pjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMDI3ODAsImV4cCI6MjA5Mjc3ODc4MH0.Kxpe0kJt0k7ZchYu70BOwm4KdT0C5aSsyeR1ov6NlQ0' } }
     );
     const rows = await res.json();
