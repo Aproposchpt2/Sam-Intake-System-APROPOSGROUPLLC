@@ -12,6 +12,7 @@ const CLIENT_NAICS = {
   'C13JZV6AY6L4': {              // Custom IT Services LLC
     name: 'CUSTOM IT SERVICES LLC',
     naics: ['541519','541511','541512','541513','541990','541690','541370','541330','517919'],
+    psc:   ['DB10','DF10','DG10','DG11','DJ10','R499','R799'],
   },
   'YVNXN3XBUSD5': {              // Apropos Group LLC
     name: 'Apropos Group LLC',
@@ -54,6 +55,21 @@ async function fetchOpps(naics, postedFrom, postedTo) {
   return data.opportunitiesData || [];
 }
 
+
+async function fetchOppsByPSC(psc, postedFrom, postedTo) {
+  const url = new URL(OPP_URL);
+  url.searchParams.set('api_key', process.env.SAM_API_KEY);
+  url.searchParams.set('postedFrom', postedFrom);
+  url.searchParams.set('postedTo', postedTo);
+  url.searchParams.set('psc', psc);
+  url.searchParams.set('limit', String(PAGE_LIMIT));
+  url.searchParams.set('offset', '0');
+
+  const res = await fetch(url, { headers: { Accept: 'application/json' } });
+  if (!res.ok) throw new Error(`SAM opp PSC ${res.status} (${psc})`);
+  const data = await res.json();
+  return data.opportunitiesData || [];
+}
 exports.handler = async (event) => {
   const headers = {
     'Content-Type': 'application/json',
@@ -80,6 +96,18 @@ exports.handler = async (event) => {
   for (const naics of client.naics) {
     try {
       const opps = await fetchOpps(naics, postedFrom, postedTo);
+      for (const o of opps) {
+        if (o.noticeId && !seen.has(o.noticeId)) seen.set(o.noticeId, o);
+      }
+    } catch (e) {
+      console.error(e.message);
+    }
+  }
+
+  // Fetch across PSC codes (if defined for this client)
+  for (const psc of (client.psc || [])) {
+    try {
+      const opps = await fetchOppsByPSC(psc, postedFrom, postedTo);
       for (const o of opps) {
         if (o.noticeId && !seen.has(o.noticeId)) seen.set(o.noticeId, o);
       }
