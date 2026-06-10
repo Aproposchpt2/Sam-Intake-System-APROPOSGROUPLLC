@@ -1,8 +1,9 @@
 'use strict';
 
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const SUPABASE_URL   = process.env.SUPABASE_URL;
+const SUPABASE_KEY   = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
+const FROM_EMAIL     = process.env.RESEND_FROM_EMAIL || 'CapGen Reports <reports@aproposgroupllc.com>';
 
 function sbH() {
   return {
@@ -42,7 +43,7 @@ exports.handler = async function (event, context) {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            from: 'CapGen Outreach <outreach@capgen.aproposgroupllc.com>',
+            from: FROM_EMAIL,
             to: [draft.to_email],
             subject: draft.subject,
             text: draft.body
