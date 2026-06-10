@@ -540,34 +540,85 @@ function openFitDrawer(opp) {
   runAnalysis(opp, false, false);
 }
 
+let _pollTimer = null;
+
 async function runAnalysis(opp, force, deep) {
   const token = getSessionToken();
-  if (!token) {
-    document.getElementById('fit-body').innerHTML = '<div class="fit-error">Session expired. Please sign in again.</div>';
-    return;
-  }
-  document.getElementById('fit-body').innerHTML = '<div class="fit-loading"><span class="fit-spinner"></span>Analyzing with Claude AI… this takes a few seconds.</div>';
+  if (!token) { document.getElementById('fit-body').innerHTML = '<div class="fit-error">Session expired. Please sign in again.</div>'; return; }
+
+  clearPollTimer();
+  document.getElementById('fit-body').innerHTML = '<div class="fit-loading"><span class="fit-spinner"></span>Contacting CapGen AI…</div>';
+
+  let res, data;
   try {
-    const res = await fetch('/.netlify/functions/analyze-fit', {
+    res  = await fetch('/.netlify/functions/analyze-fit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
       body: JSON.stringify({
         opportunityId: opp.notice_id,
-        force: force,
-        deep: deep,
+        force,
+        deep,
         opportunity: { title: opp.title, agency: opp.agency, naics: opp.naics, set_aside: opp.set_aside, deadline: opp.deadline }
       })
     });
-    const data = await res.json();
-    if (res.status === 401) { document.getElementById('fit-body').innerHTML = '<div class="fit-error">Session expired. Please sign in again.</div>'; return; }
-    if (res.status === 409) { renderProfileRequired(); return; }
-    if (res.status === 429) { renderDailyLimit(data.hoursLeft); return; }
-    if (!res.ok) throw new Error(data.error || 'Generation failed (' + res.status + ')');
-    renderStage1(data, opp);
-    // Update badge in list
-    if (data.opportunity_id) analysisCache[data.opportunity_id] = data;
+    data = await res.json();
   } catch(e) {
-    document.getElementById('fit-body').innerHTML = '<div class="fit-error">Analysis failed: ' + e.message + '</div>';
+    document.getElementById('fit-body').innerHTML = '<div class="fit-error">Network error: ' + e.message + '</div>';
+    return;
+  }
+
+  if (res.status === 401) { document.getElementById('fit-body').innerHTML = '<div class="fit-error">Session expired — please sign in again.</div>'; return; }
+  if (res.status === 409) { renderProfileRequired(); return; }
+  if (res.status === 429) { renderDailyLimit(data.hoursLeft); return; }
+  if (!res.ok) { document.getElementById('fit-body').innerHTML = '<div class="fit-error">' + (data.error || 'Request failed') + '</div>'; return; }
+
+  // 200 = cache hit (any status) — render what we have
+  if (res.status === 200) {
+    handleAnalysisRow(data, opp);
+    return;
+  }
+
+  // 202 = background job started; poll until complete
+  if (res.status === 202) {
+    const rowId = data.id;
+    document.getElementById('fit-body').innerHTML = '<div class="fit-loading"><span class="fit-spinner"></span>Running Stage 1 analysis…</div>';
+    startPolling(rowId, opp, token);
+    return;
+  }
+}
+
+function startPolling(rowId, opp, token) {
+  clearPollTimer();
+  _pollTimer = setInterval(async function() {
+    try {
+      const res  = await fetch('/.netlify/functions/get-analysis?id=' + encodeURIComponent(rowId), {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      if (!res.ok) return; // keep polling
+      const data = await res.json();
+      handleAnalysisRow(data, opp);
+      if (data.status === 'complete' || data.status === 'failed') clearPollTimer();
+    } catch { /* keep polling */ }
+  }, 3000);
+}
+
+function clearPollTimer() {
+  if (_pollTimer) { clearInterval(_pollTimer); _pollTimer = null; }
+}
+
+function handleAnalysisRow(data, opp) {
+  if (data.status === 'pending') {
+    document.getElementById('fit-body').innerHTML = '<div class="fit-loading"><span class="fit-spinner"></span>Running Stage 1 analysis…</div>';
+    return;
+  }
+  if (data.status === 'failed') {
+    const errMsg = (data.stage1 && data.stage1.error) ? data.stage1.error : 'Analysis failed';
+    document.getElementById('fit-body').innerHTML = '<div class="fit-error">' + esc(errMsg) + '</div>';
+    return;
+  }
+  if (data.status === 'stage1_complete' || data.status === 'complete') {
+    renderStage1(data, opp);
+    if (data.opportunity_id) analysisCache[data.opportunity_id] = data;
   }
 }
 
@@ -609,11 +660,8 @@ function renderStage1(data, opp) {
   let stage2Html = '';
   if (data.stage2) {
     stage2Html = buildStage2Html(data.stage2);
-  } else if (rec === 'bid' || rec === 'conditional') {
+  } else if (data.status === 'stage1_complete' && (rec === 'bid' || rec === 'conditional')) {
     stage2Html = '<div class="fit-stage2-loading"><span class="fit-spinner"></span>Building full proposal package…</div>';
-    // Stage 2 should already be in the response if recommendation warrants it.
-    // If absent (timeout), show nothing more.
-    stage2Html = '';
   }
 
   document.getElementById('fit-body').innerHTML =
@@ -691,6 +739,7 @@ function esc(str) {
 }
 
 function closeFitDrawer() {
+  clearPollTimer();
   document.getElementById('fit-overlay').classList.remove('open');
   document.getElementById('fit-drawer').classList.remove('open');
   document.body.style.overflow = '';
