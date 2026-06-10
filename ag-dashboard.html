@@ -4,6 +4,8 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Opportunity Pipeline — Apropos Group LLC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital@0;1&family=Cormorant+Garamond:ital@1&family=Jost:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#0A1A3A;--surface:#0f2244;--panel:#132954;--line:rgba(91,175,255,.15);
@@ -136,34 +138,75 @@ header{background:var(--surface);border-bottom:1px solid var(--line);padding:14p
 #signout-btn{background:transparent;border:1px solid var(--line);border-radius:7px;color:var(--soft);padding:5px 12px;cursor:pointer;font-size:.74rem}
 #signout-btn:hover{border-color:var(--red);color:var(--red)}
 
-/* ── Analyze Fit modal ── */
-#fit-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:1000;align-items:center;justify-content:center;padding:20px}
-#fit-modal.open{display:flex}
-.fit-panel{background:var(--surface);border:1px solid var(--line2);border-radius:20px;max-width:680px;width:100%;max-height:90vh;overflow-y:auto;padding:28px 30px;position:relative}
-.fit-close{position:absolute;top:14px;right:16px;background:none;border:none;color:var(--soft);font-size:1.5rem;cursor:pointer;line-height:1;padding:0 6px}
-.fit-close:hover{color:var(--text)}
-.fit-title{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:4px;padding-right:32px;line-height:1.4}
-.fit-agency{font-size:.8rem;color:var(--muted);margin-bottom:18px}
-.fit-score-bar{display:flex;align-items:center;gap:18px;margin-bottom:20px;background:var(--panel);border-radius:12px;padding:14px 18px}
-.fit-score-num{font-size:2.8rem;font-weight:900;line-height:1}
-.fit-score-num.bid{color:var(--green)}.fit-score-num.consider{color:var(--amber)}.fit-score-num.pass{color:var(--red)}
-.fit-rec{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:4px 10px;border-radius:6px;margin-top:6px;display:inline-block}
-.fit-rec.bid{background:rgba(46,204,138,.18);color:var(--green);border:1px solid rgba(46,204,138,.35)}
-.fit-rec.consider{background:rgba(240,165,0,.15);color:var(--amber);border:1px solid rgba(240,165,0,.3)}
-.fit-rec.pass{background:rgba(224,85,85,.15);color:var(--red);border:1px solid rgba(224,85,85,.3)}
-.fit-naics{font-size:.82rem;color:var(--muted);margin-top:6px;line-height:1.4}
-.fit-section{margin-bottom:16px}
-.fit-section-title{font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);margin-bottom:7px;font-weight:700}
+/* ── Analyze Fit — Gold Standard Drawer ── */
+#fit-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:900}
+#fit-overlay.open{display:block}
+#fit-drawer{position:fixed;top:0;right:0;width:min(520px,100vw);height:100vh;background:#0F2A6A;color:#fff;z-index:901;transform:translateX(110%);transition:transform .32s cubic-bezier(.4,0,.2,1);overflow-y:auto;box-shadow:-6px 0 40px rgba(0,0,0,.5)}
+#fit-drawer.open{transform:translateX(0)}
+.fit-drawer-inner{padding:22px 26px 56px}
+.fit-close{position:fixed;top:14px;right:14px;z-index:902;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.22);border-radius:8px;color:#fff;font-size:1.1rem;cursor:pointer;padding:5px 11px;font-family:'Jost',sans-serif;font-weight:700;transition:.15s}
+.fit-close:hover{background:rgba(255,255,255,.22)}
+.fit-opp-title{font-family:'Jost',sans-serif;font-weight:700;font-size:.96rem;color:#fff;margin-bottom:3px;padding-right:58px;line-height:1.35}
+.fit-opp-agency{font-family:'Jost',sans-serif;font-size:.76rem;color:rgba(255,255,255,.48);margin-bottom:20px}
+.fit-hero{display:flex;align-items:center;gap:16px;background:rgba(255,255,255,.08);border-radius:14px;padding:14px 18px;margin-bottom:20px}
+.fit-score-num{font-family:'Jost',sans-serif;font-size:2.8rem;font-weight:900;line-height:1;color:#6EE7A8}
+.fit-score-num.conditional{color:#F59E0B}.fit-score-num.no_bid{color:#F87171}
+.fit-rec-badge{font-family:'Jost',sans-serif;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;padding:3px 9px;border-radius:5px;display:inline-block;margin-top:5px}
+.fit-rec-badge.bid{background:#6EE7A8;color:#0F2A6A}
+.fit-rec-badge.conditional{background:#F59E0B;color:#0F2A6A}
+.fit-rec-badge.no_bid{background:rgba(248,113,113,.22);color:#F87171;border:1px solid rgba(248,113,113,.38)}
+.fit-naics-note{font-family:'Jost',sans-serif;font-size:.8rem;color:rgba(255,255,255,.68);line-height:1.45}
+.fit-match-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px}
+.fit-match-item{background:rgba(255,255,255,.07);border-radius:10px;padding:10px 8px;text-align:center}
+.fit-match-icon{font-size:1.1rem;margin-bottom:3px}
+.fit-match-label{font-family:'Jost',sans-serif;font-size:.58rem;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.4);margin-bottom:2px}
+.fit-match-val{font-family:'Jost',sans-serif;font-size:.76rem;font-weight:600;color:#fff}
+.fit-section{margin-bottom:20px}
+.fit-heading{font-family:'Bodoni Moda',serif;font-size:.98rem;font-weight:700;color:#fff;margin-bottom:2px;letter-spacing:.01em}
+.fit-heading-rule{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.76rem;color:rgba(255,255,255,.36);display:block;margin-bottom:9px}
+.fit-body-text{font-family:'Jost',sans-serif;font-size:.83rem;color:rgba(255,255,255,.8);line-height:1.6}
 .fit-list{list-style:none;display:flex;flex-direction:column;gap:5px}
-.fit-list li{font-size:.83rem;color:var(--text);padding-left:16px;position:relative;line-height:1.4}
-.fit-list li::before{content:'›';position:absolute;left:0;color:var(--cyan);font-weight:700}
-.fit-list.check li::before{content:'☐';color:var(--amber)}
-.fit-bottom{background:var(--panel);border-radius:10px;padding:12px 16px;font-size:.84rem;color:var(--text);line-height:1.55;margin-top:4px;border-left:3px solid var(--cyan)}
-.fit-loading{text-align:center;padding:40px;color:var(--muted);font-size:.9rem}
-.fit-error{text-align:center;padding:30px;color:var(--red);font-size:.85rem}
-.analyze-btn{background:rgba(217,164,91,.12);border:1px solid rgba(217,164,91,.3);color:var(--gold);padding:5px 10px;border-radius:7px;font-size:.7rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:.18s;margin-left:6px;display:inline-block}
-.analyze-btn:hover{background:rgba(217,164,91,.22);border-color:var(--gold)}
-@media(max-width:700px){.fit-panel{padding:20px 16px;border-radius:16px}.fit-score-num{font-size:2.2rem}.fit-score-bar{flex-wrap:wrap;gap:10px}}
+.fit-list li{font-family:'Jost',sans-serif;font-size:.82rem;color:rgba(255,255,255,.8);padding-left:15px;position:relative;line-height:1.45}
+.fit-list li::before{content:'›';position:absolute;left:0;color:#6EE7A8;font-weight:700}
+.fit-checklist{display:flex;flex-direction:column;gap:8px}
+.fit-check-item{display:flex;align-items:flex-start;gap:9px;cursor:pointer}
+.fit-check-item input[type=checkbox]{margin-top:3px;accent-color:#6EE7A8;flex-shrink:0}
+.fit-check-item .ci-text{font-family:'Jost',sans-serif;font-size:.82rem;color:rgba(255,255,255,.8);line-height:1.4}
+.fit-check-item .ci-hint{font-size:.7rem;color:rgba(255,255,255,.36);margin-top:2px}
+.fit-accordion{border:1px solid rgba(255,255,255,.1);border-radius:12px;overflow:hidden;margin-bottom:20px}
+.fit-acc-item{border-bottom:1px solid rgba(255,255,255,.07)}
+.fit-acc-item:last-child{border-bottom:none}
+.fit-acc-header{font-family:'Jost',sans-serif;font-size:.84rem;font-weight:600;color:rgba(255,255,255,.8);padding:11px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,.04);user-select:none}
+.fit-acc-header:hover{background:rgba(255,255,255,.08)}
+.fit-acc-header.is-open{color:#6EE7A8}
+.fit-acc-body{display:none;padding:10px 16px 14px;background:rgba(255,255,255,.025)}
+.fit-acc-body.is-open{display:block}
+.fit-loading{text-align:center;padding:60px 20px;font-family:'Jost',sans-serif;color:rgba(255,255,255,.45);font-size:.9rem}
+.fit-error{padding:18px;font-family:'Jost',sans-serif;color:#F87171;font-size:.84rem;background:rgba(248,113,113,.1);border-radius:10px;margin-top:12px}
+.fit-cached-bar{font-family:'Jost',sans-serif;font-size:.71rem;color:rgba(255,255,255,.38);margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.fit-reanalyze{color:#6EE7A8;background:none;border:none;font-size:.71rem;font-family:'Jost',sans-serif;cursor:pointer;padding:0;text-decoration:underline}
+.fit-analyze-anyway{background:none;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.58);font-family:'Jost',sans-serif;font-size:.78rem;padding:7px 14px;border-radius:8px;cursor:pointer;margin-top:14px;display:block}
+.fit-analyze-anyway:hover{border-color:rgba(255,255,255,.4);color:#fff}
+.fit-footer-btns{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap}
+.fit-btn-sam{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);font-family:'Jost',sans-serif;font-size:.78rem;font-weight:600;padding:8px 15px;border-radius:8px;text-decoration:none;display:inline-block;cursor:pointer;transition:.15s}
+.fit-btn-sam:hover{background:rgba(255,255,255,.18)}
+.fit-btn-capgen{background:#6EE7A8;color:#0F2A6A;border:none;font-family:'Jost',sans-serif;font-size:.78rem;font-weight:700;padding:8px 15px;border-radius:8px;text-decoration:none;display:inline-block;cursor:pointer;transition:.15s}
+.fit-btn-capgen:hover{background:#5dd49a}
+.fit-profile-prompt{text-align:center;padding:40px 20px}
+.fit-profile-prompt p{font-family:'Jost',sans-serif;color:rgba(255,255,255,.68);margin-bottom:16px;font-size:.88rem;line-height:1.6}
+.fit-limit-msg{font-family:'Jost',sans-serif;color:rgba(255,255,255,.7);font-size:.86rem;text-align:center;padding:30px 20px}
+.fit-stage2-loading{display:flex;align-items:center;gap:8px;font-family:'Jost',sans-serif;font-size:.82rem;color:rgba(255,255,255,.5);padding:10px 0}
+/* Analyze Fit button — Gold Standard: white bg, sapphire text */
+.analyze-btn{background:#fff;color:#0F2A6A;font-family:'Jost',sans-serif;border:none;padding:5px 11px;border-radius:7px;font-size:.7rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:.15s;margin-left:6px;display:inline-block;letter-spacing:.02em}
+.analyze-btn:hover{background:#e8f0ff;box-shadow:0 2px 8px rgba(15,42,106,.25)}
+/* Fit badges on opportunity list */
+.fit-list-badge{display:inline-block;font-family:'Jost',sans-serif;font-size:.6rem;font-weight:700;padding:2px 6px;border-radius:4px;margin-left:6px;vertical-align:middle;white-space:nowrap}
+.fit-list-badge.bid{background:#6EE7A8;color:#0F2A6A}
+.fit-list-badge.conditional{background:#F59E0B;color:#0F2A6A}
+.fit-list-badge.no_bid{background:rgba(248,113,113,.18);color:#F87171;border:1px solid rgba(248,113,113,.28)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.fit-spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.18);border-top-color:#6EE7A8;border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-right:6px}
+@media(max-width:700px){#fit-drawer{width:100vw}.fit-match-grid{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
@@ -339,7 +382,7 @@ function render(opps) {
     const daysCls = o.urgency === 'hot' ? 'days-hot' : o.urgency === 'warm' ? 'days-warm' : o.urgency === 'ok' ? 'days-ok' : 'days-none';
     const daysLabel = o.days_left !== null ? (o.days_left < 1 ? 'Closed' : o.days_left + 'd left') : 'No deadline';
     return `<tr>
-      <td class="title-cell"><a href="${o.url}" target="_blank" rel="noopener">${o.title || 'Untitled'}</a></td>
+      <td class="title-cell"><a href="${o.url}" target="_blank" rel="noopener">${o.title || 'Untitled'}</a>${(() => { const b = analysisCache[o.notice_id]; return b ? `<span class="fit-list-badge ${(b.recommendation||'').toLowerCase().replace(/ /g,'_')}">${b.recommendation} ${b.fit_score}</span>` : ''; })()}</td>
       <td class="agency-cell">${o.agency || '—'}</td>
       <td><span class="type-chip ${typeClass(o.type)}">${o.type || '—'}</span></td>
       <td class="setaside-cell">${o.set_aside || 'Unrestricted'}</td>
@@ -416,6 +459,10 @@ async function load() {
     document.getElementById('s-warm').textContent  = allOpps.filter(o => o.urgency === 'warm').length;
     document.getElementById('s-ok').textContent    = allOpps.filter(o => o.urgency === 'ok').length;
 
+    // Load analysis badges in background (single query)
+    const noticeIds = allOpps.map(o => o.notice_id).filter(Boolean);
+    loadAnalysisBadges(noticeIds);
+
     applyFilters();
   } catch (e) {
     document.getElementById('tbody').innerHTML = `<tr><td colspan="7" class="empty" style="color:var(--red)">${e.message}</td></tr>`;
@@ -437,88 +484,219 @@ document.querySelectorAll('.naics-bubble').forEach(b => {
 document.querySelectorAll('.win-btn').forEach(btn => { btn.addEventListener('click', function() { document.querySelectorAll('.win-btn').forEach(b => b.classList.remove('active')); this.classList.add('active'); load(); }); });
 document.getElementById('searchInput').addEventListener('input', applyFilters);
 
-// ── Analyze Fit ──────────────────────────────────────────────
+// ── Analyze Fit (Phase 2 — spec compliant) ───────────────────
+let currentFitOpp = null;
+let analysisCache = {}; // noticeId → row (pre-loaded badges)
+
+function getSessionToken() {
+  try {
+    const raw = sessionStorage.getItem('pipeline_session');
+    if (!raw) return null;
+    const s = JSON.parse(atob(raw));
+    if (!s.email || (Date.now() - s.ts) > 8 * 60 * 60 * 1000) return null;
+    return raw; // the base64 string itself is the bearer token
+  } catch { return null; }
+}
+
+// Load analysis badges for the current opportunity list (one query)
+async function loadAnalysisBadges(noticeIds) {
+  if (!noticeIds || !noticeIds.length) return;
+  const token = getSessionToken();
+  if (!token) return;
+  try {
+    const session = JSON.parse(atob(token));
+    const email   = encodeURIComponent(session.email);
+    const ids     = noticeIds.map(function(id){ return encodeURIComponent(id); }).join(',');
+    const SUPABASE_URL = 'https://judislfknmhofcgzyozc.supabase.co';
+    const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp1ZGlzbGZrbm1ob2ZjZ3p5b3pjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMDI3ODAsImV4cCI6MjA5Mjc3ODc4MH0.Kxpe0kJt0k7ZchYu70BOwm4KdT0C5aSsyeR1ov6NlQ0';
+    const res = await fetch(
+      SUPABASE_URL + '/rest/v1/opportunity_analyses?account_email=eq.' + email
+        + '&select=opportunity_id,recommendation,fit_score,profile_version,created_at'
+        + '&order=created_at.desc',
+      { headers: { apikey: ANON_KEY, Authorization: 'Bearer ' + ANON_KEY } }
+    );
+    if (!res.ok) return;
+    const rows = await res.json();
+    analysisCache = {};
+    rows.forEach(function(r) { analysisCache[r.opportunity_id] = r; });
+  } catch(e) { /* non-fatal */ }
+}
+
 document.addEventListener('click', function(e) {
   var btn = e.target.closest('.analyze-btn');
   if (!btn) return;
   var idx = parseInt(btn.dataset.idx, 10);
-  if (!isNaN(idx) && renderedOpps[idx]) analyzeFit(renderedOpps[idx]);
+  if (!isNaN(idx) && renderedOpps[idx]) openFitDrawer(renderedOpps[idx]);
 });
 
-async function analyzeFit(opp) {
-  document.getElementById('fit-opp-title').textContent = opp.title || 'Unknown Opportunity';
+function openFitDrawer(opp) {
+  currentFitOpp = opp;
+  document.getElementById('fit-opp-title').textContent = opp.title || 'Opportunity';
   document.getElementById('fit-opp-agency').textContent = opp.agency || '';
-  document.getElementById('fit-body').innerHTML = '<div class="fit-loading">Analyzing opportunity fit with Claude AI… this takes a few seconds.</div>';
-  document.getElementById('fit-modal').classList.add('open');
+  document.getElementById('fit-body').innerHTML = '<div class="fit-loading"><span class="fit-spinner"></span>Analyzing with Claude AI…</div>';
+  document.getElementById('fit-overlay').classList.add('open');
+  document.getElementById('fit-drawer').classList.add('open');
   document.body.style.overflow = 'hidden';
+  runAnalysis(opp, false, false);
+}
+
+async function runAnalysis(opp, force, deep) {
+  const token = getSessionToken();
+  if (!token) {
+    document.getElementById('fit-body').innerHTML = '<div class="fit-error">Session expired. Please sign in again.</div>';
+    return;
+  }
+  document.getElementById('fit-body').innerHTML = '<div class="fit-loading"><span class="fit-spinner"></span>Analyzing with Claude AI… this takes a few seconds.</div>';
   try {
     const res = await fetch('/.netlify/functions/analyze-fit', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
       body: JSON.stringify({
-        title:     opp.title,
-        agency:    opp.agency,
-        type:      opp.type,
-        naics:     opp.naics,
-        set_aside: opp.set_aside,
-        deadline:  opp.deadline,
-        days_left: opp.days_left,
-        url:       opp.url
+        opportunityId: opp.notice_id,
+        force: force,
+        deep: deep,
+        opportunity: { title: opp.title, agency: opp.agency, naics: opp.naics, set_aside: opp.set_aside, deadline: opp.deadline }
       })
     });
     const data = await res.json();
-    if (!data.success) throw new Error(data.error || 'Analysis failed');
-    renderFitAnalysis(data.analysis, opp);
+    if (res.status === 401) { document.getElementById('fit-body').innerHTML = '<div class="fit-error">Session expired. Please sign in again.</div>'; return; }
+    if (res.status === 409) { renderProfileRequired(); return; }
+    if (res.status === 429) { renderDailyLimit(data.hoursLeft); return; }
+    if (!res.ok) throw new Error(data.error || 'Generation failed (' + res.status + ')');
+    renderStage1(data, opp);
+    // Update badge in list
+    if (data.opportunity_id) analysisCache[data.opportunity_id] = data;
   } catch(e) {
     document.getElementById('fit-body').innerHTML = '<div class="fit-error">Analysis failed: ' + e.message + '</div>';
   }
 }
 
-function renderFitAnalysis(a, opp) {
-  var rc = ((a.recommendation || 'pass')).toLowerCase();
-  var score = (a.fit_score != null) ? a.fit_score : '—';
-  var lists = function(arr, cls) {
-    return '<ul class="fit-list' + (cls ? ' ' + cls : '') + '">'
-      + (arr || []).map(function(r){ return '<li>' + r + '</li>'; }).join('')
-      + '</ul>';
-  };
+function renderProfileRequired() {
   document.getElementById('fit-body').innerHTML =
-    '<div class="fit-score-bar">'
-    + '<div><div class="fit-score-num ' + rc + '">' + score + '</div>'
-    + '<div class="fit-rec ' + rc + '">' + (a.recommendation || 'PASS') + '</div></div>'
-    + '<div style="flex:1"><div class="fit-naics">' + (a.naics_match || '') + '</div></div>'
-    + '</div>'
-
-    + '<div class="fit-section"><div class="fit-section-title">Key Requirements</div>'
-    + lists(a.key_requirements) + '</div>'
-
-    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">'
-    + '<div class="fit-section" style="margin:0"><div class="fit-section-title">Competitive Advantages</div>'
-    + lists(a.advantages) + '</div>'
-    + '<div class="fit-section" style="margin:0"><div class="fit-section-title">Watch Outs</div>'
-    + lists(a.watch_outs) + '</div>'
-    + '</div>'
-
-    + '<div class="fit-section"><div class="fit-section-title">Bid Prep Checklist</div>'
-    + lists(a.checklist, 'check') + '</div>'
-
-    + '<div class="fit-bottom">' + (a.bottom_line || '') + '</div>'
-
-    + '<div style="margin-top:18px;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap">'
-    + (opp.url ? '<a href="' + opp.url + '" target="_blank" rel="noopener" class="capgen-btn" style="padding:8px 16px">View on SAM.gov ↗</a>' : '')
-    + '<a href="/capability-generator.html?uei=YVNXN3XBUSD5" class="capgen-btn" style="padding:8px 16px;background:rgba(91,211,255,.2)">Generate CapGen ↗</a>'
+    '<div class="fit-profile-prompt">'
+    + '<p>Complete your company profile to unlock Claude-powered fit analysis for every opportunity.</p>'
+    + '<a href="/onboarding.html" class="fit-btn-capgen" style="display:inline-block;padding:10px 22px">Complete Profile →</a>'
     + '</div>';
 }
 
-function closeFitModal() {
-  document.getElementById('fit-modal').classList.remove('open');
+function renderDailyLimit(hours) {
+  document.getElementById('fit-body').innerHTML =
+    '<div class="fit-limit-msg">Daily analysis limit reached — resets in ' + (hours || '?') + 'h.</div>';
+}
+
+function renderStage1(data, opp) {
+  const s1   = data.stage1 || {};
+  const rec  = (data.recommendation || 'NO_BID').toLowerCase().replace(/ /g,'_');
+  const score = data.fit_score != null ? data.fit_score : '—';
+  const m    = s1.match || {};
+  const naicsIcon   = m.naics_match      ? '✅' : '❌';
+  const setaside    = m.set_aside_eligible ? '✅' : '❌';
+  const capAlign    = (m.capability_alignment || 'LOW').toUpperCase();
+  const capIcon     = capAlign === 'HIGH' ? '✅' : capAlign === 'MEDIUM' ? '⚡' : '⚠️';
+  const cachedLine  = data.cached
+    ? '<div class="fit-cached-bar">Analyzed ' + fmtDeadline(data.created_at)
+      + ' <button class="fit-reanalyze" onclick="runAnalysis(currentFitOpp,true,false)">Re-analyze</button></div>'
+    : '';
+  const conditionsList = (s1.conditions && s1.conditions.length)
+    ? '<div class="fit-section"><div class="fit-heading">Conditions</div>'
+      + '<span class="fit-heading-rule">What must be true to bid</span>'
+      + '<ul class="fit-list">' + s1.conditions.map(function(c){ return '<li>' + esc(c) + '</li>'; }).join('') + '</ul></div>'
+    : '';
+  const noFidDeep = rec === 'no_bid'
+    ? '<button class="fit-analyze-anyway" onclick="runAnalysis(currentFitOpp,false,true)">Analyze anyway — build Stage 2 package</button>'
+    : '';
+
+  let stage2Html = '';
+  if (data.stage2) {
+    stage2Html = buildStage2Html(data.stage2);
+  } else if (rec === 'bid' || rec === 'conditional') {
+    stage2Html = '<div class="fit-stage2-loading"><span class="fit-spinner"></span>Building full proposal package…</div>';
+    // Stage 2 should already be in the response if recommendation warrants it.
+    // If absent (timeout), show nothing more.
+    stage2Html = '';
+  }
+
+  document.getElementById('fit-body').innerHTML =
+    cachedLine
+    + '<div class="fit-hero">'
+    + '<div><div class="fit-score-num ' + rec + '">' + score + '</div>'
+    + '<div class="fit-rec-badge ' + rec + '">' + (data.recommendation || 'NO_BID') + '</div></div>'
+    + '<div style="flex:1"><div class="fit-naics-note">' + esc(s1.opportunity_summary || '') + '</div></div>'
+    + '</div>'
+
+    + '<div class="fit-match-grid">'
+    + '<div class="fit-match-item"><div class="fit-match-icon">' + naicsIcon + '</div><div class="fit-match-label">NAICS</div><div class="fit-match-val">' + esc(m.naics_detail || (m.naics_match ? 'Match' : 'No match')) + '</div></div>'
+    + '<div class="fit-match-item"><div class="fit-match-icon">' + setaside + '</div><div class="fit-match-label">Set-Aside</div><div class="fit-match-val">' + esc(m.set_aside_detail || (m.set_aside_eligible ? 'Eligible' : 'Not eligible')) + '</div></div>'
+    + '<div class="fit-match-item"><div class="fit-match-icon">' + capIcon + '</div><div class="fit-match-label">Capability</div><div class="fit-match-val">' + capAlign + '</div></div>'
+    + '</div>'
+
+    + '<div class="fit-section"><div class="fit-heading">Analyst Rationale</div><span class="fit-heading-rule">Bid / No-Bid reasoning</span>'
+    + '<p class="fit-body-text">' + esc(s1.rationale || '') + '</p></div>'
+
+    + conditionsList
+    + noFidDeep
+    + stage2Html
+
+    + '<div class="fit-footer-btns">'
+    + (opp.url ? '<a href="' + opp.url + '" target="_blank" rel="noopener" class="fit-btn-sam">View on SAM.gov ↗</a>' : '')
+    + '<a href="/capability-generator.html?uei=YVNXN3XBUSD5" class="fit-btn-capgen">Generate CapGen ↗</a>'
+    + '</div>';
+}
+
+function buildStage2Html(s2) {
+  function accSection(label, rule, content) {
+    return '<div class="fit-acc-item">'
+      + '<div class="fit-acc-header" onclick="toggleAcc(this)">' + label + '<span>›</span></div>'
+      + '<div class="fit-acc-body">'
+      + '<span class="fit-heading-rule">' + rule + '</span>'
+      + content
+      + '</div></div>';
+  }
+  function listHtml(arr) {
+    if (!arr || !arr.length) return '<p class="fit-body-text" style="color:rgba(255,255,255,.4)">Not specified.</p>';
+    return '<ul class="fit-list">' + arr.map(function(i){ return '<li>' + esc(String(i)); }).join('') + '</ul>';
+  }
+  function checklistHtml(items) {
+    if (!items || !items.length) return '';
+    return '<div class="fit-checklist">' + items.map(function(item, idx2){
+      var obj = (typeof item === 'object') ? item : { item: item };
+      return '<label class="fit-check-item"><input type="checkbox" id="chk' + idx2 + '"><div><div class="ci-text">' + esc(obj.item || '') + '</div>'
+        + (obj.owner_hint ? '<div class="ci-hint">Owner: ' + esc(obj.owner_hint) + '</div>' : '')
+        + (obj.deadline_hint ? '<div class="ci-hint">By: ' + esc(obj.deadline_hint) + '</div>' : '')
+        + '</div></label>';
+    }).join('') + '</div>';
+  }
+
+  return '<div class="fit-section"><div class="fit-heading">Full Pursuit Package</div><span class="fit-heading-rule">Stage 2 — generated because recommendation is BID or CONDITIONAL</span></div>'
+    + '<div class="fit-accordion">'
+    + accSection('Required Work Scope', 'What the government is actually buying',   listHtml(s2.required_work))
+    + accSection('Staffing & Delivery', 'Roles, certs, clearances, delivery mode',   listHtml(s2.staffing_delivery))
+    + accSection('Documents Needed',    'Everything required to respond',            listHtml(s2.documents_needed))
+    + accSection('Proposal Checklist',  'Actionable steps with owners and deadlines', checklistHtml(s2.proposal_checklist))
+    + accSection('Draft Technical Approach', 'Tailored to your capabilities',
+        '<p class="fit-body-text" style="white-space:pre-line">' + esc(s2.draft_technical_approach || '') + '</p>')
+    + accSection('Pricing Considerations', 'Contract type, cost drivers, competitive range', listHtml(s2.pricing_considerations))
+    + accSection('Questions for the CO',  'Specific, well-formed questions to submit', listHtml(s2.questions_for_co))
+    + '</div>';
+}
+
+function toggleAcc(header) {
+  header.classList.toggle('is-open');
+  const body = header.nextElementSibling;
+  if (body) body.classList.toggle('is-open');
+}
+
+function esc(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function closeFitDrawer() {
+  document.getElementById('fit-overlay').classList.remove('open');
+  document.getElementById('fit-drawer').classList.remove('open');
   document.body.style.overflow = '';
 }
-document.getElementById('fit-modal').addEventListener('click', function(e) {
-  if (e.target === this) closeFitModal();
-});
 document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') closeFitModal();
+  if (e.key === 'Escape') closeFitDrawer();
 });
 
 </script>
@@ -612,12 +790,13 @@ document.getElementById('auth-code').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') document.getElementById('auth-verify-btn').click();
 });
 </script>
-<!-- Analyze Fit modal -->
-<div id="fit-modal">
-  <div class="fit-panel">
-    <button class="fit-close" onclick="closeFitModal()">&#xD7;</button>
-    <div id="fit-opp-title" class="fit-title"></div>
-    <div id="fit-opp-agency" class="fit-agency"></div>
+<!-- Analyze Fit — slide-in drawer -->
+<div id="fit-overlay" onclick="closeFitDrawer()"></div>
+<div id="fit-drawer">
+  <div class="fit-drawer-inner">
+    <button class="fit-close" onclick="closeFitDrawer()">&#xD7;</button>
+    <div id="fit-opp-title" class="fit-opp-title"></div>
+    <div id="fit-opp-agency" class="fit-opp-agency"></div>
     <div id="fit-body"></div>
   </div>
 </div>
