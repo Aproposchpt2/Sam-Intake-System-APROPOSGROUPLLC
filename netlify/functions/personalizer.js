@@ -21,6 +21,10 @@ function sbH() {
 }
 
 exports.handler = async function (event, context) {
+  if (!ANTHROPIC_API_KEY) {
+    return { statusCode: 500, headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ success: false, error: 'ANTHROPIC_API_KEY not set on this Netlify site' }) };
+  }
   try {
     // 1. Get contacts ready for outreach
     const query = [
@@ -157,7 +161,7 @@ Return ONLY valid JSON with this exact structure:
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ success: true, processed, drafted, errors })
+      body: JSON.stringify({ success: true, processed, drafted, errors, note: errors > 0 ? "Check Netlify logs for Claude errors" : "ok" })
     };
   } catch (err) {
     console.error('personalizer error:', err);
