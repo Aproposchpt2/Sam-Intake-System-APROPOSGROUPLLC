@@ -1,8 +1,7 @@
 'use strict';
 // importer-sam.js — CapGen Marketing Engine
-// Fetches active small business federal contractors for target NAICS codes.
-// Uses NAICS-based search (date range not supported in SAM v3 API).
-// Deduplication against existing DB ensures only NEW contractors are imported each run.
+// NAICS-based search (SAM v3 does not support date-range filtering).
+// Three-layer deduplication: DB UEI check, within-batch Set, upsert merge.
 
 const TARGET_NAICS = ['541519', '541512', '541511', '541611', '561210'];
 
@@ -26,40 +25,38 @@ function sbH() {
 }
 
 async function fetchNaicsPage(naicsCode, page) {
-  const params = new URLSearchParams({
+  var params = new URLSearchParams({
     api_key:           SAM_API_KEY,
     naicsCode:         naicsCode,
     registrationStatus:'A',
     includeSections:   'entityRegistration,coreData,assertions',
     page:              String(page),
-    size:              '10'
+    size:              '100'
   });
-  const res = await fetch(SAM_BASE + '?' + params.toString());
+  var res = await fetch(SAM_BASE + '?' + params.toString());
   if (!res.ok) {
-    const t = await res.text();
+    var t = await res.text();
     throw new Error('SAM ' + res.status + ': ' + t.slice(0, 200));
   }
   return res.json();
 }
 
 function isSmallBusiness(entity) {
-  const core        = entity.coreData || {};
-  const bt          = core.businessTypes || {};
-  const sbaList     = bt.sbaBusinessTypeList || [];
-  const assertions  = entity.assertions || {};
-  const gs          = assertions.goodsAndServices || {};
-  const naicsList   = gs.naicsList || [];
-  // Check SBA type list OR small business flag on any NAICS
+  var core     = entity.coreData || {};
+  var bt       = core.businessTypes || {};
+  var sbaList  = bt.sbaBusinessTypeList || [];
+  var gs       = (entity.assertions && entity.assertions.goodsAndServices) || {};
+  var naicsList = gs.naicsList || [];
   return sbaList.length > 0 ||
     naicsList.some(function(n) { return n.sbaSmallBusiness === 'Y'; });
 }
 
 function mapEntity(entity, naicsCode) {
-  const reg  = entity.entityRegistration || {};
-  const core = entity.coreData || {};
-  const addr = core.physicalAddress || {};
-  const gs   = (entity.assertions && entity.assertions.goodsAndServices) || {};
-  const naicsList = gs.naicsList || [];
+  var reg  = entity.entityRegistration || {};
+  var core = entity.coreData || {};
+  var addr = core.physicalAddress || {};
+  var gs   = (entity.assertions && entity.assertions.goodsAndServices) || {};
+  var naicsList = gs.naicsList || [];
   return {
     id:                reg.ueiSAM,
     legal_name:        reg.legalBusinessName || '',
@@ -73,49 +70,40 @@ function mapEntity(entity, naicsCode) {
     business_type:     'Small Business',
     sam_status:        reg.registrationStatus === 'A' ? 'Active' : (reg.registrationStatus || ''),
     registration_date: reg.registrationDate || null,
-    website_url:       (core.entityURL) || null,
+    website_url:       core.entityURL || null,
     imported_at:       new Date().toISOString(),
     enrichment_status: 'pending',
     outreach_status:   'pending'
   };
 }
 
-exports.handler = async function (event) {
+exports.handler = async function(event) {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: CORS_HEADERS, body: '' };
 
   if (!SAM_API_KEY)  return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ success: false, error: 'SAM_API_KEY not set' }) };
   if (!SUPABASE_URL) return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ success: false, error: 'SUPABASE_URL not set' }) };
 
   try {
-    // 1. Load existing UEIs from Supabase for dedup
-    const existingRes = await fetch(
+    // Layer 1: load existing UEIs from DB for deduplication
+    var existingRes = await fetch(
       SUPABASE_URL + '/rest/v1/contractors?select=id&limit=50000',
       { headers: sbH() }
     );
     if (!existingRes.ok) throw new Error('Supabase read failed: ' + await existingRes.text());
-    const existingRows = await existingRes.json();
-    const existingUEIs = new Set(existingRows.map(function(r) { return r.id; }));
+    var existingRows = await existingRes.json();
+    var existingUEIs = new Set(existingRows.map(function(r) { return r.id; }));
     console.log('[importer] Existing in DB:', existingUEIs.size);
 
-    // Diagnostic mode: return raw SAM response to debug param issues
-    var isDiag = (event.queryStringParameters && event.queryStringParameters.diag === '1');
-    if (isDiag) {
-      try {
-        var diagData = await fetchNaicsPage(TARGET_NAICS[0], 0);
-        return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify({ diag: true, naics: TARGET_NAICS[0], raw: diagData }) };
-      } catch(e) { return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ diag: true, error: e.message }) }; }
-    }
-
-    // 2. Fetch from SAM.gov per NAICS code (max 3 pages each = 300 per NAICS)
-    const newEntities = [];
-    const seenUEIs    = new Set();
-    let   samTotal    = 0;
+    // Fetch from SAM.gov per NAICS (3 pages × 100 records = up to 300 per NAICS)
+    var newEntities = [];
+    var seenUEIs    = new Set(); // Layer 2: within-batch dedup
+    var samTotal    = 0;
 
     for (var ni = 0; ni < TARGET_NAICS.length; ni++) {
       var naicsCode = TARGET_NAICS[ni];
       console.log('[importer] Fetching NAICS:', naicsCode);
 
-      for (var page = 0; page < 2; page++) {  // 2 pages x 10 records = 20 per NAICS, ~50 new/day total
+      for (var page = 0; page < 3; page++) {
         var data;
         try {
           data = await fetchNaicsPage(naicsCode, page);
@@ -138,13 +126,13 @@ exports.handler = async function (event) {
           newEntities.push(mapEntity(entity, naicsCode));
         }
 
-        if (entities.length < 10) break; // no more pages
+        if (entities.length < 100) break;
       }
     }
 
     console.log('[importer] SAM total fetched:', samTotal, '| New unique:', newEntities.length);
 
-    // 3. Upsert new contractors to Supabase in chunks of 50
+    // Layer 3: upsert with merge-duplicates as final safety net
     var inserted = 0;
     var errors   = 0;
     var CHUNK    = 50;
@@ -182,7 +170,7 @@ exports.handler = async function (event) {
       })
     };
 
-  } catch (err) {
+  } catch(err) {
     console.error('[importer] Fatal:', err.message);
     return {
       statusCode: 500,
