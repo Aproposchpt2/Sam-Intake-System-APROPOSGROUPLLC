@@ -32,7 +32,7 @@ async function fetchNaicsPage(naicsCode, page) {
     registrationStatus:'A',
     includeSections:   'entityRegistration,coreData,assertions',
     page:              String(page),
-    size:              '100'
+    size:              '10'
   });
   const res = await fetch(SAM_BASE + '?' + params.toString());
   if (!res.ok) {
@@ -115,7 +115,7 @@ exports.handler = async function (event) {
       var naicsCode = TARGET_NAICS[ni];
       console.log('[importer] Fetching NAICS:', naicsCode);
 
-      for (var page = 0; page < 3; page++) {
+      for (var page = 0; page < 30; page++) {
         var data;
         try {
           data = await fetchNaicsPage(naicsCode, page);
@@ -138,7 +138,7 @@ exports.handler = async function (event) {
           newEntities.push(mapEntity(entity, naicsCode));
         }
 
-        if (entities.length < 100) break; // no more pages
+        if (entities.length < 10) break; // no more pages
       }
     }
 
