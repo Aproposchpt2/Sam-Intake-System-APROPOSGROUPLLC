@@ -113,7 +113,7 @@ export const handler = async (event) => {
         (row.recommendation === 'NO_BID' || row.recommendation === 'PENDING')) {
       // Re-activate for stage2 run
       await sbPatch('opportunity_analyses', `id=eq.${row.id}`, { status: 'stage1_complete' });
-      fireBackground({ rowId: row.id, accountEmail, opportunityId,
+      await fireBackground({ rowId: row.id, accountEmail, opportunityId,
         profileVersion: profile.profile_version, deep: true, skipStage1: true, opportunity: inlineOpp });
       return { statusCode: 200, headers: CORS, body: JSON.stringify({ ...row, status: 'stage1_complete', cached: false }) };
     }
@@ -158,18 +158,21 @@ export const handler = async (event) => {
     return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: 'Insert failed: ' + e.message }) };
   }
 
-  // Fire background — await the trigger only (background fn returns 202 immediately)
-  fireBackground({ rowId: row.id, accountEmail, opportunityId,
+  // Await the trigger — MUST await or the fetch is killed when handler returns
+  await fireBackground({ rowId: row.id, accountEmail, opportunityId,
     profileVersion: profile.profile_version, deep, skipStage1: false, opportunity: inlineOpp });
 
   return { statusCode: 202, headers: CORS, body: JSON.stringify({ id: row.id, status: 'pending', opportunity_id: opportunityId, cached: false }) };
 };
 
-function fireBackground(payload) {
+async function fireBackground(payload) {
   const url = `${SITE_URL}/.netlify/functions/analyze-fit-background`;
-  fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  }).catch(() => {}); // fire-and-forget; background fn returns 202 immediately
+  try {
+    // Background functions return 202 immediately — await ensures the request is sent
+    await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+  } catch { /* ignore — background job accepted */ }
 }
