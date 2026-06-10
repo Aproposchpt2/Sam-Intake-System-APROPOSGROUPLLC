@@ -97,6 +97,15 @@ exports.handler = async function (event) {
     const existingUEIs = new Set(existingRows.map(function(r) { return r.id; }));
     console.log('[importer] Existing in DB:', existingUEIs.size);
 
+    // Diagnostic mode: return raw SAM response to debug param issues
+    var isDiag = (event.queryStringParameters && event.queryStringParameters.diag === '1');
+    if (isDiag) {
+      try {
+        var diagData = await fetchNaicsPage(TARGET_NAICS[0], 0);
+        return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify({ diag: true, naics: TARGET_NAICS[0], raw: diagData }) };
+      } catch(e) { return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ diag: true, error: e.message }) }; }
+    }
+
     // 2. Fetch from SAM.gov per NAICS code (max 3 pages each = 300 per NAICS)
     const newEntities = [];
     const seenUEIs    = new Set();
