@@ -7,7 +7,7 @@ import { createHmac, timingSafeEqual } from 'crypto';
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const AUTH_SECRET  = process.env.AUTH_TOKEN_SECRET;
-const SITE_URL     = process.env.URL || '';
+const SITE_URL     = process.env.DEPLOY_URL || process.env.URL || '';
 const MODEL        = process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-6';
 
 const CORS = {
