@@ -135,6 +135,35 @@ header{background:var(--surface);border-bottom:1px solid var(--line);padding:14p
 #auth-app{display:block}
 #signout-btn{background:transparent;border:1px solid var(--line);border-radius:7px;color:var(--soft);padding:5px 12px;cursor:pointer;font-size:.74rem}
 #signout-btn:hover{border-color:var(--red);color:var(--red)}
+
+/* ── Analyze Fit modal ── */
+#fit-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:1000;align-items:center;justify-content:center;padding:20px}
+#fit-modal.open{display:flex}
+.fit-panel{background:var(--surface);border:1px solid var(--line2);border-radius:20px;max-width:680px;width:100%;max-height:90vh;overflow-y:auto;padding:28px 30px;position:relative}
+.fit-close{position:absolute;top:14px;right:16px;background:none;border:none;color:var(--soft);font-size:1.5rem;cursor:pointer;line-height:1;padding:0 6px}
+.fit-close:hover{color:var(--text)}
+.fit-title{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:4px;padding-right:32px;line-height:1.4}
+.fit-agency{font-size:.8rem;color:var(--muted);margin-bottom:18px}
+.fit-score-bar{display:flex;align-items:center;gap:18px;margin-bottom:20px;background:var(--panel);border-radius:12px;padding:14px 18px}
+.fit-score-num{font-size:2.8rem;font-weight:900;line-height:1}
+.fit-score-num.bid{color:var(--green)}.fit-score-num.consider{color:var(--amber)}.fit-score-num.pass{color:var(--red)}
+.fit-rec{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:4px 10px;border-radius:6px;margin-top:6px;display:inline-block}
+.fit-rec.bid{background:rgba(46,204,138,.18);color:var(--green);border:1px solid rgba(46,204,138,.35)}
+.fit-rec.consider{background:rgba(240,165,0,.15);color:var(--amber);border:1px solid rgba(240,165,0,.3)}
+.fit-rec.pass{background:rgba(224,85,85,.15);color:var(--red);border:1px solid rgba(224,85,85,.3)}
+.fit-naics{font-size:.82rem;color:var(--muted);margin-top:6px;line-height:1.4}
+.fit-section{margin-bottom:16px}
+.fit-section-title{font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);margin-bottom:7px;font-weight:700}
+.fit-list{list-style:none;display:flex;flex-direction:column;gap:5px}
+.fit-list li{font-size:.83rem;color:var(--text);padding-left:16px;position:relative;line-height:1.4}
+.fit-list li::before{content:'›';position:absolute;left:0;color:var(--cyan);font-weight:700}
+.fit-list.check li::before{content:'☐';color:var(--amber)}
+.fit-bottom{background:var(--panel);border-radius:10px;padding:12px 16px;font-size:.84rem;color:var(--text);line-height:1.55;margin-top:4px;border-left:3px solid var(--cyan)}
+.fit-loading{text-align:center;padding:40px;color:var(--muted);font-size:.9rem}
+.fit-error{text-align:center;padding:30px;color:var(--red);font-size:.85rem}
+.analyze-btn{background:rgba(217,164,91,.12);border:1px solid rgba(217,164,91,.3);color:var(--gold);padding:5px 10px;border-radius:7px;font-size:.7rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:.18s;margin-left:6px;display:inline-block}
+.analyze-btn:hover{background:rgba(217,164,91,.22);border-color:var(--gold)}
+@media(max-width:700px){.fit-panel{padding:20px 16px;border-radius:16px}.fit-score-num{font-size:2.2rem}.fit-score-bar{flex-wrap:wrap;gap:10px}}
 </style>
 </head>
 <body>
@@ -274,6 +303,7 @@ header{background:var(--surface);border-bottom:1px solid var(--line);padding:14p
 const UEI = 'YVNXN3XBUSD5';
 let allOpps = [];
 let naicsClient = [];
+let renderedOpps = [];
 
 function typeClass(t) {
   const tl = (t||'').toLowerCase();
@@ -302,9 +332,10 @@ function render(opps) {
   }
 
   const capgenUrl = `/capability-generator.html?uei=${UEI}`;
+  renderedOpps = opps;
 
   // Desktop table rows
-  tbody.innerHTML = opps.map(o => {
+  tbody.innerHTML = opps.map((o, idx) => {
     const daysCls = o.urgency === 'hot' ? 'days-hot' : o.urgency === 'warm' ? 'days-warm' : o.urgency === 'ok' ? 'days-ok' : 'days-none';
     const daysLabel = o.days_left !== null ? (o.days_left < 1 ? 'Closed' : o.days_left + 'd left') : 'No deadline';
     return `<tr>
@@ -317,12 +348,12 @@ function render(opps) {
         <div><span class="days-badge ${daysCls}">${daysLabel}</span></div>
         <div style="font-size:.68rem;color:var(--soft);margin-top:3px">${fmtDeadline(o.deadline)}</div>
       </td>
-      <td><a class="capgen-btn" href="${capgenUrl}">CapGen ↗</a></td>
+      <td style="white-space:nowrap"><a class="capgen-btn" href="${capgenUrl}">CapGen ↗</a><button class="analyze-btn" data-idx="${idx}">Analyze Fit</button></td>
     </tr>`;
   }).join('');
 
   // Mobile cards
-  cards.innerHTML = opps.map(o => {
+  cards.innerHTML = opps.map((o, idx) => {
     const daysCls = o.urgency === 'hot' ? 'days-hot' : o.urgency === 'warm' ? 'days-warm' : o.urgency === 'ok' ? 'days-ok' : 'days-none';
     const daysLabel = o.days_left !== null ? (o.days_left < 1 ? 'Closed' : o.days_left + 'd left') : 'No deadline';
     return `<div class="opp-card">
@@ -341,8 +372,9 @@ function render(opps) {
           <span class="opp-card-date">${fmtDeadline(o.deadline)}</span>
         </div>
       </div>
-      <div>
-        <a class="capgen-btn" href="${capgenUrl}" style="width:100%;text-align:center;display:block;padding:8px">Generate CapGen Statement ↗</a>
+      <div style="display:flex;gap:8px">
+        <a class="capgen-btn" href="${capgenUrl}" style="flex:1;text-align:center;display:block;padding:8px">CapGen ↗</a>
+        <button class="analyze-btn" data-idx="${idx}" style="flex:1;padding:8px;margin-left:0">Analyze Fit</button>
       </div>
     </div>`;
   }).join('');
@@ -390,15 +422,6 @@ async function load() {
   }
 }
 
-// Day filter buttons
-document.querySelectorAll('#dayBtns .win-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('#dayBtns .win-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    load();
-  });
-});
-
 // NAICS bubble toggle
 document.querySelectorAll('.naics-bubble').forEach(b => {
   b.addEventListener('click', () => {
@@ -411,8 +434,92 @@ document.querySelectorAll('.naics-bubble').forEach(b => {
     applyFilters();
   });
 });
-document.querySelectorAll('.win-btn').forEach(btn => { btn.addEventListener('click', function() { document.querySelectorAll('.win-btn').forEach(b => b.classList.remove('active')); this.classList.add('active'); currentPage = 0; load(); }); });
+document.querySelectorAll('.win-btn').forEach(btn => { btn.addEventListener('click', function() { document.querySelectorAll('.win-btn').forEach(b => b.classList.remove('active')); this.classList.add('active'); load(); }); });
 document.getElementById('searchInput').addEventListener('input', applyFilters);
+
+// ── Analyze Fit ──────────────────────────────────────────────
+document.addEventListener('click', function(e) {
+  var btn = e.target.closest('.analyze-btn');
+  if (!btn) return;
+  var idx = parseInt(btn.dataset.idx, 10);
+  if (!isNaN(idx) && renderedOpps[idx]) analyzeFit(renderedOpps[idx]);
+});
+
+async function analyzeFit(opp) {
+  document.getElementById('fit-opp-title').textContent = opp.title || 'Unknown Opportunity';
+  document.getElementById('fit-opp-agency').textContent = opp.agency || '';
+  document.getElementById('fit-body').innerHTML = '<div class="fit-loading">Analyzing opportunity fit with Claude AI… this takes a few seconds.</div>';
+  document.getElementById('fit-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  try {
+    const res = await fetch('/.netlify/functions/analyze-fit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title:     opp.title,
+        agency:    opp.agency,
+        type:      opp.type,
+        naics:     opp.naics,
+        set_aside: opp.set_aside,
+        deadline:  opp.deadline,
+        days_left: opp.days_left,
+        url:       opp.url
+      })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'Analysis failed');
+    renderFitAnalysis(data.analysis, opp);
+  } catch(e) {
+    document.getElementById('fit-body').innerHTML = '<div class="fit-error">Analysis failed: ' + e.message + '</div>';
+  }
+}
+
+function renderFitAnalysis(a, opp) {
+  var rc = ((a.recommendation || 'pass')).toLowerCase();
+  var score = (a.fit_score != null) ? a.fit_score : '—';
+  var lists = function(arr, cls) {
+    return '<ul class="fit-list' + (cls ? ' ' + cls : '') + '">'
+      + (arr || []).map(function(r){ return '<li>' + r + '</li>'; }).join('')
+      + '</ul>';
+  };
+  document.getElementById('fit-body').innerHTML =
+    '<div class="fit-score-bar">'
+    + '<div><div class="fit-score-num ' + rc + '">' + score + '</div>'
+    + '<div class="fit-rec ' + rc + '">' + (a.recommendation || 'PASS') + '</div></div>'
+    + '<div style="flex:1"><div class="fit-naics">' + (a.naics_match || '') + '</div></div>'
+    + '</div>'
+
+    + '<div class="fit-section"><div class="fit-section-title">Key Requirements</div>'
+    + lists(a.key_requirements) + '</div>'
+
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">'
+    + '<div class="fit-section" style="margin:0"><div class="fit-section-title">Competitive Advantages</div>'
+    + lists(a.advantages) + '</div>'
+    + '<div class="fit-section" style="margin:0"><div class="fit-section-title">Watch Outs</div>'
+    + lists(a.watch_outs) + '</div>'
+    + '</div>'
+
+    + '<div class="fit-section"><div class="fit-section-title">Bid Prep Checklist</div>'
+    + lists(a.checklist, 'check') + '</div>'
+
+    + '<div class="fit-bottom">' + (a.bottom_line || '') + '</div>'
+
+    + '<div style="margin-top:18px;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap">'
+    + (opp.url ? '<a href="' + opp.url + '" target="_blank" rel="noopener" class="capgen-btn" style="padding:8px 16px">View on SAM.gov ↗</a>' : '')
+    + '<a href="/capability-generator.html?uei=YVNXN3XBUSD5" class="capgen-btn" style="padding:8px 16px;background:rgba(91,211,255,.2)">Generate CapGen ↗</a>'
+    + '</div>';
+}
+
+function closeFitModal() {
+  document.getElementById('fit-modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.getElementById('fit-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeFitModal();
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeFitModal();
+});
 
 </script>
 
@@ -505,5 +612,15 @@ document.getElementById('auth-code').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') document.getElementById('auth-verify-btn').click();
 });
 </script>
+<!-- Analyze Fit modal -->
+<div id="fit-modal">
+  <div class="fit-panel">
+    <button class="fit-close" onclick="closeFitModal()">&#xD7;</button>
+    <div id="fit-opp-title" class="fit-title"></div>
+    <div id="fit-opp-agency" class="fit-agency"></div>
+    <div id="fit-body"></div>
+  </div>
+</div>
+
 </body>
 </html>
