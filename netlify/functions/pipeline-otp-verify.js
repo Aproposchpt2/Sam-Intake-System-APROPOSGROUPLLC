@@ -1,6 +1,8 @@
-﻿'use strict';
+'use strict';
 // pipeline-otp-verify.js
-// POST { email, code } → verifies code, returns session token.
+// POST { email, code } → verifies code, returns HMAC-signed session token.
+
+const crypto = require('crypto');
 
 const headers = {
   'Access-Control-Allow-Origin': '*',
@@ -50,8 +52,12 @@ exports.handler = async (event) => {
     body: JSON.stringify({ used: true }),
   });
 
-  // Simple session token — email + timestamp signed with a constant
-  const token = Buffer.from(JSON.stringify({ email, ts: Date.now() })).toString('base64');
+  // HMAC-SHA256 signed session token
+  const ts      = Date.now();
+  const toSign  = JSON.stringify({ email, ts });
+  const sig     = crypto.createHmac('sha256', process.env.AUTH_TOKEN_SECRET || '')
+                        .update(toSign).digest('hex');
+  const token   = Buffer.from(JSON.stringify({ email, ts, sig })).toString('base64');
 
   return { statusCode: 200, headers, body: JSON.stringify({ ok: true, token, email }) };
 };
