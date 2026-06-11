@@ -130,10 +130,11 @@ header{background:var(--surface);border-bottom:1px solid var(--line);padding:14p
 <script>
 'use strict';
 const STRIPE_BASE = 'https://buy.stripe.com/bJebJ0dA65Gv9BheDm7EQ0Y';
-const q = new URLSearchParams(location.search);
+const q     = new URLSearchParams(location.search);
 const token = q.get('t') || sessionStorage.getItem('demo_view_token') || '';
+const uei   = q.get('uei') || sessionStorage.getItem('capgen_uei') || '';
 
-document.getElementById('backBtn').href = token ? '/demo/snapshot?t=' + encodeURIComponent(token) : '/demo';
+document.getElementById('backBtn').href = token ? '/demo/snapshot?t=' + encodeURIComponent(token) : '/apropos';
 document.getElementById('subCta').href  = token ? STRIPE_BASE + '?client_reference_id=' + encodeURIComponent(token) : STRIPE_BASE;
 if (token) sessionStorage.setItem('demo_view_token', token);
 
@@ -189,8 +190,28 @@ function renderCard(opp, rank, analysis, capgenUrl) {
 }
 
 async function load() {
+  // Subscriber mode: accessed with ?uei= (no demo token needed)
+  if (!token && uei) {
+    try {
+      const res  = await fetch('/.netlify/functions/client-pipeline?uei=' + encodeURIComponent(uei) + '&days=60');
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Load failed');
+      const opps      = (data.opportunities || []).slice(0, 5);
+      const bizName   = (data.client && data.client.name) || '';
+      const capgenUrl = '/capability-generator.html?uei=' + encodeURIComponent(uei);
+      if (bizName) document.getElementById('bannerBiz').textContent = bizName + ' — Top 5 Best Matches';
+      document.getElementById('loadingEl').style.display = 'none';
+      document.getElementById('cardsEl').innerHTML = opps.length
+        ? opps.map(function(o, i){ return renderCard(o, i, null, capgenUrl); }).join('')
+        : '<div style="text-align:center;padding:48px;color:var(--soft)">No open opportunities found this week.</div>';
+    } catch(e) {
+      document.getElementById('loadingEl').textContent = 'Error: ' + e.message;
+    }
+    return;
+  }
+
   if (!token) {
-    document.getElementById('loadingEl').innerHTML = 'No session. <a href="/demo" style="color:var(--cyan)">Start a new demo →</a>';
+    document.getElementById('loadingEl').innerHTML = 'No session. <a href="/demo" style="color:var(--cyan)">Start a new demo →</a> or <a href="/onboarding" style="color:var(--cyan)">Member Login →</a>';
     return;
   }
   try {
