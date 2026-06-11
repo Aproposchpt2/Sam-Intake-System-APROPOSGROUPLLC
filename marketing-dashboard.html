@@ -165,9 +165,9 @@ tr:hover td{background:rgba(91,175,255,.04)}
 const SUPABASE_URL = 'https://judislfknmhofcgzyozc.supabase.co';
 const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp1ZGlzbGZrbm1ob2ZjZ3p5b3pjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMDI3ODAsImV4cCI6MjA5Mjc3ODc4MH0.Kxpe0kJt0k7ZchYu70BOwm4KdT0C5aSsyeR1ov6NlQ0';
 
-function sbFetch(path) {
+function sbFetch(path, extra) {
   return fetch(SUPABASE_URL + '/rest/v1/' + path, {
-    headers: { apikey: ANON_KEY, Authorization: 'Bearer ' + ANON_KEY }
+    headers: Object.assign({ apikey: ANON_KEY, Authorization: 'Bearer ' + ANON_KEY }, extra || {})
   });
 }
 
@@ -180,34 +180,43 @@ async function load() {
   const errBanner = document.getElementById('errBanner');
   try {
     const [contractorsRes, emailBatchRes, leadsRes] = await Promise.all([
-      sbFetch('contractors?select=id&limit=1&count=exact'),
+      sbFetch('contractors?select=id', { Prefer: 'count=exact' }),
       sbFetch('email_batch?select=id,status'),
       sbFetch('warm_leads?select=contractor_id,legal_name,primary_naics,address_city,address_state,contact_email,first_name,last_name,title,last_engagement,open_count,click_count&order=last_engagement.desc&limit=200'),
     ]);
 
-    // Contractors count
-    const totalContractors = contractorsRes.headers.get('content-range')
-      ? parseInt((contractorsRes.headers.get('content-range') || '').split('/')[1] || '0', 10)
-      : (await contractorsRes.json()).length;
+    // Contractors count — from Content-Range header (Prefer: count=exact)
+    let totalContractors = 0;
+    if (contractorsRes.ok) {
+      const cr = contractorsRes.headers.get('content-range');
+      totalContractors = cr ? parseInt((cr.split('/')[1] || '0'), 10) : 0;
+      if (isNaN(totalContractors)) totalContractors = 0;
+    }
 
     // Emails sent
     let emailsSent = 0;
     if (emailBatchRes.ok) {
       const batches = await emailBatchRes.json();
-      emailsSent = batches.filter(function(b) { return b.status === 'sent'; }).length;
+      emailsSent = Array.isArray(batches)
+        ? batches.filter(function(b) { return b.status === 'sent'; }).length
+        : 0;
     }
 
     // Warm leads
     let leads = [];
-    if (leadsRes.ok) leads = await leadsRes.json();
+    if (leadsRes.ok) {
+      const raw = await leadsRes.json();
+      leads = Array.isArray(raw) ? raw : [];
+    }
 
     const openCount = leads.filter(function(l) { return (l.open_count || 0) > 0; }).length;
     const openRate  = emailsSent > 0 ? ((openCount / emailsSent) * 100).toFixed(1) + '%' : '—';
 
-    document.getElementById('m-contractors').textContent = totalContractors.toLocaleString();
-    document.getElementById('m-sent').textContent        = emailsSent.toLocaleString();
-    document.getElementById('m-rate').textContent        = openRate;
-    document.getElementById('m-leads').textContent       = leads.length;
+    // Safe display — all values guaranteed to be numbers before toLocaleString
+    document.getElementById('m-contractors').textContent = (totalContractors || 0).toLocaleString();
+    document.getElementById('m-sent').textContent        = (emailsSent || 0).toLocaleString();
+    document.getElementById('m-rate').textContent        = openRate || '—';
+    document.getElementById('m-leads').textContent       = (leads.length || 0).toLocaleString();
     document.getElementById('leadCount').textContent     = leads.length ? '(' + leads.length + ')' : '';
     document.getElementById('refreshLabel').textContent  = 'Last updated ' + new Date().toLocaleTimeString() + ' · Auto-refreshes every 30s';
 
