@@ -13,7 +13,11 @@
 //    Optional Adobe path: PDF_RENDERER=adobe, PDF_SERVICES_CLIENT_ID, PDF_SERVICES_CLIENT_SECRET
 // ============================================================================
 
-const json = (s, o) => new Response(JSON.stringify(o), { status: s, headers: { "Content-Type": "application/json" } });
+const json = (s, o) => ({
+  statusCode: s,
+  headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+  body: JSON.stringify(o),
+});
 const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 // ---- HTML template (same design as the proven generator) ------------------
@@ -131,9 +135,10 @@ async function logJob(rec) {
   }).catch(e => console.error("Supabase", e.message));
 }
 
-export default async (req) => {
-  if (req.method !== "POST") return json(405, { error: "POST only" });
-  let rec; try { rec = await req.json(); } catch { return json(400, { error: "bad JSON" }); }
+export const handler = async (event) => {
+  if (event.httpMethod === "OPTIONS") return { statusCode: 204, headers: { "Access-Control-Allow-Origin": "*" }, body: "" };
+  if (event.httpMethod !== "POST") return json(405, { error: "POST only" });
+  let rec; try { rec = JSON.parse(event.body || "{}"); } catch { return json(400, { error: "bad JSON" }); }
   const to = (rec.contact || {}).email;
   if (!rec.legal_name || !to) return json(422, { error: "legal_name and contact.email required" });
   try {
