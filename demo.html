@@ -18,28 +18,28 @@ body{background:var(--sap);color:var(--white);min-height:100vh;display:flex;flex
 .nav-link{font-size:.82rem;color:var(--muted);text-decoration:none}
 .nav-link:hover{color:var(--white)}
 
-.hero{text-align:center;padding:52px 5vw 36px;max-width:640px}
-.hero h1{font-family:'Bodoni Moda',serif;font-size:2.3rem;line-height:1.15;margin-bottom:12px}
+.hero{text-align:center;padding:48px 5vw 32px;max-width:720px}
+.hero h1{font-family:'Bodoni Moda',serif;font-size:2.5rem;line-height:1.15;margin-bottom:14px}
 .hero h1 span{font-family:'Cormorant Garamond',serif;font-style:italic}
-.hero-sub{font-size:.92rem;color:var(--muted);line-height:1.6;margin-bottom:6px}
-.hero-rule{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.86rem;color:rgba(255,255,255,.38)}
+.hero-sub{font-size:1rem;color:var(--muted);line-height:1.65;margin-bottom:8px}
+.hero-rule{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.9rem;color:rgba(255,255,255,.38)}
 
-.step-wrap{max-width:520px;width:100%;padding:0 5vw 60px}
+.step-wrap{max-width:680px;width:100%;padding:0 16px 60px}
 
 /* Form card */
-.form-card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:30px 32px}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
-.form-full{margin-bottom:12px}
-label{display:block;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.5);margin-bottom:5px}
-input[type=text],input[type=email]{width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:10px;color:var(--white);padding:11px 14px;font-size:.9rem;outline:none;font-family:'Jost',sans-serif;transition:.15s}
-input:focus{border-color:var(--green)}
-input::placeholder{color:rgba(255,255,255,.28)}
+.form-card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:20px;padding:36px 40px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px}
+.form-full{margin-bottom:18px}
+label{display:block;font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.55);margin-bottom:7px}
+input[type=text],input[type=email]{width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);border-radius:12px;color:var(--white);padding:15px 18px;font-size:1rem;outline:none;font-family:'Jost',sans-serif;transition:.15s}
+input:focus{border-color:var(--green);background:rgba(255,255,255,.11)}
+input::placeholder{color:rgba(255,255,255,.3)}
 .hp{display:none}
-.form-btn{width:100%;background:var(--white);color:var(--sap);font-family:'Jost',sans-serif;font-weight:700;font-size:1rem;padding:13px;border:none;border-radius:10px;cursor:pointer;transition:.15s;margin-top:6px}
+.form-btn{width:100%;background:var(--white);color:var(--sap);font-family:'Jost',sans-serif;font-weight:700;font-size:1.05rem;padding:16px;border:none;border-radius:12px;cursor:pointer;transition:.15s;margin-top:8px}
 .form-btn:hover{background:var(--off)}
 .form-btn:disabled{opacity:.55;cursor:wait}
-.form-rule{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.8rem;color:rgba(255,255,255,.33);text-align:center;margin-top:12px}
-.err-msg{color:var(--err);font-size:.82rem;margin-top:8px;text-align:center;min-height:20px}
+.form-rule{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.84rem;color:rgba(255,255,255,.33);text-align:center;margin-top:14px}
+.err-msg{color:var(--err);font-size:.86rem;margin-top:10px;text-align:center;min-height:22px}
 
 /* Disambiguation */
 #step2{display:none}
@@ -61,7 +61,12 @@ input::placeholder{color:rgba(255,255,255,.28)}
 @keyframes spin{to{transform:rotate(360deg)}}
 #step3 p{color:var(--muted);font-size:.9rem;font-family:'Cormorant Garamond',serif;font-style:italic}
 
-@media(max-width:480px){.form-row{grid-template-columns:1fr}}
+@media(max-width:600px){
+  .form-row{grid-template-columns:1fr}
+  .form-card{padding:24px 20px}
+  .hero h1{font-size:1.9rem}
+  .step-wrap{padding:0 12px 60px}
+}
 </style>
 </head>
 <body>
