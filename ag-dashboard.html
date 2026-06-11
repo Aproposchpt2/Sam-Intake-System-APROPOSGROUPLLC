@@ -249,7 +249,7 @@ header{background:var(--surface);border-bottom:1px solid var(--line);padding:14p
     <div class="brand-mark">AG</div>
     <div>
       <div class="brand-name">APROPOS GROUP LLC</div>
-      <div class="brand-sub">SAM.gov Opportunity Pipeline · CapGen by AI4 Businesses</div>
+      <div class="brand-sub">Federal Contract Pipeline · CapGen by AI4 Businesses</div>
     </div>
   </div>
   <div class="header-right">
@@ -280,6 +280,9 @@ header{background:var(--surface);border-bottom:1px solid var(--line);padding:14p
   </div>
 
   <!-- Controls -->
+  <!-- Trust phrase caption -->
+  <p style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.82rem;color:rgba(255,255,255,.3);margin-bottom:14px">Opportunities sourced from official public records.</p>
+
   <!-- NAICS ribbon -->
   <div class="naics-ribbon" id="naicsRibbon">
     <span class="naics-ribbon-label">NAICS</span>
@@ -441,7 +444,7 @@ function applyFilters() {
 }
 
 async function load() {
-  document.getElementById('tbody').innerHTML = '<tr><td colspan="7" class="loading">Fetching live opportunities from SAM.gov…</td></tr>';
+  document.getElementById('tbody').innerHTML = '<tr><td colspan="7" class="loading">Fetching live opportunities…</td></tr>';
   try {
     const activeDays = document.querySelector('.win-btn.active')?.dataset.days || '60';
     const res  = await fetch(`/.netlify/functions/client-pipeline?uei=${UEI}&days=${activeDays}`);
@@ -685,8 +688,9 @@ function renderStage1(data, opp) {
     + noFidDeep
     + stage2Html
 
+    + '<p style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-size:.75rem;color:rgba(255,255,255,.28);margin-top:16px;margin-bottom:0">Analysis based on data sourced from official public records.</p>'
     + '<div class="fit-footer-btns">'
-    + (opp.url ? '<a href="' + opp.url + '" target="_blank" rel="noopener" class="fit-btn-sam">View on SAM.gov ↗</a>' : '')
+    + (opp.url ? '<a href="' + opp.url + '" target="_blank" rel="noopener" class="fit-btn-sam">View Opportunity ↗</a>' : '')
     + '<a href="/capability-generator.html?uei=YVNXN3XBUSD5" class="fit-btn-capgen">Generate CapGen ↗</a>'
     + '</div>';
 }
