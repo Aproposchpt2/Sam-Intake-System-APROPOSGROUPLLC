@@ -198,11 +198,11 @@ async function handleCheckout(session) {
     }
   }
 
-  // Path B: direct signup — no valid snapshot
+  // Path B: direct signup — no snapshot → always entity_pending (spec Section 1)
   if (!snapshotId) {
-    onboardingState = businessName ? 'enrichment_pending' : 'entity_pending';
+    onboardingState = 'entity_pending';
     subRecord.onboarding_state = onboardingState;
-    console.log('[webhook] Path B: onboarding_state=' + onboardingState);
+    console.log('[webhook] Path B: entity_pending');
   }
 
   // 1. Upsert capgen_subscriptions (new)
