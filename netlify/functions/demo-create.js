@@ -1,7 +1,7 @@
 'use strict';
 // demo-create.js — Snapshot orchestrator
 // POST { uei, businessName, firstName, lastName, email, hp? }
-// Enforces 90-day entity cache, 90-day email cap, 20/day global cap.
+// Enforces 90-day entity cache, 90-day email cap, 100/day global cap.
 // Inserts pending row, fires background, returns 202 + view_token.
 
 const crypto       = require('crypto');
@@ -111,12 +111,12 @@ exports.handler = async function(event) {
     return { statusCode: 200, headers: CORS, body: JSON.stringify({ view_token: reuseToken, cached: true }) };
   }
 
-  // 3. Global daily cap: 20 fresh generations per 24h
+  // 3. Global daily cap: 100 fresh generations per 24h
   var dailyRows = await sbGet(
     'demo_snapshots?created_at=gte.' + encodeURIComponent(since24)
     + '&status=in.(pending,complete,not_registered)&select=id'
   );
-  if (dailyRows.length >= 20) {
+  if (dailyRows.length >= 100) {
     // Queue intent row so we can follow up tomorrow
     var qToken = crypto.randomBytes(32).toString('hex');
     try {
