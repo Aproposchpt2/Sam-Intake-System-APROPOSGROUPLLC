@@ -17,9 +17,9 @@ const CLIENT_NAICS = {
     naics: ['541519','541511','541512','541513','541990','541690','541370','541330','517919','238210'],
     psc:   ['DB10','DF10','DG10','DG11','DJ10','R499','R799'],
   },
-  'YVNXN3XBUSD5': {              // Apropos Group LLC
+  'YVNXN3XBUSD5': {              // Apropos Group LLC — updated per SAM.gov submission June 2026
     name: 'Apropos Group LLC',
-    naics: ['541512','541519','541511','518210','561421','561499'],
+    naics: ['541512','541511','541519','541330','541370','541611','541618','561210'],
   },
 };
 
