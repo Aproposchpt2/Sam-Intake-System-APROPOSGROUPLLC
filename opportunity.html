@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Opportunity Dashboard — CapGen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital@1&family=Jost:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0A1A3A;--surface:#0f2244;--panel:#132954;--line:rgba(91,175,255,.15);
+  --line2:rgba(91,175,255,.28);--text:#f0f6ff;--muted:#8facd0;--soft:#5a7899;
+  --gold:#d9a45b;--green:#2ecc8a;--amber:#f0a500;--red:#e05555;--cyan:#5BD3FF;
+  font-family:'Jost',Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.6}
+
+/* Return banner (demo mode) */
+.return-bar{background:rgba(91,211,255,.07);border-bottom:1px solid rgba(91,211,255,.2);
+  padding:9px 28px;display:none;align-items:center;gap:10px}
+.return-bar.show{display:flex}
+.return-link{color:var(--cyan);font-size:.82rem;font-weight:700;text-decoration:none;
+  display:flex;align-items:center;gap:6px}
+.return-link:hover{opacity:.8}
+.return-rule{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.78rem;
+  color:rgba(255,255,255,.35);margin-left:auto}
+
+header{background:var(--surface);border-bottom:1px solid var(--line);padding:14px 28px;
+  display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-mark{width:40px;height:40px;border-radius:10px;background:var(--bg);border:1px solid var(--line2);
+  display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;color:var(--cyan)}
+.brand-name{font-size:1rem;font-weight:700}
+.brand-sub{font-size:.72rem;color:var(--muted);letter-spacing:.04em}
+.header-right{display:flex;align-items:center;gap:10px}
+.badge-live{background:rgba(46,204,138,.12);border:1px solid rgba(46,204,138,.3);color:var(--green);
+  padding:4px 10px;border-radius:20px;font-size:.68rem;font-weight:700;letter-spacing:.04em}
+
+.page{max-width:1240px;margin:0 auto;padding:24px 20px 100px}
+
+/* Entity row */
+.entity-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;
+  padding:14px 22px;margin-bottom:20px;display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+.entity-field{min-width:100px}
+.ef-label{font-size:.62rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);margin-bottom:2px}
+.ef-value{font-size:.9rem;font-weight:700}
+.ef-value.active{color:var(--green)}
+
+/* Stats */
+.stat-bar{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 16px;min-width:100px}
+.stat-val{font-size:1.5rem;font-weight:900;line-height:1}
+.stat-val.red{color:var(--red)}.stat-val.amber{color:var(--amber)}.stat-val.green{color:var(--green)}
+.stat-label{font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;color:var(--soft);margin-top:4px}
+
+/* NAICS ribbon */
+.naics-ribbon{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;align-items:center}
+.naics-ribbon-label{font-size:.64rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);white-space:nowrap}
+.naics-bubble{display:inline-flex;flex-direction:column;align-items:center;gap:2px;padding:6px 12px;
+  border-radius:20px;cursor:pointer;border:1px solid var(--line);background:rgba(255,255,255,.04);
+  transition:.18s;user-select:none}
+.naics-bubble:hover{border-color:var(--cyan)}
+.naics-bubble.active{background:rgba(91,211,255,.15);border-color:var(--cyan)}
+.naics-bubble.active .nb-code{color:var(--cyan)}
+.naics-bubble.inactive{opacity:.38;border-color:transparent}
+.nb-code{font-size:.73rem;font-weight:900;color:var(--muted);letter-spacing:.04em;line-height:1}
+
+/* Controls */
+.controls{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px;align-items:center}
+.win-btns{display:flex;gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.win-btn{background:rgba(255,255,255,.04);border:none;border-right:1px solid var(--line);
+  color:var(--muted);padding:8px 16px;font-size:.82rem;font-weight:700;cursor:pointer;transition:.18s;
+  white-space:nowrap;font-family:'Jost',sans-serif}
+.win-btn:last-child{border-right:none}
+.win-btn.active{background:rgba(91,211,255,.18);color:var(--cyan)}
+.search-input{background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:8px;
+  color:var(--text);padding:8px 12px;font-size:.84rem;outline:none;min-width:220px;font-family:'Jost',sans-serif}
+.search-input:focus{border-color:var(--cyan)}
+.count-badge{font-size:.8rem;color:var(--muted);margin-left:auto}
+
+/* Table */
+.opp-table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.opp-table th{font-size:.62rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);
+  padding:11px 14px;text-align:left;border-bottom:1px solid var(--line);background:rgba(255,255,255,.03)}
+.opp-table td{padding:12px 14px;border-bottom:1px solid rgba(91,175,255,.07);vertical-align:top}
+.opp-table tr:last-child td{border-bottom:none}
+.opp-table tr:hover td{background:rgba(91,175,255,.04)}
+.title-cell a{color:var(--text);text-decoration:none;font-weight:600;font-size:.88rem;line-height:1.35;display:block}
+.title-cell a:hover{color:var(--cyan)}
+.agency-cell{font-size:.75rem;color:var(--muted)}
+.chip{display:inline-block;padding:2px 7px;border-radius:4px;font-size:.66rem;font-weight:700}
+.chip-naics{background:rgba(91,211,255,.1);border:1px solid rgba(91,211,255,.22);color:var(--cyan)}
+.deadline-cell{text-align:center;white-space:nowrap}
+.days-hot{background:rgba(224,85,85,.2);color:#ff9999;border:1px solid rgba(224,85,85,.35);padding:3px 8px;border-radius:6px;font-size:.7rem;font-weight:700}
+.days-warm{background:rgba(240,165,0,.15);color:#ffc96b;border:1px solid rgba(240,165,0,.3);padding:3px 8px;border-radius:6px;font-size:.7rem;font-weight:700}
+.days-ok{background:rgba(46,204,138,.12);color:#7eedc0;border:1px solid rgba(46,204,138,.28);padding:3px 8px;border-radius:6px;font-size:.7rem;font-weight:700}
+.capgen-btn{background:rgba(91,211,255,.12);border:1px solid rgba(91,211,255,.3);color:var(--cyan);
+  padding:4px 10px;border-radius:7px;font-size:.7rem;font-weight:700;cursor:pointer;
+  text-decoration:none;display:inline-block;transition:.18s;font-family:'Jost',sans-serif}
+.capgen-btn:hover{background:rgba(91,211,255,.22)}
+.empty{text-align:center;padding:52px;color:var(--soft)}
+.loading-state{text-align:center;padding:52px;color:var(--muted)}
+
+/* Subscribe bar */
+.sub-bar{position:fixed;bottom:0;left:0;right:0;background:var(--panel);border-top:1px solid var(--line2);
+  padding:13px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px;
+  z-index:100;flex-wrap:wrap}
+.sub-bar-text{font-size:.84rem;color:var(--muted);line-height:1.4}
+.sub-bar-text strong{color:var(--text)}
+.sub-cta{background:#fff;color:#0A1A3A;font-family:'Jost',sans-serif;font-weight:700;
+  font-size:.88rem;padding:10px 22px;border-radius:8px;text-decoration:none;white-space:nowrap;
+  transition:.15s;display:inline-block}
+.sub-cta:hover{background:#e8edf8}
+
+@media(max-width:700px){
+  .page{padding:14px 12px 100px}
+  .stat-bar{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .opp-table th:nth-child(3),.opp-table td:nth-child(3),
+  .opp-table th:nth-child(4),.opp-table td:nth-child(4){display:none}
+  .sub-bar{flex-direction:column;align-items:stretch;text-align:center}
+}
+</style>
+</head>
+<body>
+
+<!-- Return to Contract Dashboard (demo mode only) -->
+<div class="return-bar" id="returnBar">
+  <a href="#" class="return-link" id="returnLink">← Return to Contract Dashboard</a>
+  <span class="return-rule">Sourced from official public records.</span>
+</div>
+
+<header>
+  <div class="brand">
+    <div class="brand-mark">CG</div>
+    <div>
+      <div class="brand-name">CapGen</div>
+      <div class="brand-sub">Opportunity Dashboard</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="badge-live">● Live</span>
+  </div>
+</header>
+
+<div class="page">
+  <div class="entity-card" id="entityCard" style="display:none"></div>
+
+  <div class="stat-bar">
+    <div class="stat"><div class="stat-val" id="s-total">—</div><div class="stat-label">Open Contracts</div></div>
+    <div class="stat"><div class="stat-val red" id="s-hot">—</div><div class="stat-label">Due &lt;7 Days</div></div>
+    <div class="stat"><div class="stat-val amber" id="s-warm">—</div><div class="stat-label">Due 7–30 Days</div></div>
+    <div class="stat"><div class="stat-val green" id="s-ok">—</div><div class="stat-label">Due 30+ Days</div></div>
+  </div>
+
+  <div class="naics-ribbon" id="naicsRibbon" style="display:none">
+    <span class="naics-ribbon-label">NAICS</span>
+  </div>
+
+  <div class="controls">
+    <div class="win-btns" id="dayBtns">
+      <button class="win-btn active" data-days="60">60 Days</button>
+      <button class="win-btn" data-days="30">30 Days</button>
+      <button class="win-btn" data-days="7">7 Days</button>
+    </div>
+    <input type="search" class="search-input" id="searchInput" placeholder="Search title or agency…"/>
+    <span class="count-badge" id="countBadge"></span>
+  </div>
+
+  <div style="border:1px solid var(--line);border-radius:12px;overflow:hidden">
+    <table class="opp-table">
+      <thead>
+        <tr>
+          <th>Opportunity</th>
+          <th>Agency</th>
+          <th>NAICS</th>
+          <th>Set-Aside</th>
+          <th style="text-align:center">Deadline</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="oppBody"><tr><td colspan="6" class="loading-state">Loading opportunities…</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Subscribe bar -->
+<div class="sub-bar">
+  <div class="sub-bar-text"><strong>Subscribe for permanent access.</strong> Your pipeline updated daily — every opportunity matched to your NAICS codes.</div>
+  <a href="#" id="subCta" class="sub-cta">Start My 14-Day Free Trial →</a>
+</div>
+
+<script>
+'use strict';
+const STRIPE_BASE = 'https://buy.stripe.com/bJebJ0dA65Gv9BheDm7EQ0Y';
+const q = new URLSearchParams(location.search);
+const token = q.get('t') || sessionStorage.getItem('demo_view_token') || '';
+const uei   = q.get('uei') || sessionStorage.getItem('demo_uei') || 'YVNXN3XBUSD5';
+
+let allOpps = [], clientData = null;
+
+// Demo session: show return link
+if (token) {
+  const bar  = document.getElementById('returnBar');
+  const link = document.getElementById('returnLink');
+  bar.classList.add('show');
+  link.href = '/demo/snapshot?t=' + encodeURIComponent(token);
+  document.getElementById('subCta').href = STRIPE_BASE + '?client_reference_id=' + encodeURIComponent(token);
+} else {
+  document.getElementById('subCta').href = STRIPE_BASE;
+}
+
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function fmtDate(iso){ if(!iso)return'—'; return new Date(iso).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
+
+function urgencyBadge(o) {
+  if (!o.days_left && o.days_left !== 0) return '<span style="font-size:.72rem;color:var(--soft)">No deadline</span>';
+  if (o.days_left < 1)  return '<span class="days-hot">Closed</span>';
+  if (o.urgency === 'hot')  return '<span class="days-hot">' + o.days_left + 'd</span>';
+  if (o.urgency === 'warm') return '<span class="days-warm">' + o.days_left + 'd</span>';
+  return '<span class="days-ok">' + o.days_left + 'd</span>';
+}
+
+function render(opps) {
+  document.getElementById('countBadge').textContent = opps.length + ' opportunities';
+  document.getElementById('s-total').textContent = opps.length;
+  document.getElementById('s-hot').textContent   = opps.filter(o=>o.urgency==='hot').length;
+  document.getElementById('s-warm').textContent  = opps.filter(o=>o.urgency==='warm').length;
+  document.getElementById('s-ok').textContent    = opps.filter(o=>o.urgency==='ok').length;
+
+  const capgenUrl = '/capability-generator.html?uei=' + encodeURIComponent((clientData && clientData.uei) || uei);
+  const tbody = document.getElementById('oppBody');
+  if (!opps.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty">No open opportunities in this window.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = opps.map(function(o) {
+    return '<tr>'
+      + '<td class="title-cell"><a href="' + esc(o.url||'#') + '" target="_blank" rel="noopener">' + esc(o.title||'Untitled') + '</a>'
+      + '<div class="agency-cell">' + esc(o.agency||'—') + '</div></td>'
+      + '<td><span style="font-size:.76rem;color:var(--muted)">' + esc(o.type||'—') + '</span></td>'
+      + '<td><span class="chip chip-naics">' + esc(o.naics||'—') + '</span></td>'
+      + '<td style="font-size:.74rem;color:var(--soft)">' + esc(((o.set_aside&&o.set_aside!=='None')?o.set_aside:'Unrestricted').slice(0,30)) + '</td>'
+      + '<td class="deadline-cell">' + urgencyBadge(o) + '<div style="font-size:.66rem;color:var(--soft);margin-top:2px">' + fmtDate(o.deadline) + '</div></td>'
+      + '<td><a class="capgen-btn" href="' + esc(capgenUrl) + '">CapGen ↗</a></td>'
+      + '</tr>';
+  }).join('');
+}
+
+function activeNaics() {
+  return [...document.querySelectorAll('.naics-bubble.active')].map(b => b.dataset.naics);
+}
+
+function applyFilters() {
+  const sel = activeNaics();
+  const s   = document.getElementById('searchInput').value.toLowerCase();
+  let f = allOpps;
+  if (sel.length && sel.length < (clientData && clientData.naics ? clientData.naics.length : 99)) {
+    f = f.filter(o => sel.includes(o.naics));
+  }
+  if (s) f = f.filter(o => (o.title||'').toLowerCase().includes(s)||(o.agency||'').toLowerCase().includes(s));
+  render(f);
+}
+
+function buildRibbon(naicsCodes, primaryNaics) {
+  const ribbon = document.getElementById('naicsRibbon');
+  if (!naicsCodes || naicsCodes.length <= 1) return;
+  ribbon.innerHTML = '<span class="naics-ribbon-label">NAICS</span>'
+    + naicsCodes.map(function(c) {
+      return '<div class="naics-bubble active" data-naics="' + esc(c) + '">'
+        + '<span class="nb-code">' + esc(c) + (c===primaryNaics?' ⭐':'') + '</span>'
+        + '</div>';
+    }).join('');
+  ribbon.style.display = 'flex';
+  ribbon.querySelectorAll('.naics-bubble').forEach(function(b) {
+    b.addEventListener('click', function() {
+      const n = ribbon.querySelectorAll('.naics-bubble.active').length;
+      if (b.classList.contains('active') && n === 1) return;
+      b.classList.toggle('active'); b.classList.toggle('inactive');
+      applyFilters();
+    });
+  });
+}
+
+async function load() {
+  const days = document.querySelector('.win-btn.active')?.dataset.days || '60';
+  const endpoint = token
+    ? '/.netlify/functions/demo-pipeline?t=' + encodeURIComponent(token) + '&days=' + days
+    : '/.netlify/functions/client-pipeline?uei=' + encodeURIComponent(uei) + '&days=' + days;
+
+  try {
+    const res  = await fetch(endpoint);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Load failed');
+
+    clientData = data.client;
+    allOpps    = data.opportunities || [];
+
+    // Entity card
+    const card = document.getElementById('entityCard');
+    if (clientData && clientData.name) {
+      card.innerHTML = '<div class="entity-field"><div class="ef-label">Business</div><div class="ef-value">' + esc(clientData.name) + '</div></div>'
+        + (clientData.uei ? '<div class="entity-field"><div class="ef-label">UEI</div><div class="ef-value">' + esc(clientData.uei) + '</div></div>' : '')
+        + '<div class="entity-field"><div class="ef-label">Registration</div><div class="ef-value active">● Active</div></div>';
+      card.style.display = 'flex';
+    }
+
+    buildRibbon(clientData && clientData.naics, clientData && clientData.primary_naics);
+    applyFilters();
+  } catch(e) {
+    document.getElementById('oppBody').innerHTML = '<tr><td colspan="6" class="empty" style="color:var(--red)">' + esc(e.message) + '</td></tr>';
+  }
+}
+
+document.querySelectorAll('.win-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.win-btn').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active'); load();
+  });
+});
+document.getElementById('searchInput').addEventListener('input', applyFilters);
+
+load();
+</script>
+</body>
+</html>
