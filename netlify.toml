@@ -103,6 +103,11 @@
   to = "/opportunity.html"
   status = 200
 
+[[redirects]]
+  from = "/marketing-dashboard"
+  to = "/marketing-dashboard.html"
+  status = 200
+
 [[headers]]
   for = "/*"
   [headers.values]
