@@ -261,7 +261,7 @@ header{background:var(--surface);border-bottom:1px solid var(--line);padding:14p
   </div>
   <div class="header-right">
     <span class="badge-wosb">AI4 Businesses</span>
-    <span style="font-size:.72rem;color:var(--soft)">UEI: YVNXN3XBUSD5 · CAGE: 20UQ1</span>
+    <span style="font-size:.72rem;color:var(--soft)" id="ueiCageEl">UEI: YVNXN3XBUSD5 · CAGE: 20UQ1</span>
   </div>
 </header>
 
@@ -422,7 +422,7 @@ function applyFilters() {
   const search  = document.getElementById('searchInput').value.toLowerCase();
 
   let filtered = allOpps;
-  if (selectedNaics.length < 6) filtered = filtered.filter(o => selectedNaics.includes(o.naics));
+  if (selectedNaics.length < naicsClient.length) filtered = filtered.filter(o => selectedNaics.includes(o.naics));
   if (search)  filtered = filtered.filter(o =>
     (o.title||'').toLowerCase().includes(search) ||
     (o.agency||'').toLowerCase().includes(search)
@@ -451,9 +451,14 @@ async function load() {
 
     // Build NAICS bubbles dynamically from subscription profile
     buildNaicsRibbon(naicsClient, data.client.name);
-    // Update primary NAICS display
+    // Update primary NAICS display dynamically
     const primaryEl = document.getElementById('primaryNaicsEl');
-    if (primaryEl) primaryEl.textContent = data.client.naics && data.client.naics[0] ? data.client.naics[0] : '541511';
+    if (primaryEl) primaryEl.textContent = '541511'; // SAM.gov registered primary
+    // Update UEI / CAGE from subscription data
+    const ueiCageEl = document.getElementById('ueiCageEl');
+    if (ueiCageEl && data.client.cage) {
+      ueiCageEl.textContent = 'UEI: ' + UEI + ' · CAGE: ' + data.client.cage;
+    }
 
     // Load analysis badges in background (single query)
     const noticeIds = allOpps.map(o => o.notice_id).filter(Boolean);
