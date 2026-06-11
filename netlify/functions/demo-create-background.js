@@ -87,7 +87,7 @@ async function fetchEntity(uei) {
 // ── Opportunity matching from sam_opportunities ───────────────────────────────
 
 async function matchOpportunities(naicsCodes, primaryNaics) {
-  if (!naicsCodes.length) return { top3: [], remaining: 0 };
+  if (!naicsCodes.length) return { top5: [], remaining: 0 };
   var today = new Date();
   var minDeadline = new Date(today.getTime() + 7 * 24 * 3600000).toISOString();
 
@@ -108,7 +108,7 @@ async function matchOpportunities(naicsCodes, primaryNaics) {
     return new Date(a.response_deadline) - new Date(b.response_deadline);
   });
 
-  var top3 = rows.slice(0, 3).map(function(r) {
+  var top5 = rows.slice(0, 5).map(function(r) {
     return {
       notice_id:         r.notice_id,
       title:             r.title,
@@ -120,7 +120,7 @@ async function matchOpportunities(naicsCodes, primaryNaics) {
     };
   });
 
-  return { top3: top3, remaining: Math.max(0, rows.length - 3) };
+  return { top5: top5, remaining: Math.max(0, rows.length - 5) };
 }
 
 // ── Claude Stage 1 (verbatim prompts from Phase II spec) ─────────────────────
@@ -297,7 +297,7 @@ exports.handler = async function(event) {
       var rows = await sbGet('demo_snapshots?view_token=eq.' + encodeURIComponent(body.viewToken) + '&limit=1');
       if (rows.length) {
         var r = rows[0];
-        var topOpp = r.opportunities && r.opportunities[0];
+        var topOpp = r.opportunities && r.opportunities[0]; // #1 best match for email
         await sendEmail({
           email: body.email, firstName: body.firstName, businessName: body.businessName,
           viewToken: body.viewToken, profile: r.profile, opp: topOpp, analysis: r.analysis,
@@ -332,15 +332,15 @@ exports.handler = async function(event) {
     // 2. Match opportunities
     var naicsCodes = profile.naics.map(function(n) { return n.code; });
     var matchResult = await matchOpportunities(naicsCodes, profile.primary_naics);
-    var top3       = matchResult.top3;
+    var top5       = matchResult.top5;
     var remaining  = matchResult.remaining;
-    console.log('[demo-bg] Opportunities: top3=' + top3.length + ' remaining=' + remaining);
+    console.log('[demo-bg] Opportunities: top5=' + top5.length + ' remaining=' + remaining);
 
     // 3. Stage 1 analysis on #1 opportunity (if one exists)
     var analysis = null;
-    if (top3.length > 0) {
+    if (top5.length > 0) {
       try {
-        analysis = await runStage1(profile, top3[0]);
+        analysis = await runStage1(profile, top5[0]);
         console.log('[demo-bg] Stage 1 complete: ' + (analysis && analysis.recommendation) + ' ' + (analysis && analysis.fit_score));
       } catch(e) {
         console.error('[demo-bg] Stage 1 failed:', e.message);
@@ -351,7 +351,7 @@ exports.handler = async function(event) {
     // 4. Persist and mark complete
     await sbPatch(rowId, {
       profile:                profile,
-      opportunities:          top3.length > 0 ? top3 : null,
+      opportunities:          top5.length > 0 ? top5 : null,
       additional_match_count: remaining,
       analysis:               analysis,
       status:                 'complete',
