@@ -15,6 +15,31 @@ exports.handler = async function(event) {
 
   if (!WEBHOOK_SEC) return { statusCode: 500, body: JSON.stringify({ error: 'STRIPE_CAPGEN_WEBHOOK_SECRET not set' }) };
 
+  // DB direct test: insert a row via REST API to expose exact Supabase error
+  if (q.test === 'db') {
+    const SUPA_URL = process.env.SUPABASE_URL;
+    const SUPA_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
+    const testEmail = 'db-test-' + Date.now() + '@test.internal';
+    const checkRes = await fetch(
+      SUPA_URL + '/rest/v1/capgen_subscriptions?email=eq.' + encodeURIComponent(testEmail) + '&select=id',
+      { headers: { apikey: SUPA_KEY, Authorization: 'Bearer ' + SUPA_KEY } }
+    );
+    const insertRes = await fetch(SUPA_URL + '/rest/v1/capgen_subscriptions', {
+      method: 'POST',
+      headers: { apikey: SUPA_KEY, Authorization: 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+      body: JSON.stringify({ email: testEmail, business_name: 'DB Test', status: 'active', onboarding_state: 'enrichment_pending', first_name: 'Test' }),
+    });
+    const insertBody = await insertRes.text();
+    return { statusCode: 200, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+      supa_url: SUPA_URL ? SUPA_URL.slice(0,40) + '...' : 'NOT SET',
+      supa_key_set: !!SUPA_KEY,
+      supa_key_prefix: SUPA_KEY ? SUPA_KEY.slice(0,10) + '...' : 'NOT SET',
+      check_status: checkRes.status,
+      insert_status: insertRes.status,
+      insert_response: insertBody,
+    }) };
+  }
+
   function makeEvent(type, data, eventId) {
     return {
       id: eventId || ('evt_test_' + Date.now()),
