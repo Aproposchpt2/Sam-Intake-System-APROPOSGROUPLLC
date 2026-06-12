@@ -57,7 +57,8 @@ exports.handler = async function(event) {
   var email        = (body.email        || '').trim().toLowerCase();
   var ip           = event.headers['x-nf-client-connection-ip'] || event.headers['x-forwarded-for'] || 'unknown';
 
-  if (!uei || !businessName || !email || !firstName) {
+  // uei is optional — empty on zero-match / not-registered path
+  if (!businessName || !email || !firstName) {
     return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'Missing required fields' }) };
   }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
