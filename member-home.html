@@ -65,25 +65,27 @@ body{background:var(--sap);color:var(--white);min-height:100vh;display:flex;flex
 
 <script>
 'use strict';
-// Read session
-const stored = sessionStorage.getItem('pipeline_session');
-const biz    = sessionStorage.getItem('capgen_biz') || '';
-const uei    = sessionStorage.getItem('capgen_uei') || '';
+// ONE TOKEN — read from localStorage (set at demo intake, persists forever)
+const stored    = sessionStorage.getItem('pipeline_session');
+const demoToken = localStorage.getItem('demo_view_token') || '';
 
 if (!stored) { window.location.href = '/onboarding'; }
-if (biz) document.getElementById('bizName').textContent = biz;
 
-// Wire All Contracts link with UEI in URL — avoids sessionStorage race condition
-const allContractsLink = document.querySelector('a[href="/apropos"]');
-if (allContractsLink && uei) allContractsLink.href = '/apropos?uei=' + encodeURIComponent(uei);
-
-// Best Match links to opportunity with subscriber's UEI (no demo token needed)
-if (uei) {
-  document.getElementById('bestMatchBtn').href = '/opportunity?uei=' + encodeURIComponent(uei);
+// Wire all nav buttons to token-based URLs — no UEI juggling
+if (demoToken) {
+  const contractsLink = document.querySelector('a[href="/apropos"]');
+  const bestMatchBtn  = document.getElementById('bestMatchBtn');
+  if (contractsLink) contractsLink.href = '/demo/snapshot?t=' + encodeURIComponent(demoToken);
+  if (bestMatchBtn)  bestMatchBtn.href  = '/opportunity?t='   + encodeURIComponent(demoToken);
 }
+
+// Show business name from localStorage if stored alongside token
+const bizName = localStorage.getItem('demo_biz_name') || '';
+if (bizName) document.getElementById('bizName').textContent = bizName;
 
 function signOut() {
   sessionStorage.clear();
+  // Keep demo_view_token in localStorage — it's their persistent identity
   window.location.href = '/';
 }
 </script>
