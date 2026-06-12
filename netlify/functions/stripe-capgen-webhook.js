@@ -130,7 +130,18 @@ async function getSnapshot(viewToken) {
       + '&status=eq.complete&limit=1'
     );
     return rows[0] || null;
-  } catch(e) { console.warn('[webhook] snapshot lookup failed:', e.message); return null; }
+  } catch(e) { console.warn('[webhook] snapshot by token failed:', e.message); return null; }
+}
+
+// Primary: find snapshot by email — token never needs to travel between sites
+async function getSnapshotByEmail(email) {
+  try {
+    var rows = await sbGet(
+      'demo_snapshots?requester_email=eq.' + encodeURIComponent(email.toLowerCase().trim())
+      + '&status=eq.complete&order=created_at.desc&limit=1'
+    );
+    return rows[0] || null;
+  } catch(e) { console.warn('[webhook] snapshot by email failed:', e.message); return null; }
 }
 
 // ── Plan config ───────────────────────────────────────────────────────────────
@@ -202,24 +213,31 @@ async function handleCheckout(session, livemode) {
   var demoSetAsides   = [];
   var demoSnapshotId  = null;
 
-  if (viewToken && viewToken.length > 20) {
-    var snapshot = await getSnapshot(viewToken);
-    if (snapshot) {
-      var p         = snapshot.profile || {};
-      demoEmail     = snapshot.requester_email || null;
-      demoBusinessName = p.legal_name || snapshot.business_name || null;
-      demoUei       = p.uei || null;
-      demoNaics     = p.naics ? p.naics.map(function(n) { return n.code || n; }) : null;
-      demoSetAsides = p.set_asides || [];
-      demoSnapshotId = snapshot.id;
-      onboardingState = 'enrichment_pending';
-      console.log('[webhook] Path A: snapshot found uei=' + (demoUei || 'none'));
-    } else {
-      console.log('[webhook] token present but snapshot not found — falling to Option A (generate)');
-    }
+  // Look up snapshot by EMAIL first (primary — token never needs to travel)
+  // Fall back to token if provided (legacy / direct link clicks)
+  var snapshot = null;
+  if (email) {
+    snapshot = await getSnapshotByEmail(email);
+    if (snapshot) console.log('[webhook] snapshot found by email, uei=' + ((snapshot.profile || {}).uei || 'none'));
+  }
+  if (!snapshot && viewToken && viewToken.length > 20) {
+    snapshot = await getSnapshot(viewToken);
+    if (snapshot) console.log('[webhook] snapshot found by token, uei=' + ((snapshot.profile || {}).uei || 'none'));
   }
 
-  // Option A: no demo token or snapshot not found → generate token, create snapshot row
+  if (snapshot) {
+    var p         = snapshot.profile || {};
+    demoEmail     = snapshot.requester_email || null;
+    demoBusinessName = p.legal_name || snapshot.business_name || null;
+    demoUei       = p.uei || null;
+    demoNaics     = p.naics ? p.naics.map(function(n) { return n.code || n; }) : null;
+    demoSetAsides = p.set_asides || [];
+    demoSnapshotId = snapshot.id;
+    viewToken     = snapshot.view_token; // always use the canonical token from DB
+    onboardingState = 'enrichment_pending';
+  }
+
+  // Option A: no snapshot found → generate token for direct subscriber
   if (!demoSnapshotId) {
     var generatedToken = crypto.randomBytes(32).toString('hex');
     try {
