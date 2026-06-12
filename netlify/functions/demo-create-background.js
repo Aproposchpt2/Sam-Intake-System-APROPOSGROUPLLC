@@ -105,15 +105,32 @@ function scoreOpportunity(row, naicsCodes, primaryNaics, setAsides) {
   }
 
   // 2. Set-aside / certifications (25 pts)
-  var sa = (row.set_aside || '').toLowerCase();
-  if (!sa || sa === 'none' || sa === 'unrestricted') {
+  var sa = (row.set_aside || '').toLowerCase().trim();
+  var saOpen = !sa || ['none','unrestricted','full and open','no set aside','n/a'].some(function(p){ return sa.includes(p); });
+  if (saOpen) {
     score += 15; criteria.setaside = 'open';
   } else {
-    var eligible = (setAsides || []).some(function(cert) {
-      return sa.includes(cert.toLowerCase().split(' ')[0].toLowerCase());
-    });
-    if (eligible) { score += 25; criteria.setaside = 'eligible'; }
-    else           { score += 0;  criteria.setaside = 'ineligible'; }
+    // Check specific restricted programs in priority order to avoid substring false-positives
+    var saEligible = false;
+    if (/isbee|indian small business economic enterprise/.test(sa)) {
+      saEligible = (setAsides||[]).some(function(c){ return /isbee/i.test(c); });
+    } else if (/8\(a\)|8a set/.test(sa)) {
+      saEligible = (setAsides||[]).some(function(c){ return /8.?a/i.test(c); });
+    } else if (/wosb|edwosb|woman.owned small business/.test(sa)) {
+      saEligible = (setAsides||[]).some(function(c){ return /wosb|woman/i.test(c); });
+    } else if (/sdvosb|service.disabled veteran/.test(sa)) {
+      saEligible = (setAsides||[]).some(function(c){ return /sdvosb|service.disabled/i.test(c); });
+    } else if (/vosb|veteran.owned small business/.test(sa)) {
+      saEligible = (setAsides||[]).some(function(c){ return /vosb|veteran/i.test(c); });
+    } else if (/hubzone/.test(sa)) {
+      saEligible = (setAsides||[]).some(function(c){ return /hubzone/i.test(c); });
+    } else if (/small business/.test(sa)) {
+      saEligible = (setAsides||[]).some(function(c){ return /small business/i.test(c); });
+    } else {
+      saEligible = true; // unknown type — give benefit of the doubt
+    }
+    if (saEligible) { score += 25; criteria.setaside = 'eligible'; }
+    else             { score += 0;  criteria.setaside = 'ineligible'; }
   }
 
   // 3. Risk factors / timeline (20 pts)
@@ -165,6 +182,12 @@ async function matchOpportunities(naicsCodes, primaryNaics, setAsides) {
     + '&select=notice_id,title,agency,naics_code,set_aside,response_deadline,ui_link'
     + '&order=response_deadline.asc&limit=100'
   );
+
+  // Drop non-competitive notices (sole-source awards, intent to award)
+  rows = rows.filter(function(r) {
+    var t = (r.title || '').toLowerCase();
+    return !(t.includes('intent to award') || t.match(/\bnoi\b.*sole/) || t.includes('notice of intent to sole'));
+  });
 
   // Score every opportunity against all 7 criteria
   var scored = rows.map(function(r) {

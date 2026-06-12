@@ -313,18 +313,35 @@ function changePage(delta) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+function isCompetitive(opp) {
+  var t = (opp.title || '').toLowerCase();
+  return !(t.includes('intent to award') || t.match(/\bnoi\b.*sole/) || t.includes('notice of intent to sole'));
+}
+
 function isEligible(opp) {
   if (!profileSetAsides || !profileSetAsides.length) return true;
-  var saCode = (opp.set_aside || '').toLowerCase().trim();
-  if (!saCode || saCode === 'none' || saCode === 'unrestricted' || saCode === 'full and open') return true;
-  return profileSetAsides.some(function(sa) {
-    var s = (sa || '').toLowerCase().trim();
-    return saCode.includes(s) || s.includes(saCode);
-  });
+  var sa = (opp.set_aside || '').toLowerCase().trim();
+  if (!sa || ['none','unrestricted','full and open','no set aside','n/a'].some(function(p){ return sa.includes(p); })) return true;
+  // Specific programs — check in priority order to prevent substring false-positives
+  if (/isbee|indian small business economic enterprise/.test(sa))
+    return profileSetAsides.some(function(c){ return /isbee/i.test(c); });
+  if (/8\(a\)|8a set/.test(sa))
+    return profileSetAsides.some(function(c){ return /8.?a/i.test(c); });
+  if (/wosb|edwosb|woman.owned small business/.test(sa))
+    return profileSetAsides.some(function(c){ return /wosb|woman/i.test(c); });
+  if (/sdvosb|service.disabled veteran/.test(sa))
+    return profileSetAsides.some(function(c){ return /sdvosb|service.disabled/i.test(c); });
+  if (/vosb|veteran.owned small business/.test(sa))
+    return profileSetAsides.some(function(c){ return /vosb|veteran/i.test(c); });
+  if (/hubzone/.test(sa))
+    return profileSetAsides.some(function(c){ return /hubzone/i.test(c); });
+  if (/small business/.test(sa))
+    return profileSetAsides.some(function(c){ return /small business/i.test(c); });
+  return true; // unknown type — show it
 }
 
 function getFiltered() {
-  var pool = allOpps.filter(function(o) { return !ignoredIds.has(o.notice_id) && isEligible(o); });
+  var pool = allOpps.filter(function(o) { return !ignoredIds.has(o.notice_id) && isEligible(o) && isCompetitive(o); });
   if (currentFilter === '60') pool = pool.filter(function(o) { return o.days_left !== null && o.days_left <= 60; });
   else if (currentFilter === '30') pool = pool.filter(function(o) { return o.days_left !== null && o.days_left <= 30; });
   else if (currentFilter === '7')  pool = pool.filter(function(o) { return o.days_left !== null && o.days_left <= 7; });
