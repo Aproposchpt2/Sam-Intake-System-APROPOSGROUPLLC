@@ -1,6 +1,5 @@
-﻿'use strict';
-// pipeline-otp-verify.js
-// POST { email, code } → verifies code, returns HMAC-signed session token.
+'use strict';
+// POST { email, code } → verifies OTP, returns signed session token + dashboard redirect data.
 
 const crypto = require('crypto');
 
@@ -27,12 +26,12 @@ exports.handler = async (event) => {
 
   if (!email || !code) return { statusCode: 400, headers, body: JSON.stringify({ error: 'Email and code required.' }) };
 
-  // Look up the code
-  const res = await fetch(
+  // Look up the OTP
+  const otpRes = await fetch(
     `${SUPABASE_URL}/rest/v1/pipeline_otp?email=eq.${encodeURIComponent(email)}&code=eq.${encodeURIComponent(code)}&used=eq.false&order=created_at.desc&limit=1`,
     { headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` } }
   );
-  const rows = await res.json();
+  const rows = await otpRes.json();
 
   if (!Array.isArray(rows) || !rows.length) {
     return { statusCode: 401, headers, body: JSON.stringify({ error: 'Incorrect code. Please try again.' }) };
@@ -40,12 +39,11 @@ exports.handler = async (event) => {
 
   const row = rows[0];
 
-  // Check expiry
   if (new Date(row.expires_at) < new Date()) {
     return { statusCode: 401, headers, body: JSON.stringify({ error: 'Code expired. Request a new one.' }) };
   }
 
-  // Mark used
+  // Mark OTP used
   await fetch(`${SUPABASE_URL}/rest/v1/pipeline_otp?id=eq.${row.id}`, {
     method: 'PATCH',
     headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}`, 'Content-Type': 'application/json' },
@@ -53,13 +51,45 @@ exports.handler = async (event) => {
   });
 
   // HMAC-SHA256 signed session token
-  const ts      = Date.now();
-  const toSign  = JSON.stringify({ email, ts });
-  const sig     = crypto.createHmac('sha256', process.env.AUTH_TOKEN_SECRET || '')
-                        .update(toSign).digest('hex');
-  const token   = Buffer.from(JSON.stringify({ email, ts, sig })).toString('base64');
+  const ts     = Date.now();
+  const toSign = JSON.stringify({ email, ts });
+  const sig    = crypto.createHmac('sha256', process.env.AUTH_TOKEN_SECRET || '').update(toSign).digest('hex');
+  const token  = Buffer.from(JSON.stringify({ email, ts, sig })).toString('base64');
 
-  // (OTP email is sent by pipeline-otp-send.js — trust phrase added there)
-  return { statusCode: 200, headers, body: JSON.stringify({ ok: true, token, email }) };
+  // Look up subscriber record (service key bypasses RLS)
+  let isSubscriber = false;
+  let viewToken    = null;
+  const lookupKey  = SERVICE_KEY || ANON_KEY;
+
+  try {
+    const subRes = await fetch(
+      `${SUPABASE_URL}/rest/v1/capgen_subscriptions?email=eq.${encodeURIComponent(email)}&select=demo_token&limit=1`,
+      { headers: { apikey: lookupKey, Authorization: `Bearer ${lookupKey}` } }
+    );
+    const subs = await subRes.json();
+    if (Array.isArray(subs) && subs[0]) {
+      isSubscriber = true;
+      viewToken    = subs[0].demo_token || null;
+    }
+  } catch(e) { /* non-fatal */ }
+
+  // If no token from subscription, check demo_snapshots (any status — pending snapshots still have a valid token)
+  if (!viewToken) {
+    try {
+      const snapRes = await fetch(
+        `${SUPABASE_URL}/rest/v1/demo_snapshots?requester_email=eq.${encodeURIComponent(email)}&order=created_at.desc&limit=1&select=view_token`,
+        { headers: { apikey: lookupKey, Authorization: `Bearer ${lookupKey}` } }
+      );
+      const snaps = await snapRes.json();
+      if (Array.isArray(snaps) && snaps[0] && snaps[0].view_token) {
+        viewToken = snaps[0].view_token;
+      }
+    } catch(e) { /* non-fatal */ }
+  }
+
+  return {
+    statusCode: 200,
+    headers,
+    body: JSON.stringify({ ok: true, token, email, view_token: viewToken, is_subscriber: isSubscriber }),
+  };
 };
-

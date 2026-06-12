@@ -113,11 +113,21 @@ document.getElementById('verifyBtn').addEventListener('click', async function() 
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Invalid code.');
-    // Store session
+
+    // Persist session
     sessionStorage.setItem('pipeline_session', data.token);
     sessionStorage.setItem('capgen_email', currentEmail);
-    // Fetch client UEI from Supabase and redirect
-    await loadClientAndRedirect(currentEmail, data.token);
+    if (data.is_subscriber) localStorage.setItem('is_subscriber', '1');
+    if (data.view_token)    localStorage.setItem('demo_view_token', data.view_token);
+
+    // Redirect to dashboard
+    if (data.is_subscriber) {
+      window.location.href = '/member-home.html';
+    } else if (data.view_token) {
+      window.location.href = '/demo/snapshot?t=' + encodeURIComponent(data.view_token);
+    } else {
+      window.location.href = '/demo';
+    }
   } catch(e) {
     err.textContent = e.message; err.style.display = 'block';
     this.disabled = false; this.textContent = 'Access My Dashboard →';
@@ -140,69 +150,9 @@ document.getElementById('resendBtn').addEventListener('click', async function() 
   setTimeout(() => { this.textContent = 'Resend code'; this.disabled = false; }, 5000);
 });
 
-async function loadClientAndRedirect(email) {
-  const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp1ZGlzbGZrbm1ob2ZjZ3p5b3pjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMDI3ODAsImV4cCI6MjA5Mjc3ODc4MH0.Kxpe0kJt0k7ZchYu70BOwm4KdT0C5aSsyeR1ov6NlQ0';
-  const SUPA = 'https://judislfknmhofcgzyozc.supabase.co';
-
-  // 1. Check localStorage first (already on this device — fastest path)
-  const cached = localStorage.getItem('demo_view_token') || '';
-  if (cached) {
-    window.location.href = '/demo/snapshot?t=' + encodeURIComponent(cached);
-    return;
-  }
-
-  // 2. Look up token from demo_snapshots by email — token stays in DB, never in URLs
-  try {
-    const snapRes = await fetch(
-      SUPA + '/rest/v1/demo_snapshots?requester_email=eq.' + encodeURIComponent(email)
-      + '&status=eq.complete&order=created_at.desc&limit=1&select=view_token,business_name',
-      { headers: { apikey: ANON, Authorization: 'Bearer ' + ANON } }
-    );
-    const snaps = await snapRes.json();
-    if (Array.isArray(snaps) && snaps[0] && snaps[0].view_token) {
-      const t = snaps[0].view_token;
-      localStorage.setItem('demo_view_token', t);
-      if (snaps[0].business_name) localStorage.setItem('demo_biz_name', snaps[0].business_name);
-      window.location.href = '/demo/snapshot?t=' + encodeURIComponent(t);
-      return;
-    }
-  } catch(e) { console.warn('Snapshot lookup:', e.message); }
-
-  // 3. Check subscription for webhook-generated token (Option A / different device)
-  try {
-    const subRes = await fetch(
-      SUPA + '/rest/v1/capgen_subscriptions?email=eq.' + encodeURIComponent(email)
-      + '&select=demo_token,onboarding_state&limit=1',
-      { headers: { apikey: ANON, Authorization: 'Bearer ' + ANON } }
-    );
-    const subs = await subRes.json();
-    if (Array.isArray(subs) && subs[0]) {
-      const sub = subs[0];
-      localStorage.setItem('is_subscriber', '1'); // hide Subscribe bar on all demo pages
-      if (sub.demo_token) {
-        localStorage.setItem('demo_view_token', sub.demo_token);
-        window.location.href = '/demo/snapshot?t=' + encodeURIComponent(sub.demo_token);
-        return;
-      }
-      const state = sub.onboarding_state || 'needs_profile';
-      if (state !== 'complete') {
-        window.location.href = '/capgen-onboarding?s=entity_pending';
-        return;
-      }
-    }
-  } catch(e) { console.warn('Subscription lookup:', e.message); }
-
-  // 4. No snapshot, no subscription — start a demo to get a token
-  window.location.href = '/demo';
-}
-
-// Auto-redirect if already have a demo token (returning visitor)
+// Auto-redirect if already subscribed on this device — still require OTP gate
 (function() {
-  const t = localStorage.getItem('demo_view_token');
-  if (t) {
-    // Has a token — show login so they prove identity, then they'll be sent to their dashboard
-    // Do NOT auto-redirect; OTP gate must be passed first
-  }
+  // Token is in localStorage but identity must be verified via OTP first — do not skip the gate
 })();
 </script>
 </body>
