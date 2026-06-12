@@ -118,6 +118,11 @@
   to = "/member-home.html"
   status = 200
 
+[[redirects]]
+  from = "/analyze-fit"
+  to = "/analyze-fit.html"
+  status = 200
+
 [[headers]]
   for = "/*"
   [headers.values]

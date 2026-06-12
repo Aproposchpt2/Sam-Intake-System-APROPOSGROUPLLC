@@ -93,16 +93,15 @@ export const handler = async (event) => {
   const { opportunityId, force = false, deep = false, opportunity: inlineOpp } = body;
   if (!opportunityId) return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'opportunityId required' }) };
 
-  // Load profile
-  const profiles = await sbGet(`capgen_subscriptions?email=eq.${encodeURIComponent(accountEmail)}&limit=1`);
-  if (!profiles.length) return { statusCode: 409, headers: CORS, body: JSON.stringify({ error: 'PROFILE_REQUIRED' }) };
-  const profile = profiles[0];
+  // Load profile from demo_snapshots
+  const snaps = await sbGet(`demo_snapshots?requester_email=eq.${encodeURIComponent(accountEmail)}&order=created_at.desc&limit=1`);
+  if (!snaps.length) return { statusCode: 409, headers: CORS, body: JSON.stringify({ error: 'PROFILE_REQUIRED' }) };
 
   // Cache check
-  const aeEnc = encodeURIComponent(accountEmail);
+  const aeEnc  = encodeURIComponent(accountEmail);
   const oidEnc = encodeURIComponent(opportunityId);
   const cached = await sbGet(
-    `opportunity_analyses?account_email=eq.${aeEnc}&opportunity_id=eq.${oidEnc}&profile_version=eq.${profile.profile_version}&limit=1`
+    `opportunity_analyses?account_email=eq.${aeEnc}&opportunity_id=eq.${oidEnc}&profile_version=eq.0&limit=1`
   );
 
   if (cached.length && !force) {
@@ -111,10 +110,9 @@ export const handler = async (event) => {
     // Special case: deep=true + complete NO_BID with no stage2 → trigger stage2 only.
     if (deep && row.status === 'complete' && !row.stage2 &&
         (row.recommendation === 'NO_BID' || row.recommendation === 'PENDING')) {
-      // Re-activate for stage2 run
       await sbPatch('opportunity_analyses', `id=eq.${row.id}`, { status: 'stage1_complete' });
       await fireBackground({ rowId: row.id, accountEmail, opportunityId,
-        profileVersion: profile.profile_version, deep: true, skipStage1: true, opportunity: inlineOpp });
+        profileVersion: 0, deep: true, skipStage1: true, opportunity: inlineOpp });
       return { statusCode: 200, headers: CORS, body: JSON.stringify({ ...row, status: 'stage1_complete', cached: false }) };
     }
     return { statusCode: 200, headers: CORS, body: JSON.stringify({ ...row, cached: true }) };
@@ -142,7 +140,7 @@ export const handler = async (event) => {
     row = await sbInsert('opportunity_analyses', {
       account_email:   accountEmail,
       opportunity_id:  opportunityId,
-      profile_version: profile.profile_version,
+      profile_version: 0,
       stage1:          {},
       recommendation:  'PENDING',
       fit_score:       0,
@@ -160,7 +158,7 @@ export const handler = async (event) => {
 
   // Await the trigger — MUST await or the fetch is killed when handler returns
   await fireBackground({ rowId: row.id, accountEmail, opportunityId,
-    profileVersion: profile.profile_version, deep, skipStage1: false, opportunity: inlineOpp });
+    profileVersion: 0, deep, skipStage1: false, opportunity: inlineOpp });
 
   return { statusCode: 202, headers: CORS, body: JSON.stringify({ id: row.id, status: 'pending', opportunity_id: opportunityId, cached: false }) };
 };

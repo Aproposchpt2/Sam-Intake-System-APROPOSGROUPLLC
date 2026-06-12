@@ -160,13 +160,26 @@ export const handler = async (event) => {
   const markFilter = `id=eq.${rowId}`;
 
   try {
-    // Load profile
-    const profiles = await sbGet(`capgen_subscriptions?email=eq.${encodeURIComponent(accountEmail)}&limit=1`);
-    if (!profiles.length) {
+    // Load profile from demo_snapshots
+    const snaps = await sbGet(`demo_snapshots?requester_email=eq.${encodeURIComponent(accountEmail)}&order=created_at.desc&limit=1`);
+    if (!snaps.length) {
       await sbPatch(markFilter, { status: 'failed', stage1: { error: 'Profile not found' } });
       return { statusCode: 200, body: 'no profile' };
     }
-    const profile = profiles[0];
+    const snap    = snaps[0];
+    const rawProf = snap.profile || {};
+    const profile = {
+      business_name:  rawProf.legal_name || snap.business_name || '',
+      uei:            rawProf.uei  || '',
+      cage:           rawProf.cage || '',
+      naics:          (rawProf.naics || []).map(n => n.code || n),
+      set_asides:     rawProf.set_asides || [],
+      certifications: rawProf.set_asides || [],
+      capabilities:   rawProf.capabilities || 'IT services, computer programming, systems design',
+      past_performance: rawProf.past_performance || 'Not specified',
+      team_size:      rawProf.team_size || 'Not specified',
+      keywords:       rawProf.keywords || [],
+    };
 
     // Load existing row (to get stage1 if skipStage1)
     const existingRows = await sbGet(`opportunity_analyses?id=eq.${rowId}&limit=1`);

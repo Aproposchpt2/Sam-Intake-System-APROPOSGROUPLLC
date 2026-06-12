@@ -86,6 +86,10 @@ header{background:var(--surface);border-bottom:1px solid var(--line);padding:14p
   cursor:pointer;transition:.15s}
 .page-btn:hover:not(:disabled){background:rgba(255,255,255,.14)}
 .page-btn:disabled{opacity:.3;cursor:default}
+.btn-analyze{background:rgba(110,231,168,.15);border:1px solid rgba(110,231,168,.3);color:#6EE7A8;
+  font-family:'Jost',sans-serif;font-size:.78rem;font-weight:700;padding:7px 16px;border-radius:8px;
+  cursor:pointer;transition:.18s}
+.btn-analyze:hover{background:rgba(110,231,168,.28)}
 .btn-ignore{background:none;border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.35);
   font-family:'Jost',sans-serif;font-size:.72rem;padding:5px 10px;border-radius:6px;cursor:pointer;transition:.15s}
 .btn-ignore:hover{border-color:var(--red);color:var(--red)}
@@ -273,6 +277,7 @@ function renderCard(opp, rank, analysis) {
     + fitHtml
     + '<div class="card-actions">'
     + (opp.url ? '<a href="' + esc(opp.url) + '" target="_blank" rel="noopener" class="btn-view">View Opportunity →</a>' : '')
+    + '<button class="btn-analyze" onclick="openAnalyzeFit(' + JSON.stringify(opp) + ')">Analyze Fit ↗</button>'
     + '<button class="btn-ignore" onclick="ignoreOpp(' + JSON.stringify(opp.notice_id || '') + ')">✕ Ignore</button>'
     + '</div>'
     + '</div>';
@@ -419,6 +424,11 @@ function renderPage() {
 function signOut() {
   sessionStorage.clear();
   window.location.href = '/';
+}
+
+function openAnalyzeFit(opp) {
+  sessionStorage.setItem('analyze_opp', JSON.stringify(opp));
+  window.location.href = '/analyze-fit?id=' + encodeURIComponent(opp.notice_id || '') + '&t=' + encodeURIComponent(token);
 }
 
 async function load() {

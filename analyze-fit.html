@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Analyze Fit — CapGen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital@1&family=Jost:wght@400;600;700&display=swap" rel="stylesheet">
+<script>if(localStorage.getItem('is_subscriber')||sessionStorage.getItem('pipeline_session')){document.documentElement.style.setProperty('--sub-bar','none');}</script>
+<style>
+:root{
+  --bg:#0A1A3A;--surface:#0f2244;--panel:#132954;--line:rgba(91,175,255,.15);
+  --line2:rgba(91,175,255,.28);--text:#f0f6ff;--muted:#8facd0;--soft:#5a7899;
+  --green:#6EE7A8;--amber:#F59E0B;--red:#F87171;--cyan:#5BD3FF;
+  font-family:'Jost',Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.6}
+
+.top-banner{background:var(--surface);border-bottom:1px solid var(--line2);
+  padding:11px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.back-btn{background:var(--cyan);color:#0A1A3A;font-family:'Jost',sans-serif;font-weight:700;
+  font-size:.78rem;padding:7px 16px;border-radius:8px;text-decoration:none;white-space:nowrap}
+.back-btn:hover{opacity:.88}
+.banner-title{font-size:.88rem;font-weight:700;color:var(--text)}
+
+header{background:var(--surface);border-bottom:1px solid var(--line);padding:14px 28px;
+  display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-mark{width:40px;height:40px;border-radius:10px;background:var(--bg);border:1px solid var(--line2);
+  display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;color:var(--cyan)}
+.brand-name{font-size:1rem;font-weight:700}
+.brand-sub{font-size:.72rem;color:var(--muted)}
+
+.page{max-width:860px;margin:0 auto;padding:28px 20px 80px}
+
+/* Loading */
+.loading-state{text-align:center;padding:80px 20px}
+.spinner{width:48px;height:48px;border:3px solid rgba(255,255,255,.1);border-top-color:var(--green);
+  border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 20px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-label{font-size:.9rem;color:var(--muted);margin-bottom:8px}
+.loading-sub{font-size:.78rem;color:var(--soft)}
+
+/* Score hero */
+.score-hero{background:var(--surface);border:1px solid var(--line);border-radius:16px;
+  padding:28px 32px;margin-bottom:20px;display:flex;align-items:center;gap:28px;flex-wrap:wrap}
+.score-ring{width:90px;height:90px;border-radius:50%;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;flex-shrink:0;border:3px solid}
+.score-ring.bid{border-color:var(--green);background:rgba(110,231,168,.08)}
+.score-ring.caution{border-color:var(--amber);background:rgba(245,158,11,.08)}
+.score-ring.watchlist{border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.04)}
+.score-ring.no_bid{border-color:var(--red);background:rgba(248,113,113,.08)}
+.score-num{font-size:2rem;font-weight:900;line-height:1}
+.score-num.bid{color:var(--green)}.score-num.caution{color:var(--amber)}
+.score-num.watchlist{color:var(--muted)}.score-num.no_bid{color:var(--red)}
+.score-label{font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft)}
+.hero-right{flex:1;min-width:200px}
+.opp-title-hero{font-size:1.05rem;font-weight:700;line-height:1.35;margin-bottom:6px}
+.opp-agency-hero{font-size:.8rem;color:var(--muted);margin-bottom:12px}
+.rec-badge{display:inline-block;padding:5px 14px;border-radius:6px;font-size:.72rem;
+  font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+.rec-badge.bid{background:rgba(110,231,168,.18);color:var(--green);border:1px solid rgba(110,231,168,.3)}
+.rec-badge.caution{background:rgba(245,158,11,.15);color:var(--amber);border:1px solid rgba(245,158,11,.28)}
+.rec-badge.watchlist{background:rgba(255,255,255,.07);color:var(--muted);border:1px solid rgba(255,255,255,.15)}
+.rec-badge.no_bid{background:rgba(248,113,113,.14);color:var(--red);border:1px solid rgba(248,113,113,.27)}
+.hero-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+.hchip{padding:3px 10px;border-radius:5px;font-size:.68rem;font-weight:700}
+.hchip-naics{background:rgba(91,211,255,.1);border:1px solid rgba(91,211,255,.22);color:var(--cyan)}
+.hchip-hot{background:rgba(248,113,113,.15);border:1px solid rgba(248,113,113,.28);color:var(--red)}
+.hchip-warm{background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.22);color:var(--amber)}
+.hchip-ok{background:rgba(110,231,168,.12);border:1px solid rgba(110,231,168,.22);color:var(--green)}
+.hchip-neutral{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);color:var(--muted)}
+
+/* Sections */
+.section{background:var(--surface);border:1px solid var(--line);border-radius:12px;
+  padding:22px 26px;margin-bottom:14px}
+.section-title{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--cyan);
+  font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.section-title .s-num{background:rgba(91,211,255,.12);border:1px solid rgba(91,211,255,.22);
+  color:var(--cyan);width:22px;height:22px;border-radius:50%;display:inline-flex;
+  align-items:center;justify-content:center;font-size:.65rem;font-weight:900;flex-shrink:0}
+.section-body{font-size:.86rem;color:rgba(255,255,255,.82);line-height:1.7}
+.section-body p{margin-bottom:10px}
+.section-body p:last-child{margin-bottom:0}
+
+/* Two-col grid */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+/* Metadata table */
+.meta-table{width:100%;border-collapse:collapse}
+.meta-table tr:not(:last-child) td{padding-bottom:8px}
+.meta-table td:first-child{font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--soft);width:38%;padding-right:12px;vertical-align:top;padding-top:2px}
+.meta-table td:last-child{font-size:.86rem;font-weight:600;color:var(--text)}
+
+/* Status pill */
+.status-pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:5px;
+  font-size:.68rem;font-weight:700}
+.status-pill.good{background:rgba(110,231,168,.15);color:var(--green);border:1px solid rgba(110,231,168,.28)}
+.status-pill.warn{background:rgba(245,158,11,.12);color:var(--amber);border:1px solid rgba(245,158,11,.22)}
+.status-pill.bad{background:rgba(248,113,113,.12);color:var(--red);border:1px solid rgba(248,113,113,.22)}
+.status-pill.neutral{background:rgba(255,255,255,.07);color:var(--muted);border:1px solid rgba(255,255,255,.14)}
+
+/* Checklist */
+.checklist{list-style:none;display:flex;flex-direction:column;gap:8px}
+.checklist li{display:flex;align-items:flex-start;gap:10px;font-size:.84rem;
+  color:rgba(255,255,255,.8);line-height:1.5}
+.checklist li::before{content:'☐';color:var(--cyan);font-size:1rem;flex-shrink:0;margin-top:1px}
+
+/* Questions */
+.questions{display:flex;flex-direction:column;gap:10px}
+.question-item{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+  border-radius:8px;padding:12px 14px;font-size:.84rem;color:rgba(255,255,255,.8);
+  line-height:1.55;border-left:3px solid var(--cyan)}
+
+/* Action bar */
+.action-bar{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
+.btn-export{background:var(--white);color:#0A1A3A;font-family:'Jost',sans-serif;font-weight:700;
+  font-size:.82rem;padding:10px 22px;border-radius:8px;border:none;cursor:pointer;
+  background:#fff;transition:.15s}
+.btn-export:hover{opacity:.88}
+.btn-stage2{background:rgba(110,231,168,.15);border:1px solid rgba(110,231,168,.3);color:var(--green);
+  font-family:'Jost',sans-serif;font-weight:700;font-size:.82rem;padding:10px 22px;
+  border-radius:8px;cursor:pointer;transition:.18s}
+.btn-stage2:hover{background:rgba(110,231,168,.28)}
+
+.stage2-loading{text-align:center;padding:40px;color:var(--muted);font-size:.88rem}
+.trust-line{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.78rem;
+  color:rgba(255,255,255,.28);text-align:center;margin-top:20px}
+
+.not-enough{color:var(--soft);font-style:italic;font-size:.82rem}
+
+@media(max-width:600px){
+  .top-banner{padding:10px 14px}.page{padding:14px 12px 80px}
+  .score-hero{padding:20px}.two-col{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="top-banner">
+  <span class="banner-title" id="bannerTitle">Analyze Fit</span>
+  <a href="#" class="back-btn" id="backBtn">← Back to Best Match</a>
+</div>
+
+<header>
+  <div class="brand">
+    <div class="brand-mark">CG</div>
+    <div>
+      <div class="brand-name">CapGen</div>
+      <div class="brand-sub">Fit Analysis Engine</div>
+    </div>
+  </div>
+</header>
+
+<div class="page">
+  <div id="loadingEl" class="loading-state">
+    <div class="spinner"></div>
+    <div class="loading-label" id="loadingLabel">Analyzing opportunity fit…</div>
+    <div class="loading-sub">Evaluating eligibility, capability match, compliance requirements, and bid complexity.</div>
+  </div>
+  <div id="reportEl" style="display:none"></div>
+</div>
+
+<script>
+'use strict';
+const q          = new URLSearchParams(location.search);
+const noticeId   = q.get('id') || '';
+const token      = q.get('t') || localStorage.getItem('demo_view_token') || '';
+const sessionTok = sessionStorage.getItem('pipeline_session') || '';
+const opp        = JSON.parse(sessionStorage.getItem('analyze_opp') || 'null');
+
+document.getElementById('backBtn').href = token ? '/opportunity?t=' + encodeURIComponent(token) : '/opportunity';
+if (opp) document.getElementById('bannerTitle').textContent = (opp.title || 'Analyze Fit').slice(0, 60);
+
+if (!sessionTok) { window.location.href = '/onboarding'; }
+
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function fmtDate(iso){ if(!iso) return '—'; return new Date(iso).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
+
+function deadlineDays(iso) {
+  if (!iso) return null;
+  return Math.floor((new Date(iso) - new Date()) / 86400000);
+}
+
+function deadlineChipClass(days) {
+  if (days === null) return 'hchip-neutral';
+  if (days <= 7)  return 'hchip-hot';
+  if (days <= 30) return 'hchip-warm';
+  return 'hchip-ok';
+}
+
+function recClass(rec) {
+  if (!rec) return 'neutral';
+  const r = rec.toLowerCase();
+  if (r.includes('no_bid') || r.includes('do not')) return 'no_bid';
+  if (r.includes('caution') || r.includes('watchlist') || r === 'conditional') return 'caution';
+  if (r.includes('watchlist')) return 'watchlist';
+  return 'bid';
+}
+
+function recLabel(rec) {
+  const map = { 'BID': 'Pursue', 'CONDITIONAL': 'Pursue with Caution', 'NO_BID': 'Do Not Pursue', 'PENDING': 'Analyzing…' };
+  return map[rec] || rec || '—';
+}
+
+function pill(label, type) {
+  return `<span class="status-pill ${type}">${esc(label)}</span>`;
+}
+
+function section(num, title, content) {
+  return `<div class="section">
+    <div class="section-title"><span class="s-num">${num}</span>${esc(title)}</div>
+    <div class="section-body">${content}</div>
+  </div>`;
+}
+
+function bulletList(arr) {
+  if (!arr || !arr.length) return '<span class="not-enough">Not enough information available.</span>';
+  return '<ul class="checklist">' + arr.map(i => `<li>${esc(String(i))}</li>`).join('') + '</ul>';
+}
+
+function renderReport(row) {
+  const s1  = row.stage1 || {};
+  const s2  = row.stage2 || null;
+  const m   = s1.match || {};
+  const rec = row.recommendation || 'PENDING';
+  const cls = recClass(rec);
+  const dl  = opp ? deadlineDays(opp.response_deadline || opp.deadline) : null;
+  const dlCls = deadlineChipClass(dl);
+  const dlLabel = dl === null ? 'No deadline' : dl < 1 ? 'Closed' : dl + ' days left';
+
+  let html = '';
+
+  // ── Score hero ──────────────────────────────────────────────────────────────
+  html += `<div class="score-hero">
+    <div class="score-ring ${cls}">
+      <div class="score-num ${cls}">${row.fit_score || '—'}</div>
+      <div class="score-label">Fit Score</div>
+    </div>
+    <div class="hero-right">
+      <div class="opp-title-hero">${esc(opp ? opp.title : (s1.opportunity_summary || '').slice(0,80))}</div>
+      <div class="opp-agency-hero">${esc(opp ? opp.agency : '')}</div>
+      <span class="rec-badge ${cls}">${esc(recLabel(rec))}</span>
+      <div class="hero-chips">
+        ${opp && opp.naics ? `<span class="hchip hchip-naics">NAICS ${esc(opp.naics)}</span>` : ''}
+        <span class="hchip ${dlCls}">${esc(dlLabel)}</span>
+        ${opp && opp.set_aside && opp.set_aside !== 'None' && opp.set_aside !== 'Unrestricted'
+          ? `<span class="hchip hchip-neutral">${esc(opp.set_aside.slice(0,40))}</span>` : ''}
+      </div>
+    </div>
+  </div>`;
+
+  // ── Section 1 — Opportunity Summary ────────────────────────────────────────
+  html += section(1, 'Opportunity Summary', `
+    <table class="meta-table">
+      <tr><td>Agency</td><td>${esc(opp ? opp.agency : '—')}</td></tr>
+      <tr><td>NAICS</td><td>${esc(opp ? opp.naics : '—')}</td></tr>
+      <tr><td>Set-Aside</td><td>${esc(opp ? (opp.set_aside || 'Unrestricted') : '—')}</td></tr>
+      <tr><td>Deadline</td><td>${esc(opp ? fmtDate(opp.response_deadline || opp.deadline) : '—')}</td></tr>
+      <tr><td>Notice ID</td><td>${esc(noticeId)}</td></tr>
+    </table>
+    <p style="margin-top:14px">${esc(s1.opportunity_summary || 'Summary not available.')}</p>
+  `);
+
+  // ── Section 2 — Why CapGen Matched ─────────────────────────────────────────
+  html += section(2, 'Why CapGen Matched This Opportunity', `
+    <p>${esc(m.naics_detail || 'Not enough information available.')}</p>
+  `);
+
+  // ── Section 3 — Eligibility Review ─────────────────────────────────────────
+  const eligPill = m.set_aside_eligible ? pill('Eligible', 'good') : pill('Not Eligible', 'bad');
+  html += section(3, 'Eligibility Review', `
+    <p style="margin-bottom:12px">${eligPill}</p>
+    <p>${esc(m.set_aside_detail || 'Not enough information available.')}</p>
+  `);
+
+  // ── Section 4 — Capability Match ───────────────────────────────────────────
+  const capMap = { HIGH: ['Strong Match','good'], MEDIUM: ['Moderate Match','warn'], LOW: ['Weak Match','bad'] };
+  const capInfo = capMap[m.capability_alignment] || ['Not Enough Information','neutral'];
+  html += section(4, 'Capability Match', `
+    <p style="margin-bottom:12px">${pill(capInfo[0], capInfo[1])}</p>
+    <p>${esc(m.capability_detail || 'Not enough information available.')}</p>
+  `);
+
+  // ── Section 5 — Rationale / Recommendation ─────────────────────────────────
+  html += section(5, 'Bid / No-Bid Rationale', `<p>${esc(s1.rationale || 'Not enough information available.')}</p>`);
+
+  // ── Stage 2 sections ────────────────────────────────────────────────────────
+  if (s2) {
+    // Section 6 — Performance Requirements
+    html += section(6, 'Performance Requirements', bulletList(s2.required_work));
+
+    // Section 7 — Staffing & Delivery
+    html += section(7, 'Staffing & Delivery Requirements', bulletList(s2.staffing_delivery));
+
+    // Section 8 — Compliance
+    html += section(8, 'Compliance Requirements', bulletList(s2.documents_needed ? s2.documents_needed.filter(d =>
+      /clearance|security|privacy|cyber|wage|insurance|training|compliance|background/i.test(d)
+    ) : []));
+
+    // Section 9 — Deadline Risk
+    const dlRisk = dl === null ? pill('No Deadline', 'neutral')
+      : dl <= 7  ? pill('High Urgency — Under 7 Days', 'bad')
+      : dl <= 30 ? pill('Normal Pursuit Window', 'warn')
+      : pill('Good Planning Window — 30+ Days', 'good');
+    html += section(9, 'Deadline Risk', `<p style="margin-bottom:12px">${dlRisk}</p><p>${dl !== null ? dl + ' days remaining to respond.' : 'No deadline specified.'}</p>`);
+
+    // Section 10 — Pricing Considerations
+    html += section(10, 'Pricing Considerations', bulletList(s2.pricing_considerations));
+
+    // Section 11 — Draft Technical Approach
+    html += section(11, 'Draft Technical Approach',
+      `<p>${esc(s2.draft_technical_approach || 'Not enough information available.')}</p>`);
+
+    // Section 12 — Proposal Checklist
+    const checklistHtml = s2.proposal_checklist && s2.proposal_checklist.length
+      ? '<ul class="checklist">' + s2.proposal_checklist.map(item =>
+          `<li><div><strong>${esc(item.item || item)}</strong>${item.owner_hint ? '<br><span style="font-size:.75rem;color:var(--soft)">' + esc(item.owner_hint) + '</span>' : ''}</div></li>`
+        ).join('') + '</ul>'
+      : bulletList(s2.documents_needed);
+    html += section(12, 'Proposal Checklist', checklistHtml);
+
+    // Section 13 — Questions for Contracting Officer
+    const qHtml = s2.questions_for_co && s2.questions_for_co.length
+      ? '<div class="questions">' + s2.questions_for_co.map(q => `<div class="question-item">${esc(q)}</div>`).join('') + '</div>'
+      : '<span class="not-enough">Not enough information available.</span>';
+    html += section(13, 'Questions for the Contracting Officer', qHtml);
+
+    // Section 14 — Recommended Next Step
+    const nextStep = s2.questions_for_co && s2.questions_for_co.length
+      ? 'Contact the contracting officer with the questions listed above to clarify scope before committing proposal resources.'
+      : 'Review the full solicitation on SAM.gov and confirm eligibility requirements before proceeding.';
+    html += section(14, 'Recommended Next Step', `<p style="font-weight:700;color:var(--cyan)">${esc(nextStep)}</p>`);
+
+  } else if (rec === 'BID' || rec === 'CONDITIONAL') {
+    html += `<div class="section stage2-loading">
+      <div class="spinner" style="width:32px;height:32px;margin:0 auto 12px"></div>
+      <div>Building full pursuit package — proposal checklist, technical approach, questions for the CO…</div>
+    </div>`;
+  }
+
+  // ── Action bar ──────────────────────────────────────────────────────────────
+  html += `<div class="action-bar">
+    ${opp && opp.url ? `<a href="${esc(opp.url)}" target="_blank" rel="noopener" style="background:var(--cyan);color:#0A1A3A;font-family:'Jost',sans-serif;font-weight:700;font-size:.82rem;padding:10px 22px;border-radius:8px;text-decoration:none">View on SAM.gov →</a>` : ''}
+    <button class="btn-export" onclick="window.print()">Export as PDF ↓</button>
+    ${!s2 && (rec === 'BID' || rec === 'CONDITIONAL') ? '' :
+      rec !== 'BID' && rec !== 'CONDITIONAL' ? `<button class="btn-stage2" onclick="requestDeep()">Run Full Analysis →</button>` : ''}
+  </div>
+  <p class="trust-line">Analysis based on official public records and your registered capability profile.</p>`;
+
+  document.getElementById('reportEl').innerHTML = html;
+  document.getElementById('reportEl').style.display = 'block';
+  document.getElementById('loadingEl').style.display = 'none';
+}
+
+let pollTimer = null;
+
+async function requestDeep() {
+  await runAnalysis(true);
+}
+
+async function runAnalysis(force = false) {
+  if (!noticeId || !sessionTok) return;
+
+  document.getElementById('loadingEl').style.display = 'block';
+  document.getElementById('reportEl').style.display  = 'none';
+
+  const payload = {
+    opportunityId: noticeId,
+    force,
+    deep: true,
+    opportunity: opp ? {
+      title:     opp.title,
+      agency:    opp.agency,
+      naics:     opp.naics,
+      set_aside: opp.set_aside,
+      deadline:  opp.response_deadline || opp.deadline,
+    } : undefined,
+  };
+
+  try {
+    const res  = await fetch('/.netlify/functions/analyze-fit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + sessionTok },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      document.getElementById('loadingEl').innerHTML =
+        `<p style="color:var(--red);text-align:center">${esc(data.error || 'Analysis failed. Please try again.')}</p>`;
+      return;
+    }
+
+    if (data.status === 'pending' || data.status === 'stage1_complete') {
+      document.getElementById('loadingLabel').textContent =
+        data.status === 'stage1_complete' ? 'Building pursuit package…' : 'Analyzing opportunity fit…';
+      pollTimer = setTimeout(() => poll(data.id), 3000);
+      return;
+    }
+
+    renderReport(data);
+  } catch(e) {
+    document.getElementById('loadingEl').innerHTML =
+      `<p style="color:var(--red);text-align:center">Error: ${esc(e.message)}</p>`;
+  }
+}
+
+async function poll(rowId) {
+  try {
+    const res  = await fetch('/.netlify/functions/analyze-fit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + sessionTok },
+      body: JSON.stringify({ opportunityId: noticeId, deep: true, opportunity: opp ? {
+        title: opp.title, agency: opp.agency, naics: opp.naics,
+        set_aside: opp.set_aside, deadline: opp.response_deadline || opp.deadline,
+      } : undefined }),
+    });
+    const data = await res.json();
+
+    if (data.status === 'complete') {
+      renderReport(data);
+      return;
+    }
+    if (data.status === 'stage1_complete') {
+      document.getElementById('loadingLabel').textContent = 'Building pursuit package…';
+    }
+    pollTimer = setTimeout(() => poll(rowId), 3000);
+  } catch(e) {
+    pollTimer = setTimeout(() => poll(rowId), 5000);
+  }
+}
+
+// Start
+runAnalysis(false);
+</script>
+</body>
+</html>
