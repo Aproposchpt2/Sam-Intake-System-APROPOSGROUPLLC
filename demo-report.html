@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Capability Report — CapGen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital@1&family=Jost:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--sap:#0F2A6A;--sap2:#163472;--white:#fff;--green:#6EE7A8;--muted:rgba(255,255,255,.55);font-family:'Jost',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--sap);color:var(--white);min-height:100vh}
+
+.top-banner{background:var(--sap2);border-bottom:1px solid rgba(255,255,255,.12);
+  padding:11px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.banner-biz{font-size:.88rem;font-weight:700}
+.back-btn{background:var(--white);color:var(--sap);font-family:'Jost',sans-serif;font-weight:700;
+  font-size:.78rem;padding:7px 16px;border-radius:8px;text-decoration:none;white-space:nowrap;transition:.15s}
+.back-btn:hover{opacity:.88}
+
+header{background:var(--sap2);border-bottom:1px solid rgba(255,255,255,.1);padding:14px 28px;
+  display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-mark{width:40px;height:40px;border-radius:10px;background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.2);
+  display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;color:var(--green)}
+.brand-name{font-size:1rem;font-weight:700}
+.brand-sub{font-size:.72rem;color:var(--muted)}
+.action-bar{display:flex;gap:10px}
+.btn-email{background:rgba(110,231,168,.15);border:1px solid rgba(110,231,168,.3);color:var(--green);
+  font-family:'Jost',sans-serif;font-weight:700;font-size:.8rem;padding:8px 18px;border-radius:8px;
+  cursor:pointer;transition:.18s;border-radius:8px}
+.btn-email:hover{background:rgba(110,231,168,.25)}
+.btn-print{background:var(--white);color:var(--sap);font-family:'Jost',sans-serif;font-weight:700;
+  font-size:.8rem;padding:8px 18px;border-radius:8px;cursor:pointer;border:none;transition:.15s}
+.btn-print:hover{opacity:.88}
+
+.page{max-width:900px;margin:0 auto;padding:28px 20px 60px}
+
+/* Report preview */
+.report-frame{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.4);
+  margin-bottom:24px}
+.report-frame iframe{width:100%;height:960px;border:none;display:block}
+
+.loading-state{text-align:center;padding:80px 20px;color:var(--muted);font-size:.9rem}
+.spinner{width:44px;height:44px;border:3px solid rgba(255,255,255,.1);border-top-color:var(--green);
+  border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 20px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.error-state{text-align:center;padding:60px;color:#F87171}
+
+.trust-line{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.82rem;
+  color:rgba(255,255,255,.35);text-align:center;margin-top:12px}
+
+/* Subscribe bar */
+.sub-bar{position:fixed;bottom:0;left:0;right:0;background:var(--sap2);border-top:1px solid rgba(255,255,255,.1);
+  padding:12px 28px;display:flex;align-items:center;justify-content:space-between;gap:14px;
+  z-index:100;flex-wrap:wrap}
+.sub-bar-text{font-size:.84rem;color:var(--muted)}
+.sub-bar-text strong{color:var(--white)}
+.sub-cta{background:var(--white);color:var(--sap);font-family:'Jost',sans-serif;font-weight:700;
+  font-size:.88rem;padding:10px 22px;border-radius:8px;text-decoration:none;white-space:nowrap}
+
+@media(max-width:600px){
+  .top-banner{padding:10px 14px}.page{padding:14px 12px 80px}
+  .action-bar{flex-wrap:wrap}.report-frame iframe{height:600px}
+  .sub-bar{flex-direction:column;align-items:stretch;text-align:center}
+}
+</style>
+</head>
+<body>
+
+<div class="top-banner">
+  <span class="banner-biz" id="bannerBiz">Capability Report</span>
+  <a href="#" class="back-btn" id="backBtn">← Return to All Contracts</a>
+</div>
+
+<header>
+  <div class="brand">
+    <div class="brand-mark">CG</div>
+    <div>
+      <div class="brand-name">CapGen</div>
+      <div class="brand-sub">Capability Report</div>
+    </div>
+  </div>
+  <div class="action-bar">
+    <button class="btn-email" id="emailBtn" onclick="emailReport()" style="display:none">Email My Report →</button>
+    <button class="btn-print" id="printBtn" onclick="printReport()" style="display:none">Save as PDF ↓</button>
+  </div>
+</header>
+
+<div class="page">
+  <div id="loadingEl" class="loading-state">
+    <div class="spinner"></div>
+    <p>Generating your capability report from official public records…</p>
+  </div>
+  <div class="report-frame" id="reportFrame" style="display:none">
+    <iframe id="reportIframe" title="Capability Report"></iframe>
+  </div>
+  <p class="trust-line" id="trustLine" style="display:none">Sourced from official public records.</p>
+</div>
+
+<div class="sub-bar">
+  <div class="sub-bar-text"><strong>Subscribe</strong> to keep your report updated daily and unlock all features.</div>
+  <a href="https://ai4-product-purchasing.ai4businesses.org/capgen-offer.html" id="subCta" class="sub-cta">Subscribe Now →</a>
+</div>
+
+<script>
+'use strict';
+const STRIPE_OFFER = 'https://ai4-product-purchasing.ai4businesses.org/capgen-offer.html';
+const q = new URLSearchParams(location.search);
+const token = q.get('t') || localStorage.getItem('demo_view_token') || '';
+
+document.getElementById('backBtn').href = token ? '/demo/snapshot?t=' + encodeURIComponent(token) : '/demo';
+document.getElementById('subCta').href  = STRIPE_OFFER;
+if (token) localStorage.setItem('demo_view_token', token);
+
+let entityData = null;
+
+async function load() {
+  if (!token) {
+    document.getElementById('loadingEl').innerHTML = '<p class="error-state">No session. <a href="/demo" style="color:var(--green)">Start a new demo →</a></p>';
+    return;
+  }
+  try {
+    const res  = await fetch('/.netlify/functions/demo-report?t=' + encodeURIComponent(token));
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Report generation failed');
+
+    entityData = data.entity;
+    const bizName = entityData && entityData.legal_name ? entityData.legal_name : '';
+    if (bizName) document.getElementById('bannerBiz').textContent = bizName + ' — Capability Report';
+
+    // Render in iframe
+    const iframe = document.getElementById('reportIframe');
+    iframe.srcdoc = data.html;
+    document.getElementById('loadingEl').style.display = 'none';
+    document.getElementById('reportFrame').style.display = 'block';
+    document.getElementById('trustLine').style.display = 'block';
+    document.getElementById('emailBtn').style.display = 'inline-block';
+    document.getElementById('printBtn').style.display = 'inline-block';
+
+  } catch(e) {
+    document.getElementById('loadingEl').innerHTML =
+      '<p class="error-state">Could not generate report: ' + e.message + '</p>';
+  }
+}
+
+function printReport() {
+  const iframe = document.getElementById('reportIframe');
+  iframe.contentWindow.print();
+}
+
+async function emailReport() {
+  const btn = document.getElementById('emailBtn');
+  btn.textContent = 'Sending…';
+  btn.disabled = true;
+  try {
+    // Calls generate-capability-background which emails the PDF
+    const res = await fetch('/.netlify/functions/generate-capability-background', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(entityData),
+    });
+    if (res.ok) {
+      btn.textContent = 'Sent ✓';
+      btn.style.background = 'rgba(110,231,168,.3)';
+    } else {
+      btn.textContent = 'Email My Report →';
+      btn.disabled = false;
+    }
+  } catch(e) {
+    btn.textContent = 'Email My Report →';
+    btn.disabled = false;
+  }
+}
+
+load();
+</script>
+</body>
+</html>
