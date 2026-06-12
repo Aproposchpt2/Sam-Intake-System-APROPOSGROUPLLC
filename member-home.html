@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Welcome — CapGen Pro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,700;1,400&family=Cormorant+Garamond:ital@1&family=Jost:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--sap:#0F2A6A;--sap2:#163472;--white:#fff;--off:#e8edf8;--green:#6EE7A8;
+  --cyan:#5BD3FF;--muted:rgba(255,255,255,.55);font-family:'Jost',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--sap);color:var(--white);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+.card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:24px;
+  padding:44px 48px;max-width:520px;width:100%;text-align:center}
+.brand{font-family:'Bodoni Moda',serif;font-size:1.4rem;margin-bottom:6px}
+.welcome{font-size:.88rem;color:var(--muted);margin-bottom:32px}
+.welcome strong{color:var(--white)}
+.nav-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
+.nav-btn{display:flex;flex-direction:column;align-items:center;gap:8px;background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:20px 16px;text-decoration:none;
+  color:var(--white);transition:.18s;cursor:pointer}
+.nav-btn:hover{background:rgba(255,255,255,.13);border-color:var(--cyan)}
+.nav-btn.primary{border-color:var(--cyan);background:rgba(91,211,255,.1)}
+.nav-icon{font-size:1.6rem}
+.nav-label{font-weight:700;font-size:.9rem}
+.nav-desc{font-size:.72rem;color:var(--muted);line-height:1.35}
+.sign-out{font-size:.76rem;color:rgba(255,255,255,.3);text-decoration:none;cursor:pointer;border:none;background:none;margin-top:8px}
+.sign-out:hover{color:rgba(255,255,255,.6)}
+.rule{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.8rem;color:rgba(255,255,255,.3);margin-top:16px}
+@media(max-width:420px){.nav-grid{grid-template-columns:1fr}.card{padding:28px 20px}}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="brand">CapGen Pro</div>
+  <p class="welcome">Welcome back, <strong id="bizName">member</strong>.</p>
+
+  <div class="nav-grid">
+    <a href="/apropos" class="nav-btn primary">
+      <span class="nav-icon">📋</span>
+      <span class="nav-label">All Contracts</span>
+      <span class="nav-desc">Full opportunity pipeline with NAICS filters</span>
+    </a>
+    <a href="/opportunity" class="nav-btn" id="bestMatchBtn">
+      <span class="nav-icon">🎯</span>
+      <span class="nav-label">Best Match</span>
+      <span class="nav-desc">Top 5 curated contracts for your profile</span>
+    </a>
+    <a href="/marketing-dashboard" class="nav-btn">
+      <span class="nav-icon">📊</span>
+      <span class="nav-label">Marketing</span>
+      <span class="nav-desc">Pipeline metrics &amp; warm leads</span>
+    </a>
+    <a href="/profile" class="nav-btn">
+      <span class="nav-icon">⚙️</span>
+      <span class="nav-label">My Profile</span>
+      <span class="nav-desc">Edit capabilities &amp; certifications</span>
+    </a>
+  </div>
+
+  <button class="sign-out" onclick="signOut()">Sign out</button>
+  <p class="rule">Sourced from official public records.</p>
+</div>
+
+<script>
+'use strict';
+// ONE TOKEN — read from localStorage (set at demo intake, persists forever)
+const stored    = sessionStorage.getItem('pipeline_session');
+const demoToken = localStorage.getItem('demo_view_token') || '';
+
+if (!stored) { window.location.href = '/onboarding'; }
+
+// Wire all nav buttons to token-based URLs — no UEI juggling
+if (demoToken) {
+  const contractsLink = document.querySelector('a[href="/apropos"]');
+  const bestMatchBtn  = document.getElementById('bestMatchBtn');
+  if (contractsLink) contractsLink.href = '/demo/snapshot?t=' + encodeURIComponent(demoToken);
+  if (bestMatchBtn)  bestMatchBtn.href  = '/opportunity?t='   + encodeURIComponent(demoToken);
+}
+
+// Show business name from localStorage if stored alongside token
+const bizName = localStorage.getItem('demo_biz_name') || '';
+if (bizName) document.getElementById('bizName').textContent = bizName;
+
+function signOut() {
+  sessionStorage.clear();
+  // Keep demo_view_token in localStorage — it's their persistent identity
+  window.location.href = '/';
+}
+</script>
+</body>
+</html>

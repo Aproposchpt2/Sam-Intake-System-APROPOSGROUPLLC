@@ -1,0 +1,52 @@
+FlowDesk Pro Twilio Simulation Setup
+
+Purpose
+- Simulate the end-to-end contact center flow before outbound SMS approval.
+- A caller dials the Twilio number.
+- Twilio sends the call to a Netlify Voice webhook.
+- The webhook captures speech and creates a Supabase intake record.
+- The existing Resend notification path alerts the team.
+
+Netlify environment variable to add
+- FLOWDESK_PUBLIC_TWILIO_NUMBER
+- Value: your Twilio number in E.164 format, for example +17025550198
+
+Existing variables still required
+- FLOWDESK_SITE_URL=https://ai4app.aiflowdeskpro.com
+- SUPABASE_URL
+- SUPABASE_SERVICE_KEY
+- FLOWDESK_INTAKE_TABLE=flowdesk_intake_records
+- RESEND_API_KEY
+- RESEND_FROM_EMAIL
+- RESEND_TO_EMAIL
+
+Supabase migration required for SMS consent fields
+Run this once in Supabase SQL Editor if web intake saves fail with a missing sms_consent column:
+
+alter table public.flowdesk_intake_records
+  add column if not exists sms_consent boolean not null default false,
+  add column if not exists sms_consent_text text;
+
+Twilio Voice webhook
+- URL: https://ai4app.aiflowdeskpro.com/.netlify/functions/flowdesk-voice-webhook
+- Method: POST
+- Clean alias URL: https://aiflowdeskpro.com/.netlify/functions/call
+- Method: POST
+
+Twilio Messaging webhook, after SMS is approved
+- URL: https://ai4app.aiflowdeskpro.com/.netlify/functions/flowdesk-sms-webhook
+- Method: POST
+
+Test script
+1. Deploy this folder to Netlify.
+2. Add FLOWDESK_PUBLIC_TWILIO_NUMBER in Netlify.
+3. In Twilio, set the Voice webhook on the phone number to the Voice URL above.
+4. Call the Twilio number.
+5. Say: My name is Dana Roberts. Roberts Family Dental needs an AI receptionist for missed calls. This is urgent.
+6. Confirm a new Supabase record appears with source_page = twilio-voice-webhook.
+7. Confirm the Resend notification arrives.
+
+Notes
+- This does not require Twilio Auth Token because Twilio is calling our webhook.
+- Outbound SMS is still paused until A2P approval.
+- The SMS webhook is included so the flow is ready when messaging approval clears.

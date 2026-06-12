@@ -1,0 +1,17 @@
+name: Enrichment Nudge
+# Runs daily at 8AM UTC. Sends one-time 3-day nudge to enrichment_pending subscribers.
+# Sent-flag guarded — safe to run daily; each subscriber receives at most one email.
+
+on:
+  schedule:
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+
+jobs:
+  nudge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send enrichment nudge emails
+        run: |
+          curl -s -X POST https://capgen.aproposgroupllc.com/.netlify/functions/enrichment-nudge \
+            -H "Content-Type: application/json" | tee /dev/stderr | grep -q '"success":true'

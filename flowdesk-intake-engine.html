@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FlowDesk Intake Engine MVP</title>
+  <style>
+    :root {
+      --bg: #07111f;
+      --panel: #0d1b2d;
+      --panel-2: #10243b;
+      --line: rgba(137, 176, 215, 0.22);
+      --line-strong: rgba(91, 200, 255, 0.38);
+      --text: #edf7ff;
+      --muted: #9db4ca;
+      --soft: #6f8aa4;
+      --blue: #2bb3ff;
+      --blue-2: #1274e8;
+      --green: #48d597;
+      --gold: #f6c65b;
+      --red: #ff6767;
+      --shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
+      --radius: 18px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 15% 0%, rgba(43, 179, 255, 0.16), transparent 32rem),
+        radial-gradient(circle at 100% 10%, rgba(72, 213, 151, 0.12), transparent 36rem),
+        linear-gradient(180deg, #050b14 0%, var(--bg) 48%, #081525 100%);
+      color: var(--text);
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    .shell {
+      width: min(1220px, calc(100% - 36px));
+      margin: 0 auto;
+      padding: 28px 0 48px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+    }
+
+    .brand-mark {
+      width: 44px;
+      height: 44px;
+      border: 1px solid var(--line-strong);
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      color: var(--blue);
+      background: linear-gradient(145deg, rgba(43, 179, 255, 0.14), rgba(255, 255, 255, 0.03));
+      box-shadow: 0 0 32px rgba(43, 179, 255, 0.14);
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: clamp(1.05rem, 1vw + 0.9rem, 1.45rem);
+      line-height: 1.1;
+    }
+
+    .brand span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .status-pill {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: #cceeff;
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.04);
+      font-size: 0.82rem;
+      white-space: nowrap;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+      gap: 24px;
+      align-items: stretch;
+      margin-bottom: 24px;
+    }
+
+    .intro {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: clamp(24px, 4vw, 44px);
+      background:
+        linear-gradient(150deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02)),
+        rgba(13, 27, 45, 0.78);
+      box-shadow: var(--shadow);
+      min-height: 330px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .kicker {
+      color: var(--green);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 0.78rem;
+      font-weight: 800;
+      margin-bottom: 18px;
+    }
+
+    .intro h2 {
+      font-size: clamp(2.1rem, 5vw, 4.8rem);
+      line-height: 0.96;
+      margin: 0;
+      letter-spacing: 0;
+      max-width: 740px;
+    }
+
+    .intro p {
+      color: var(--muted);
+      font-size: 1.02rem;
+      line-height: 1.75;
+      max-width: 660px;
+      margin: 26px 0 0;
+    }
+
+    .flow-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 30px;
+    }
+
+    .flow-step {
+      min-height: 86px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+      background: rgba(6, 14, 26, 0.58);
+    }
+
+    .flow-step strong {
+      display: block;
+      color: #ffffff;
+      font-size: 0.84rem;
+      margin-bottom: 8px;
+    }
+
+    .flow-step span {
+      color: var(--soft);
+      font-size: 0.78rem;
+      line-height: 1.45;
+    }
+
+    .metrics {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 24px;
+      background: rgba(7, 17, 31, 0.84);
+      box-shadow: var(--shadow);
+      display: grid;
+      gap: 14px;
+      align-content: start;
+    }
+
+    .metric {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 18px;
+      background: linear-gradient(145deg, rgba(16, 36, 59, 0.95), rgba(9, 20, 35, 0.92));
+    }
+
+    .metric .label {
+      color: var(--muted);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      margin-bottom: 12px;
+    }
+
+    .metric .value {
+      font-size: 1.8rem;
+      font-weight: 800;
+    }
+
+    .metric .note {
+      color: var(--soft);
+      font-size: 0.85rem;
+      line-height: 1.45;
+      margin-top: 7px;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 0.95fr) minmax(360px, 1.05fr);
+      gap: 24px;
+      align-items: start;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(13, 27, 45, 0.78);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 20px 22px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.035);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .panel-header h3 {
+      margin: 0;
+      font-size: 1.02rem;
+    }
+
+    .panel-header span {
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    form {
+      padding: 22px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+    }
+
+    label {
+      color: #cfe5f6;
+      font-size: 0.84rem;
+      font-weight: 700;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid rgba(136, 176, 215, 0.28);
+      border-radius: 12px;
+      background: rgba(3, 10, 20, 0.72);
+      color: var(--text);
+      padding: 12px 13px;
+      outline: none;
+      min-height: 46px;
+      transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+    }
+
+    textarea {
+      min-height: 112px;
+      resize: vertical;
+      line-height: 1.55;
+    }
+
+    .consent-box {
+      display: grid;
+      grid-template-columns: 22px 1fr;
+      gap: 12px;
+      align-items: start;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+      background: rgba(255, 255, 255, 0.035);
+    }
+
+    .consent-box input {
+      width: 18px;
+      height: 18px;
+      min-height: 18px;
+      margin-top: 3px;
+      accent-color: var(--blue);
+    }
+
+    .consent-copy {
+      color: var(--muted);
+      font-size: 0.84rem;
+      line-height: 1.55;
+    }
+
+    .consent-copy strong {
+      color: var(--text);
+    }
+
+    .consent-copy a {
+      color: var(--blue);
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: rgba(43, 179, 255, 0.72);
+      box-shadow: 0 0 0 3px rgba(43, 179, 255, 0.16);
+      background: rgba(4, 13, 25, 0.92);
+    }
+
+    select option {
+      background: #0d1b2d;
+      color: var(--text);
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 16px;
+      color: #ffffff;
+      font-weight: 800;
+      cursor: pointer;
+      min-height: 46px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--blue), var(--blue-2));
+      min-width: 190px;
+      box-shadow: 0 14px 30px rgba(18, 116, 232, 0.26);
+    }
+
+    .btn-secondary {
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.06);
+      color: #d9edff;
+    }
+
+    .save-status {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 11px 13px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.035);
+      font-size: 0.86rem;
+      line-height: 1.45;
+    }
+
+    .save-status.success {
+      color: #d7fff0;
+      border-color: rgba(72, 213, 151, 0.42);
+      background: rgba(72, 213, 151, 0.09);
+    }
+
+    .save-status.error {
+      color: #ffdadd;
+      border-color: rgba(255, 103, 103, 0.42);
+      background: rgba(255, 103, 103, 0.09);
+    }
+
+    .output {
+      display: grid;
+      gap: 24px;
+    }
+
+    .summary-grid {
+      padding: 22px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .summary-item {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 15px;
+      background: rgba(7, 17, 31, 0.55);
+      min-height: 82px;
+    }
+
+    .summary-item.full {
+      grid-column: 1 / -1;
+    }
+
+    .summary-label {
+      color: var(--soft);
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      font-weight: 800;
+    }
+
+    .summary-value {
+      color: #ffffff;
+      line-height: 1.55;
+      word-break: break-word;
+    }
+
+    .dashboard-preview {
+      padding: 22px;
+    }
+
+    .lead-card {
+      border: 1px solid var(--line-strong);
+      border-radius: 16px;
+      background:
+        linear-gradient(145deg, rgba(43, 179, 255, 0.11), rgba(72, 213, 151, 0.055)),
+        rgba(7, 17, 31, 0.78);
+      overflow: hidden;
+    }
+
+    .lead-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .lead-card h4 {
+      margin: 0;
+      font-size: 1.15rem;
+    }
+
+    .lead-card .contact {
+      color: var(--muted);
+      margin-top: 5px;
+      font-size: 0.9rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      padding: 7px 10px;
+      font-size: 0.76rem;
+      font-weight: 900;
+      border: 1px solid var(--line);
+      white-space: nowrap;
+    }
+
+    .badge.new {
+      color: #0d1b2d;
+      background: var(--green);
+      border-color: transparent;
+    }
+
+    .badge.urgent {
+      color: #ffffff;
+      background: rgba(255, 103, 103, 0.18);
+      border-color: rgba(255, 103, 103, 0.42);
+    }
+
+    .badge.normal {
+      color: #07111f;
+      background: var(--gold);
+      border-color: transparent;
+    }
+
+    .lead-details {
+      padding: 18px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .mini {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.035);
+    }
+
+    .mini span {
+      display: block;
+      color: var(--soft);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+      font-weight: 900;
+    }
+
+    .mini strong {
+      color: #ffffff;
+      font-size: 0.94rem;
+      line-height: 1.45;
+    }
+
+    .record-panel {
+      padding: 22px;
+    }
+
+    pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: #d8ecff;
+      background: #030914;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 16px;
+      line-height: 1.55;
+      max-height: 420px;
+      overflow: auto;
+      font-size: 0.83rem;
+    }
+
+    .empty {
+      padding: 28px;
+      color: var(--muted);
+      line-height: 1.65;
+      border: 1px dashed var(--line);
+      border-radius: 14px;
+      margin: 22px;
+      background: rgba(255, 255, 255, 0.025);
+    }
+
+    .footer-note {
+      color: var(--soft);
+      margin-top: 22px;
+      font-size: 0.86rem;
+      line-height: 1.55;
+    }
+
+    @media (max-width: 980px) {
+      .hero,
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+
+      .flow-strip {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 680px) {
+      .shell {
+        width: min(100% - 22px, 1220px);
+        padding-top: 16px;
+      }
+
+      .topbar,
+      .lead-card-top {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .status-pill {
+        white-space: normal;
+      }
+
+      .intro,
+      .metrics,
+      .panel-header,
+      form,
+      .summary-grid,
+      .dashboard-preview,
+      .record-panel {
+        padding: 16px;
+      }
+
+      .grid-2,
+      .summary-grid,
+      .lead-details,
+      .flow-strip {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">FD</div>
+        <div>
+          <h1>FlowDesk Intake Engine</h1>
+          <span>Prototype MVP for structured business intake</span>
+        </div>
+      </div>
+      <div class="status-pill">Connected prototype: Supabase save on Netlify, local preview on desktop</div>
+    </header>
+
+    <section class="hero">
+      <div class="intro">
+        <div>
+          <div class="kicker">FlowDesk Pro / Intake System</div>
+          <h2>Capture the request. Prepare the follow-up.</h2>
+          <p>
+            A reusable intake workflow for customer requests, lead capture, appointment routing,
+            automation inquiries, and future AI-assisted business operations.
+          </p>
+        </div>
+        <div class="flow-strip" aria-label="Prototype workflow">
+          <div class="flow-step"><strong>Customer submits</strong><span>Contact and request details enter one clean form.</span></div>
+          <div class="flow-step"><strong>System structures</strong><span>Fields are normalized into a dashboard-ready record.</span></div>
+          <div class="flow-step"><strong>Summary appears</strong><span>Rule-based category, status, and next action are generated.</span></div>
+          <div class="flow-step"><strong>Team follows up</strong><span>Future CRM, SMS, email, and AI routing can attach here.</span></div>
+        </div>
+      </div>
+
+      <aside class="metrics" aria-label="Prototype metrics">
+        <div class="metric">
+          <div class="label">Prototype scope</div>
+          <div class="value">MVP</div>
+          <div class="note">Local-only intake logic for demonstration and portfolio review.</div>
+        </div>
+        <div class="metric">
+          <div class="label">Future integrations</div>
+          <div class="value">CRM</div>
+          <div class="note">Prepared for Supabase, Resend, Twilio, AI routing, and dashboard tracking.</div>
+        </div>
+        <div class="metric">
+          <div class="label">Current safety</div>
+          <div class="value">Offline</div>
+          <div class="note">No external API calls or production system changes are made.</div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="workspace">
+      <section class="panel" aria-labelledby="intake-title">
+        <div class="panel-header">
+          <div>
+            <h3 id="intake-title">Business Intake Form</h3>
+            <span>Capture the request in a structured format</span>
+          </div>
+        </div>
+
+        <form id="intakeForm">
+          <div class="grid-2">
+            <div class="field">
+              <label for="fullName">Full name *</label>
+              <input id="fullName" name="full_name" autocomplete="name" required />
+            </div>
+            <div class="field">
+              <label for="email">Email *</label>
+              <input id="email" name="email" type="email" autocomplete="email" required />
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="field">
+              <label for="phone">Phone *</label>
+              <input id="phone" name="phone" type="tel" autocomplete="tel" required />
+            </div>
+            <div class="field">
+              <label for="businessName">Business name *</label>
+              <input id="businessName" name="business_name" autocomplete="organization" required />
+            </div>
+          </div>
+
+          <label class="consent-box" for="smsConsent">
+            <input id="smsConsent" name="sms_consent" type="checkbox" value="yes" />
+            <span class="consent-copy">
+              <strong>Optional SMS consent:</strong> I agree to receive transactional SMS notifications from FlowDesk Pro regarding inbound leads, missed calls, appointment/status updates, and account-related alerts.
+              Message frequency varies. Message and data rates may apply. Reply STOP to opt out or HELP for help.
+              Consent is not a condition of purchase, account creation, or use of FlowDesk Pro's primary service.
+              View our <a href="privacy.html" target="_blank" rel="noopener">Privacy Policy</a>,
+              <a href="terms.html" target="_blank" rel="noopener">Terms &amp; Conditions</a>, and
+              <a href="sms-consent.html" target="_blank" rel="noopener">SMS Consent / Messaging Terms</a>.
+            </span>
+          </label>
+
+          <div class="grid-2">
+            <div class="field">
+              <label for="industry">Industry *</label>
+              <input id="industry" name="industry" placeholder="Healthcare, restaurant, legal, retail..." required />
+            </div>
+            <div class="field">
+              <label for="requestType">Request type *</label>
+              <select id="requestType" name="request_type" required>
+                <option value="">Select request type</option>
+                <option>New Lead</option>
+                <option>Service Request</option>
+                <option>Appointment Request</option>
+                <option>Website Inquiry</option>
+                <option>Automation Inquiry</option>
+                <option>Support Question</option>
+                <option>General Question</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="field">
+              <label for="serviceNeeded">Service needed *</label>
+              <input id="serviceNeeded" name="service_needed" placeholder="AI receptionist, website, automation..." required />
+            </div>
+            <div class="field">
+              <label for="urgency">Urgency level *</label>
+              <select id="urgency" name="urgency" required>
+                <option value="">Select urgency</option>
+                <option>Low</option>
+                <option>Normal</option>
+                <option>Time-sensitive</option>
+                <option>Urgent</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="field">
+              <label for="preferredContact">Preferred contact method *</label>
+              <select id="preferredContact" name="preferred_contact_method" required>
+                <option value="">Select method</option>
+                <option>Email</option>
+                <option>Phone Call</option>
+                <option>SMS/Text</option>
+                <option>Video Call</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="callbackTime">Preferred callback time</label>
+              <input id="callbackTime" name="preferred_callback_time" placeholder="Tomorrow morning, weekdays after 2 PM..." />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="details">Project or request details *</label>
+            <textarea id="details" name="details" required placeholder="Describe what the customer needs, what problem they are trying to solve, or what workflow they want improved."></textarea>
+          </div>
+
+          <div class="field">
+            <label for="notes">Additional notes</label>
+            <textarea id="notes" name="notes" placeholder="Budget range, timeline, tools currently used, decision-makers, or other useful context."></textarea>
+          </div>
+
+          <div class="actions">
+            <button class="btn btn-primary" type="submit" id="submitButton">Generate & Save Record</button>
+            <button class="btn btn-secondary" type="button" id="loadSample">Load Sample</button>
+            <button class="btn btn-secondary" type="reset">Reset</button>
+            <div class="save-status" id="saveStatus">Desktop preview mode is available. Deployed Netlify submissions save to Supabase.</div>
+          </div>
+        </form>
+      </section>
+
+      <section class="output">
+        <section class="panel" aria-labelledby="summary-title">
+          <div class="panel-header">
+            <div>
+              <h3 id="summary-title">Local Intake Summary</h3>
+              <span>Rule-based summary for first-version review</span>
+            </div>
+          </div>
+          <div id="summaryContent" class="empty">
+            Submit the form to generate a structured summary, suggested category, next action,
+            and dashboard-ready lead status.
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="dashboard-title">
+          <div class="panel-header">
+            <div>
+              <h3 id="dashboard-title">Dashboard Preview</h3>
+              <span>How the record could appear in FlowDesk Lead Manager</span>
+            </div>
+          </div>
+          <div id="dashboardPreview" class="empty">
+            Dashboard card will appear here after submission.
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="json-title">
+          <div class="panel-header">
+            <div>
+              <h3 id="json-title">Dashboard-Ready Data Structure</h3>
+              <span>Prototype JSON object for future Supabase/CRM mapping</span>
+            </div>
+          </div>
+          <div class="record-panel">
+            <pre id="recordJson">No intake record generated yet.</pre>
+          </div>
+        </section>
+      </section>
+    </section>
+
+    <p class="footer-note">
+      Prototype note: This page generates the local preview in the browser. When deployed on Netlify, it saves intake records
+      through a server-side function. Voice and SMS simulation webhooks can now create intake records; outbound SMS remains paused until Twilio approval.
+      <br />
+      <a href="privacy.html">Privacy Policy</a> / <a href="terms.html">Terms &amp; Conditions</a> / <a href="sms-consent.html">SMS Consent</a>
+    </p>
+  </main>
+
+  <script>
+    const form = document.getElementById('intakeForm');
+    const summaryContent = document.getElementById('summaryContent');
+    const dashboardPreview = document.getElementById('dashboardPreview');
+    const recordJson = document.getElementById('recordJson');
+    const loadSample = document.getElementById('loadSample');
+    const saveStatus = document.getElementById('saveStatus');
+    const submitButton = document.getElementById('submitButton');
+
+    const sampleRecord = {
+      fullName: 'Dana Roberts',
+      email: 'dana@example.com',
+      phone: '702-555-0198',
+      businessName: 'Roberts Family Dental',
+      industry: 'Healthcare',
+      requestType: 'Automation Inquiry',
+      serviceNeeded: 'AI receptionist and missed call text-back',
+      urgency: 'Time-sensitive',
+      preferredContact: 'Phone Call',
+      callbackTime: 'Weekdays after 3 PM',
+      smsConsent: false,
+      details: 'We miss patient calls during lunch and after hours. We need a system that captures caller details, answers common questions, and routes appointment requests.',
+      notes: 'Interested in a simple first phase before adding voice automation.'
+    };
+
+    loadSample.addEventListener('click', () => {
+      document.getElementById('fullName').value = sampleRecord.fullName;
+      document.getElementById('email').value = sampleRecord.email;
+      document.getElementById('phone').value = sampleRecord.phone;
+      document.getElementById('businessName').value = sampleRecord.businessName;
+      document.getElementById('industry').value = sampleRecord.industry;
+      document.getElementById('requestType').value = sampleRecord.requestType;
+      document.getElementById('serviceNeeded').value = sampleRecord.serviceNeeded;
+      document.getElementById('urgency').value = sampleRecord.urgency;
+      document.getElementById('preferredContact').value = sampleRecord.preferredContact;
+      document.getElementById('callbackTime').value = sampleRecord.callbackTime;
+      document.getElementById('smsConsent').checked = sampleRecord.smsConsent;
+      document.getElementById('details').value = sampleRecord.details;
+      document.getElementById('notes').value = sampleRecord.notes;
+    });
+
+    form.addEventListener('reset', () => {
+      window.setTimeout(() => {
+        summaryContent.className = 'empty';
+        summaryContent.textContent = 'Submit the form to generate a structured summary, suggested category, next action, and dashboard-ready lead status.';
+        dashboardPreview.className = 'empty';
+        dashboardPreview.textContent = 'Dashboard card will appear here after submission.';
+        recordJson.textContent = 'No intake record generated yet.';
+        setSaveStatus('Desktop preview mode is available. Deployed Netlify submissions save to Supabase.');
+      }, 0);
+    });
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const data = Object.fromEntries(new FormData(form).entries());
+      data.sms_consent = document.getElementById('smsConsent').checked ? 'yes' : 'no';
+      data.sms_consent_text = SMS_CONSENT_TEXT;
+      const suggestions = buildSuggestions(data);
+      const record = buildIntakeRecord(data, suggestions);
+
+      renderSummary(record);
+      renderDashboard(record);
+      recordJson.textContent = JSON.stringify(record, null, 2);
+
+      await submitRecord(record);
+    });
+
+    async function submitRecord(record) {
+      if (window.location.protocol === 'file:') {
+        setSaveStatus('Local preview generated. Open this page from the Netlify deployment to save the record to Supabase.', 'success');
+        return;
+      }
+
+      submitButton.disabled = true;
+      setSaveStatus('Saving intake record to Supabase...');
+
+      try {
+        const response = await fetch('/.netlify/functions/flowdesk-submit-intake', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(record)
+        });
+
+        const result = await response.json().catch(() => ({}));
+
+        if (!response.ok || !result.ok) {
+          throw new Error(result.error || 'Unable to save intake record.');
+        }
+
+        if (result.notification?.ok) {
+          setSaveStatus('Saved to Supabase and email notification sent.', 'success');
+        } else if (result.notification?.skipped) {
+          setSaveStatus('Saved to Supabase. Email notification skipped because Resend variables are not configured.', 'success');
+        } else {
+          setSaveStatus('Saved to Supabase. Email notification did not send; check Netlify function logs.', 'error');
+        }
+      } catch (error) {
+        setSaveStatus(`Local preview generated, but Supabase save failed: ${error.message}`, 'error');
+      } finally {
+        submitButton.disabled = false;
+      }
+    }
+
+    function setSaveStatus(message, type = '') {
+      saveStatus.className = `save-status${type ? ` ${type}` : ''}`;
+      saveStatus.textContent = message;
+    }
+
+    function buildSuggestions(data) {
+      const requestType = data.request_type;
+      const service = `${data.service_needed} ${data.details}`.toLowerCase();
+      let category = requestType || 'New Lead';
+
+      if (service.includes('automation') || service.includes('workflow') || service.includes('ai receptionist') || service.includes('missed call')) {
+        category = 'Automation Inquiry';
+      } else if (service.includes('website') || service.includes('landing page') || service.includes('site')) {
+        category = 'Website Inquiry';
+      } else if (service.includes('appointment') || requestType === 'Appointment Request') {
+        category = 'Appointment Request';
+      } else if (requestType === 'Support Question') {
+        category = 'Support Question';
+      }
+
+      const isUrgent = data.urgency === 'Urgent' || data.urgency === 'Time-sensitive';
+      const leadStatus = isUrgent ? 'New / Priority Review' : 'New / Needs Review';
+      const followUpNeeded = true;
+      const contactMethod = data.preferred_contact_method || 'preferred contact method';
+      const nextAction = isUrgent
+        ? `Review immediately and follow up by ${contactMethod}.`
+        : `Review request and follow up using ${contactMethod}.`;
+
+      const aiSummary = `${data.business_name || 'The business'} submitted a ${category.toLowerCase()} for ${data.service_needed || 'business support'}. Urgency is ${data.urgency || 'not specified'}, and the preferred contact method is ${contactMethod}.`;
+
+      return {
+        ai_summary: aiSummary,
+        category,
+        lead_status: leadStatus,
+        follow_up_needed: followUpNeeded,
+        next_action: nextAction
+      };
+    }
+
+    const SMS_CONSENT_TEXT = "I agree to receive transactional SMS notifications from FlowDesk Pro regarding inbound leads, missed calls, appointment/status updates, and account-related alerts. Message frequency varies. Message and data rates may apply. Reply STOP to opt out or HELP for help. Consent is not a condition of purchase, account creation, or use of FlowDesk Pro's primary service. View our Privacy Policy, Terms & Conditions, and SMS Consent / Messaging Terms.";
+
+    function buildIntakeRecord(data, suggestions) {
+      return {
+        intake_id: `fd-${Date.now().toString(36)}`,
+        created_at: new Date().toISOString(),
+        full_name: clean(data.full_name),
+        email: clean(data.email),
+        phone: clean(data.phone),
+        business_name: clean(data.business_name),
+        industry: clean(data.industry),
+        request_type: clean(data.request_type),
+        service_needed: clean(data.service_needed),
+        urgency: clean(data.urgency),
+        preferred_contact_method: clean(data.preferred_contact_method),
+        preferred_callback_time: clean(data.preferred_callback_time),
+        sms_consent: data.sms_consent === 'yes',
+        sms_consent_text: data.sms_consent === 'yes'
+          ? SMS_CONSENT_TEXT
+          : 'User did not opt in to SMS messages.',
+        details: clean(data.details),
+        notes: clean(data.notes),
+        ai_summary: suggestions.ai_summary,
+        category: suggestions.category,
+        lead_status: suggestions.lead_status,
+        follow_up_needed: suggestions.follow_up_needed,
+        next_action: suggestions.next_action
+      };
+    }
+
+    function renderSummary(record) {
+      summaryContent.className = 'summary-grid';
+      summaryContent.innerHTML = `
+        ${summaryItem('Contact information', `${escapeHtml(record.full_name)}<br>${escapeHtml(record.email)}<br>${escapeHtml(record.phone)}`)}
+        ${summaryItem('Business information', `${escapeHtml(record.business_name)}<br>${escapeHtml(record.industry)}`)}
+        ${summaryItem('Request type', record.request_type)}
+        ${summaryItem('Urgency', record.urgency)}
+        ${summaryItem('Customer details', record.details, true)}
+        ${summaryItem('Suggested category', record.category)}
+        ${summaryItem('Suggested next action', record.next_action)}
+        ${summaryItem('Dashboard-ready lead status', record.lead_status, true)}
+      `;
+    }
+
+    function renderDashboard(record) {
+      const urgencyClass = record.urgency === 'Urgent' || record.urgency === 'Time-sensitive' ? 'urgent' : 'normal';
+      dashboardPreview.className = 'dashboard-preview';
+      dashboardPreview.innerHTML = `
+        <article class="lead-card">
+          <div class="lead-card-top">
+            <div>
+              <h4>${escapeHtml(record.business_name)}</h4>
+              <div class="contact">${escapeHtml(record.full_name)} / ${escapeHtml(record.email)}</div>
+            </div>
+            <div class="badge new">${escapeHtml(record.lead_status)}</div>
+          </div>
+          <div class="lead-details">
+            ${mini('Request type', record.request_type)}
+            ${mini('Urgency', `<span class="badge ${urgencyClass}">${escapeHtml(record.urgency)}</span>`)}
+            ${mini('Summary', record.ai_summary)}
+            ${mini('Status', record.lead_status)}
+            ${mini('Follow-up needed', record.follow_up_needed ? 'Yes' : 'No')}
+            ${mini('Next action', record.next_action)}
+          </div>
+        </article>
+      `;
+    }
+
+    function summaryItem(label, value, full = false) {
+      return `
+        <div class="summary-item${full ? ' full' : ''}">
+          <div class="summary-label">${escapeHtml(label)}</div>
+          <div class="summary-value">${value}</div>
+        </div>
+      `;
+    }
+
+    function mini(label, value) {
+      return `
+        <div class="mini">
+          <span>${escapeHtml(label)}</span>
+          <strong>${value}</strong>
+        </div>
+      `;
+    }
+
+    function clean(value) {
+      return String(value || '').trim();
+    }
+
+    function escapeHtml(value) {
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+  </script>
+</body>
+</html>

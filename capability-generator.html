@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FlowDesk Pro — Capability Statement Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --navy:#0A1A3A; --navy-2:#13284f; --ink:#1a2332; --muted:#5a687f;
+    --line:#e1e7f1; --gold:#b5762a; --gold-soft:#d9a45b; --ok:#1d7a4d; --err:#c0392b; }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:"IBM Plex Sans",sans-serif;color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased;
+    background:radial-gradient(130% 120% at 85% -10%,#16305f 0%,var(--navy) 55%,#06122b 100%);min-height:100vh;padding:30px 16px}
+  .mono{font-family:"IBM Plex Mono",monospace}
+  .shell{max-width:640px;margin:0 auto}
+  .brand{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+  .brand .mk{width:42px;height:42px;border-radius:9px;background:#fff;color:var(--navy);display:flex;align-items:center;justify-content:center;font-family:"Archivo";font-weight:800;font-size:16px}
+  .brand h1{font-family:"Archivo";color:#fff;font-size:18px} .brand .sub{color:#b9c5dd;font-size:11px;text-transform:uppercase;letter-spacing:.7px;font-weight:600}
+
+  .steps{display:flex;gap:8px;margin-bottom:14px}
+  .steps .s{flex:1;height:4px;border-radius:3px;background:rgba(255,255,255,.18)}
+  .steps .s.on{background:var(--gold-soft)}
+
+  .card{background:#fff;border-radius:16px;box-shadow:0 30px 70px rgba(0,0,0,.3);padding:26px 28px}
+  h2{font-family:"Archivo";font-size:21px;color:var(--navy);margin-bottom:6px}
+  .lead{color:var(--muted);font-size:14px;margin-bottom:18px}
+  label{display:block;font-size:13px;font-weight:600;color:var(--navy);margin-bottom:6px;margin-top:14px}
+  label:first-child{margin-top:0}
+  input,select,textarea{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:10px;font-family:inherit;font-size:14px;background:#fcfdff;outline:none;transition:border .15s,box-shadow .15s}
+  input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(181,118,42,.12)}
+  .row{display:flex;gap:12px}.row>div{flex:1}
+  .btn{margin-top:18px;padding:13px 18px;border:none;border-radius:11px;background:var(--navy);color:#fff;font-family:"Archivo";font-weight:700;font-size:14px;cursor:pointer;transition:background .15s,transform .08s}
+  .btn:hover{background:var(--navy-2)} .btn:active{transform:translateY(1px)} .btn[disabled]{opacity:.6;cursor:default}
+  .btn.ghost{background:#eef2f8;color:var(--navy)} .btn.ghost:hover{background:#e3e9f4}
+  .btn.full{width:100%}
+  .ai{font-size:12px;color:var(--gold);background:none;border:1px solid #ecd7b3;border-radius:8px;padding:6px 10px;cursor:pointer;font-weight:600;margin-left:8px}
+
+  /* candidate cards */
+  .cand{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px;cursor:pointer;transition:border .15s,box-shadow .15s,background .15s}
+  .cand:hover{border-color:var(--gold);box-shadow:0 4px 14px rgba(181,118,42,.12)}
+  .cand .nm{font-weight:700;color:var(--navy);font-size:15px}
+  .cand .meta{color:var(--muted);font-size:12.5px;margin-top:3px}
+  .cand .uei{font-family:"IBM Plex Mono";font-size:11.5px;color:#8a94a8;margin-top:5px}
+
+  /* pulled facts confirmation */
+  .pulled{background:#f3f6fb;border:1px solid #e1e7f1;border-radius:12px;padding:14px 16px;margin-bottom:6px}
+  .pulled .h{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--gold);font-weight:700;margin-bottom:8px}
+  .pulled .ln{display:flex;justify-content:space-between;font-size:13px;padding:3px 0;border-bottom:1px dotted #d4dce8}
+  .pulled .ln:last-child{border-bottom:none}
+  .pulled .k{color:var(--muted)} .pulled .v{color:var(--navy);font-weight:600;text-align:right}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .chip{font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;background:#0A1A3A;color:#fff}
+  .chip.soft{background:#fbf2e6;color:var(--gold)}
+
+  .note{font-size:12.5px;margin-top:10px;min-height:16px}.note.err{color:var(--err)}.note.ok{color:var(--ok)}
+  .back{background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;margin-top:14px;text-decoration:underline}
+  .done{text-align:center;padding:30px 10px}
+  .done .ring{width:62px;height:62px;border-radius:50%;background:#e6f4ec;color:var(--ok);display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 16px}
+  .foot{text-align:center;color:#9fb0cc;font-size:11px;margin-top:16px}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="brand"><div class="mk">CG</div><div><h1>CapGen</h1><div class="sub">by AI4 Businesses</div></div></div>
+  <div class="steps"><div class="s on" id="st1"></div><div class="s" id="st2"></div><div class="s" id="st3"></div></div>
+
+  <div class="card">
+    <!-- STEP 1: find -->
+    <div id="step1">
+      <h2>Find your business</h2>
+      <p class="lead">Enter your business name as registered in SAM.gov. We'll pull your details automatically — no UEI to look up.</p>
+      <label for="bizName">Business name</label>
+      <input id="bizName" type="text" placeholder="Custom IT Services LLC" />
+      <label for="bizState">State <span style="font-weight:400;color:#8a94a8">(narrows the match)</span></label>
+      <select id="bizState"><option value="">Any state</option></select>
+      <button class="btn full" id="searchBtn">Search SAM.gov</button>
+      <div class="note" id="searchNote"></div>
+    </div>
+
+    <!-- STEP 2: confirm -->
+    <div id="step2" class="hidden">
+      <h2>Is this you?</h2>
+      <p class="lead">Select your business to lock the exact SAM.gov record.</p>
+      <div id="candidates"></div>
+      <button class="back" id="backTo1">&larr; Search a different name</button>
+    </div>
+
+    <!-- STEP 3: finishing touches -->
+    <div id="step3" class="hidden">
+      <h2>Finishing touches</h2>
+      <p class="lead">We pulled the official facts from SAM. Add the few things SAM doesn't hold, and you're done.</p>
+
+      <div class="pulled" id="pulled"></div>
+
+      <label for="oneLiner">In one line, what does your business do?
+        <button class="ai" id="aiBtn" type="button">&#10024; Draft with AI</button></label>
+      <input id="oneLiner" type="text" placeholder="e.g. IT modernization & managed services for government" />
+
+      <div class="row">
+        <div><label for="cName">Contact name</label><input id="cName" type="text"></div>
+        <div><label for="cTitle">Title</label><input id="cTitle" type="text"></div>
+      </div>
+      <div class="row">
+        <div><label for="cPhone">Phone</label><input id="cPhone" type="tel"></div>
+        <div><label for="cEmail">Email (where we send it)</label><input id="cEmail" type="email"></div>
+      </div>
+      <label for="cSite">Website</label><input id="cSite" type="text">
+
+      <button class="btn full" id="genBtn">Generate my CapGen statement</button>
+      <div class="note" id="genNote"></div>
+      <button class="back" id="backTo2">&larr; Pick a different business</button>
+    </div>
+
+    <!-- DONE -->
+    <div id="done" class="hidden done">
+      <div class="ring">&#10003;</div>
+      <h2>Your CapGen statement is on its way.</h2>
+      <p class="lead" id="doneMsg" style="margin-top:8px"></p>
+    </div>
+  </div>
+  <div class="foot">CapGen by AI4 Businesses</div>
+</div>
+
+<script>
+  const LOOKUP = "/.netlify/functions/sam-lookup";
+  const GENERATE = "/.netlify/functions/generate-capability-background"; // delivery brick (next)
+  const DRAFT = "/.netlify/functions/draft-narrative";        // optional AI assist
+
+  const $ = (id) => document.getElementById(id);
+  let RECORD = null;
+
+  // states
+  const STATES = ["AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY","DC"];
+  $("bizState").innerHTML += STATES.map(s=>`<option>${s}</option>`).join("");
+
+  function show(step){ ["step1","step2","step3","done"].forEach(s=>$(s).classList.add("hidden"));
+    $(step).classList.remove("hidden");
+    $("st1").classList.toggle("on", true);
+    $("st2").classList.toggle("on", step!=="step1");
+    $("st3").classList.toggle("on", step==="step3"||step==="done"); }
+
+  // STEP 1 -> search
+  $("searchBtn").addEventListener("click", async ()=>{
+    const name = $("bizName").value.trim(); const note=$("searchNote");
+    if(!name){ note.className="note err"; note.textContent="Enter a business name."; return; }
+    $("searchBtn").disabled=true; note.className="note"; note.textContent="Searching SAM.gov…";
+    try{
+      const url = `${LOOKUP}?mode=search&name=${encodeURIComponent(name)}&state=${$("bizState").value}`;
+      const data = await (await fetch(url)).json();
+      $("searchBtn").disabled=false; note.textContent="";
+      const list = data.candidates||[];
+      if(list.length===0){ note.className="note err"; note.textContent="No active SAM record found by that name. Check spelling, or your entity may be set to private."; return; }
+      renderCandidates(list); show("step2");
+    }catch(e){ $("searchBtn").disabled=false; note.className="note err"; note.textContent="Lookup failed. Please try again."; }
+  });
+
+  function renderCandidates(list){
+    $("candidates").innerHTML = list.map((c,i)=>`
+      <div class="cand" data-uei="${c.uei}">
+        <div class="nm">${c.legal_name||"(no name)"}</div>
+        <div class="meta">${[c.city,c.state].filter(Boolean).join(", ")||"Location not listed"}${c.cage?" · CAGE "+c.cage:""}</div>
+        <div class="uei">UEI ${maskUei(c.uei)}</div>
+      </div>`).join("");
+    document.querySelectorAll(".cand").forEach(el=>el.addEventListener("click",()=>loadEntity(el.dataset.uei)));
+  }
+  function maskUei(u){ return u? u.slice(0,4)+"····"+u.slice(-4) : ""; }
+
+  // STEP 2 -> entity pull
+  async function loadEntity(uei){
+    show("step3"); $("pulled").innerHTML = `<div class="h">Loading from SAM.gov…</div>`;
+    try{
+      const data = await (await fetch(`${LOOKUP}?mode=entity&uei=${encodeURIComponent(uei)}`)).json();
+      RECORD = data.record; renderPulled(RECORD);
+    }catch(e){ $("pulled").innerHTML = `<div class="h" style="color:#c0392b">Could not load that record</div>`; }
+  }
+  function renderPulled(r){
+    const certs = (r.socioeconomic||[]).map(c=>`<span class="chip ${c.key?'':'soft'}">${c.label}</span>`).join("");
+    const naics = (r.naics||[]).map(n=>n.code+(n.primary?"*":"")).join(", ");
+    $("pulled").innerHTML = `
+      <div class="h">Pulled from SAM.gov &#10003;</div>
+      <div class="ln"><span class="k">Legal name</span><span class="v">${r.legal_name||"—"}</span></div>
+      <div class="ln"><span class="k">UEI / CAGE</span><span class="v mono">${r.uei||"—"} · ${r.cage||"—"}</span></div>
+      <div class="ln"><span class="k">Status</span><span class="v">${r.sam_status||"—"}</span></div>
+      <div class="ln"><span class="k">NAICS</span><span class="v">${naics||"—"}</span></div>
+      <div class="chips">${certs||'<span class="chip soft">No certifications on record</span>'}</div>`;
+    if(!$("cSite").value && r.contact && r.contact.website) $("cSite").value = r.contact.website;
+  }
+
+  // optional AI draft of the one-liner / narrative
+  $("aiBtn").addEventListener("click", async ()=>{
+    if(!RECORD) return;
+    $("aiBtn").disabled=true; $("aiBtn").textContent="Drafting…";
+    try{
+      const data = await (await fetch(DRAFT,{method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({naics:RECORD.naics,name:RECORD.legal_name})})).json();
+      if(data.tagline) $("oneLiner").value = data.tagline;
+    }catch(e){}
+    $("aiBtn").disabled=false; $("aiBtn").innerHTML="&#10024; Draft with AI";
+  });
+
+  // STEP 3 -> generate + deliver
+  $("genBtn").addEventListener("click", async ()=>{
+    const note=$("genNote");
+    const email=$("cEmail").value.trim();
+    if(!RECORD){ note.className="note err"; note.textContent="No business selected."; return; }
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ note.className="note err"; note.textContent="Enter the email to send it to."; return; }
+    // merge soft fields into the SAM record
+    const oneLiner = $("oneLiner").value.trim();
+    RECORD.tagline_pre = oneLiner ? oneLiner.replace(/\s+\S+$/, "") : "Capability Statement —";
+    RECORD.tagline_em  = oneLiner ? (oneLiner.split(/\s+/).slice(-1)[0]) : "";
+    RECORD.tagline_pre = oneLiner || "Federal Contractor";
+    RECORD.tagline_em  = "";
+    RECORD.contact = { name:$("cName").value, title:$("cTitle").value, phone:$("cPhone").value, email, website:$("cSite").value };
+    $("genBtn").disabled=true; note.className="note"; note.textContent="Generating your branded PDF…";
+    try{
+      const res = await fetch(GENERATE,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(RECORD)});
+      if(!res.ok) throw new Error();
+      $("doneMsg").textContent = "We've emailed your CapGen statement to "+email+".";
+      show("done");
+    }catch(e){ $("genBtn").disabled=false; note.className="note err"; note.textContent="Generation failed. Please try again."; }
+  });
+
+  $("backTo1").addEventListener("click",()=>show("step1"));
+  $("backTo2").addEventListener("click",()=>show("step2"));
+  show("step1");
+</script>
+</body>
+</html>

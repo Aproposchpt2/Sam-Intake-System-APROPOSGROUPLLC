@@ -1,0 +1,458 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FlowDesk Pro - Live Lead Manager</title>
+  <style>
+    :root {
+      --bg: #050b14;
+      --bg-2: #071423;
+      --panel: rgba(10, 24, 42, 0.9);
+      --panel-2: rgba(13, 32, 54, 0.94);
+      --line: rgba(142, 184, 222, 0.18);
+      --line-strong: rgba(83, 201, 255, 0.36);
+      --text: #f2f8ff;
+      --muted: #a7bbcf;
+      --soft: #7088a1;
+      --blue: #27aefb;
+      --cyan: #6fdcff;
+      --green: #4bd89d;
+      --gold: #f5c968;
+      --red: #ff6d76;
+      --purple: #9c8cff;
+      --shadow: 0 24px 80px rgba(0, 0, 0, 0.38);
+      --radius: 18px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      background:
+        linear-gradient(rgba(39, 174, 251, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(39, 174, 251, 0.03) 1px, transparent 1px),
+        radial-gradient(circle at 12% 0%, rgba(39, 174, 251, 0.17), transparent 30rem),
+        radial-gradient(circle at 90% 16%, rgba(75, 216, 157, 0.12), transparent 32rem),
+        linear-gradient(180deg, #030712 0%, var(--bg) 44%, var(--bg-2) 100%);
+      background-size: 64px 64px, 64px 64px, auto, auto, auto;
+    }
+
+    button, input, select, textarea { font: inherit; }
+    a { color: inherit; }
+
+    .app { min-height: 100vh; display: grid; grid-template-columns: 260px minmax(0, 1fr); }
+
+    aside {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 24px 18px;
+      border-right: 1px solid var(--line);
+      background: rgba(3, 8, 18, 0.86);
+      backdrop-filter: blur(18px);
+    }
+
+    .brand { display: flex; align-items: center; gap: 12px; padding-bottom: 22px; border-bottom: 1px solid var(--line); margin-bottom: 22px; }
+    .brand img { width: 64px; height: 38px; object-fit: contain; background: #020713; border: 1px solid rgba(111, 220, 255, 0.22); box-shadow: 0 0 24px rgba(39, 174, 251, 0.26); }
+    .brand strong { display: block; font-size: 0.94rem; line-height: 1.1; }
+    .brand span { display: block; margin-top: 4px; color: var(--soft); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; }
+
+    .nav-group { display: grid; gap: 8px; }
+    .nav-link { display: flex; justify-content: space-between; align-items: center; gap: 10px; min-height: 42px; padding: 10px 12px; border-radius: 12px; color: var(--muted); text-decoration: none; font-size: 0.88rem; border: 1px solid transparent; }
+    .nav-link.active, .nav-link:hover { color: var(--text); background: rgba(39, 174, 251, 0.09); border-color: rgba(39, 174, 251, 0.2); }
+    .nav-pill { color: var(--cyan); font-size: 0.68rem; font-weight: 800; border: 1px solid rgba(111, 220, 255, 0.22); border-radius: 999px; padding: 2px 8px; }
+    .sidebar-note { margin-top: 28px; padding: 14px; border: 1px solid var(--line); border-radius: 14px; background: rgba(255, 255, 255, 0.04); color: var(--soft); font-size: 0.78rem; line-height: 1.55; }
+
+    main { padding: 26px; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; gap: 18px; margin-bottom: 22px; }
+    .page-title h1 { margin: 0; font-size: clamp(1.55rem, 2.4vw, 2.7rem); letter-spacing: 0; line-height: 1.05; }
+    .page-title p { margin: 8px 0 0; color: var(--muted); line-height: 1.55; max-width: 780px; }
+    .top-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+
+    .btn { display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: 999px; min-height: 42px; padding: 0 16px; color: var(--text); background: rgba(255, 255, 255, 0.05); cursor: pointer; font-weight: 800; text-decoration: none; transition: transform 0.18s, border-color 0.18s, background 0.18s; }
+    .btn:hover { transform: translateY(-1px); border-color: var(--line-strong); background: rgba(39, 174, 251, 0.1); }
+    .btn.primary { color: #021323; background: linear-gradient(135deg, #f7fbff, var(--cyan) 48%, var(--blue)); border-color: rgba(111, 220, 255, 0.45); box-shadow: 0 0 34px rgba(39, 174, 251, 0.32); }
+    .btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+    .metrics { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; margin-bottom: 18px; }
+    .metric { border: 1px solid var(--line); border-radius: var(--radius); background: linear-gradient(145deg, rgba(255, 255, 255, 0.065), rgba(255, 255, 255, 0.018)), var(--panel); padding: 18px; box-shadow: 0 16px 44px rgba(0, 0, 0, 0.2); }
+    .metric span { display: block; color: var(--soft); text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.68rem; font-weight: 900; margin-bottom: 10px; }
+    .metric strong { display: block; font-size: 2rem; line-height: 1; }
+    .metric small { display: block; color: var(--muted); margin-top: 8px; line-height: 1.45; }
+
+    .workspace { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(380px, 0.95fr); gap: 18px; align-items: start; }
+    .panel { border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel); box-shadow: var(--shadow); overflow: hidden; }
+    .panel-head { display: flex; justify-content: space-between; align-items: center; gap: 14px; min-height: 72px; padding: 18px; border-bottom: 1px solid var(--line); background: rgba(255, 255, 255, 0.035); }
+    .panel-head h2 { margin: 0; font-size: 1rem; }
+    .panel-head span { display: block; color: var(--soft); margin-top: 4px; font-size: 0.78rem; }
+
+    .filters { display: grid; grid-template-columns: minmax(220px, 1.3fr) repeat(3, minmax(145px, 0.7fr)); gap: 10px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+    .field { min-height: 42px; width: 100%; border: 1px solid var(--line); border-radius: 12px; background: rgba(3, 8, 18, 0.78); color: var(--text); padding: 0 12px; outline: none; }
+    textarea.field { min-height: 96px; padding: 12px; resize: vertical; line-height: 1.5; }
+    .field:focus { border-color: var(--line-strong); box-shadow: 0 0 0 3px rgba(39, 174, 251, 0.1); }
+
+    .notice { margin: 12px 18px 0; border: 1px solid var(--line); border-radius: 13px; padding: 11px 13px; color: var(--muted); background: rgba(255,255,255,.04); font-size: .84rem; line-height: 1.45; }
+    .notice.success { color: #b7ffe0; border-color: rgba(75,216,157,.35); background: rgba(75,216,157,.08); }
+    .notice.error { color: #ffd3d6; border-color: rgba(255,109,118,.36); background: rgba(255,109,118,.08); }
+
+    .lead-list { display: grid; gap: 10px; padding: 16px; max-height: 760px; overflow: auto; }
+    .lead-card { text-align: left; border: 1px solid var(--line); border-radius: 16px; background: rgba(5, 12, 24, 0.74); padding: 15px; color: inherit; cursor: pointer; transition: border-color 0.18s, background 0.18s, transform 0.18s; }
+    .lead-card:hover, .lead-card.active { transform: translateY(-1px); border-color: var(--line-strong); background: rgba(10, 30, 52, 0.9); }
+    .lead-top { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; margin-bottom: 12px; }
+    .lead-top h3 { margin: 0 0 4px; font-size: 1rem; }
+    .lead-top p { margin: 0; color: var(--muted); font-size: 0.82rem; line-height: 1.45; }
+
+    .badge { display: inline-flex; align-items: center; justify-content: center; min-height: 25px; border-radius: 999px; padding: 4px 10px; font-size: 0.68rem; font-weight: 900; white-space: nowrap; border: 1px solid transparent; }
+    .priority { color: #3b1900; background: var(--gold); border-color: rgba(245, 201, 104, 0.5); }
+    .new { color: #041b2e; background: var(--cyan); border-color: rgba(111, 220, 255, 0.5); }
+    .progress { color: #07192f; background: var(--green); border-color: rgba(75, 216, 157, 0.5); }
+    .closed { color: #e7edff; background: rgba(156, 140, 255, 0.18); border-color: rgba(156, 140, 255, 0.38); }
+    .voice { color: #f2eaff; background: rgba(156, 140, 255, 0.18); border-color: rgba(156, 140, 255, 0.38); }
+    .web { color: #d8fff0; background: rgba(75, 216, 157, 0.14); border-color: rgba(75, 216, 157, 0.32); }
+    .unknown { color: #d8e5f3; background: rgba(167, 187, 207, 0.12); border-color: rgba(167, 187, 207, 0.2); }
+
+    .meta-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .meta { border: 1px solid rgba(142, 184, 222, 0.12); border-radius: 11px; padding: 9px; background: rgba(255, 255, 255, 0.03); min-width: 0; }
+    .meta span { display: block; color: var(--soft); font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+    .meta strong { display: block; color: var(--text); font-size: 0.78rem; line-height: 1.35; overflow-wrap: anywhere; }
+
+    .detail-body { padding: 18px; display: grid; gap: 16px; }
+    .detail-title { display: flex; justify-content: space-between; gap: 14px; align-items: flex-start; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+    .detail-title h2 { margin: 0 0 6px; font-size: 1.4rem; line-height: 1.12; }
+    .detail-title p { margin: 0; color: var(--muted); line-height: 1.55; }
+    .chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .detail-section { border: 1px solid var(--line); border-radius: 15px; padding: 14px; background: rgba(255, 255, 255, 0.03); }
+    .detail-section h3 { margin: 0 0 10px; color: var(--cyan); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.1em; }
+    .detail-section p { margin: 0; color: var(--muted); line-height: 1.65; font-size: 0.92rem; white-space: pre-wrap; }
+    .detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .action-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+    .action-row { display: flex; flex-wrap: wrap; gap: 10px; }
+    .empty { color: var(--soft); padding: 26px; text-align: center; line-height: 1.6; }
+    .footer-note { color: var(--soft); margin: 18px 0 0; font-size: 0.82rem; line-height: 1.55; }
+
+    @media (max-width: 1180px) { .app { grid-template-columns: 1fr; } aside { position: static; height: auto; } .nav-group { grid-template-columns: repeat(3, minmax(0, 1fr)); } .sidebar-note { display: none; } .workspace, .metrics { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 820px) { main { padding: 18px; } .topbar, .detail-title { flex-direction: column; align-items: stretch; } .filters, .workspace, .metrics, .meta-grid, .detail-grid, .nav-group { grid-template-columns: 1fr; } aside { padding: 18px; } }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside>
+      <div class="brand">
+        <img src="AI4-FLOWDESK-PRO-LOGO.png" alt="FlowDesk Pro" />
+        <div><strong>FlowDesk Pro</strong><span>Lead Manager</span></div>
+      </div>
+      <nav class="nav-group" aria-label="FlowDesk prototype navigation">
+        <a class="nav-link" href="index.html">Homepage <span class="nav-pill">01</span></a>
+        <a class="nav-link" href="flowdesk-intake-engine.html">Intake Engine <span class="nav-pill">02</span></a>
+        <a class="nav-link active" href="flowdesk-lead-manager-dashboard.html">Lead Manager <span class="nav-pill">03</span></a>
+      </nav>
+      <div class="sidebar-note">Live operations view. Records are loaded through Netlify Functions so private Supabase credentials never enter browser JavaScript.</div>
+      <div class="sidebar-note">
+        <a href="privacy.html">Privacy Policy</a> / <a href="terms.html">Terms &amp; Conditions</a> / <a href="sms-consent.html">SMS Consent</a>
+      </div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <div class="page-title">
+          <h1>Lead Manager Dashboard</h1>
+          <p>Live command view for web intake, Twilio voice intake, and future SMS records flowing into FlowDesk Pro.</p>
+        </div>
+        <div class="top-actions">
+          <a class="btn" href="flowdesk-intake-engine.html">Open Intake</a>
+          <button class="btn" id="adminKeyButton" type="button">Admin Key</button>
+          <button class="btn primary" id="refreshButton" type="button">Refresh Records</button>
+        </div>
+      </header>
+
+      <section class="metrics" aria-label="Lead metrics">
+        <article class="metric"><span>Total Leads</span><strong id="metricTotal">0</strong><small>All records loaded from Supabase.</small></article>
+        <article class="metric"><span>New Leads</span><strong id="metricNew">0</strong><small>Needs review or priority review.</small></article>
+        <article class="metric"><span>Voice Leads</span><strong id="metricVoice">0</strong><small>Created by Twilio voice intake.</small></article>
+        <article class="metric"><span>Web Leads</span><strong id="metricWeb">0</strong><small>Created by the intake form.</small></article>
+        <article class="metric"><span>High Urgency</span><strong id="metricHigh">0</strong><small>Urgent or time-sensitive leads.</small></article>
+      </section>
+
+      <section class="workspace">
+        <section class="panel" aria-labelledby="list-title">
+          <div class="panel-head">
+            <div><h2 id="list-title">Live Intake Queue</h2><span id="listSubtitle">Loading records from Supabase...</span></div>
+          </div>
+          <div class="filters">
+            <input class="field" id="searchBox" type="search" placeholder="Search name, phone, email, business, intake ID, transcript..." />
+            <select class="field" id="sourceFilter" aria-label="Filter by source"><option value="all">All sources</option><option value="web">Web intake</option><option value="voice">Twilio voice</option><option value="other">Other / unknown</option></select>
+            <select class="field" id="urgencyFilter" aria-label="Filter by urgency"><option value="all">All urgency</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option><option value="unknown">Unknown</option></select>
+            <select class="field" id="statusFilter" aria-label="Filter by status"><option value="all">All statuses</option><option value="new">New</option><option value="contacted">Contacted</option><option value="scheduled">Scheduled</option><option value="follow-up">Follow-up</option><option value="closed">Closed</option></select>
+          </div>
+          <div id="listNotice" class="notice">Connecting to live FlowDesk records...</div>
+          <div class="lead-list" id="leadList"></div>
+        </section>
+
+        <section class="panel" aria-labelledby="detail-title">
+          <div class="panel-head">
+            <div><h2 id="detail-title">Record Detail</h2><span>Review, classify, and update lead status.</span></div>
+          </div>
+          <div class="detail-body" id="detailPanel"><div class="empty">Select a lead after records load.</div></div>
+        </section>
+      </section>
+
+      <p class="footer-note">Security note: this page calls Netlify Functions only. Supabase service-role keys, Twilio tokens, Resend keys, and Stripe secrets are not present in frontend code.</p>
+    </main>
+  </div>
+
+  <script>
+    const state = { records: [], selectedKey: '', loading: false, error: '' };
+    const els = {
+      leadList: document.getElementById('leadList'),
+      detailPanel: document.getElementById('detailPanel'),
+      listSubtitle: document.getElementById('listSubtitle'),
+      listNotice: document.getElementById('listNotice'),
+      searchBox: document.getElementById('searchBox'),
+      sourceFilter: document.getElementById('sourceFilter'),
+      urgencyFilter: document.getElementById('urgencyFilter'),
+      statusFilter: document.getElementById('statusFilter'),
+      adminKeyButton: document.getElementById('adminKeyButton'),
+      refreshButton: document.getElementById('refreshButton')
+    };
+
+    els.searchBox.addEventListener('input', render);
+    els.sourceFilter.addEventListener('change', render);
+    els.urgencyFilter.addEventListener('change', render);
+    els.statusFilter.addEventListener('change', render);
+    els.adminKeyButton.addEventListener('click', configureAdminKey);
+    els.refreshButton.addEventListener('click', loadRecords);
+    loadRecords();
+
+    async function loadRecords() {
+      state.loading = true;
+      state.error = '';
+      els.refreshButton.disabled = true;
+      setNotice('Connecting to live FlowDesk records...', '');
+      render();
+      try {
+        const response = await fetch('/.netlify/functions/flowdesk-leads?limit=150', { headers: flowdeskHeaders() });
+        const payload = await response.json().catch(() => ({}));
+        if (response.status === 401) {
+          promptForAdminKey();
+          throw new Error('Admin key required. Enter the key, then refresh records.');
+        }
+        if (!response.ok || !payload.ok) throw new Error(payload.error || 'Unable to load records.');
+        state.records = Array.isArray(payload.records) ? payload.records : [];
+        state.selectedKey = state.records[0] ? recordKey(state.records[0]) : '';
+        setNotice(state.records.length ? `Loaded ${state.records.length} live records from Supabase.` : 'No FlowDesk records found yet.', state.records.length ? 'success' : '');
+      } catch (error) {
+        state.error = error.message;
+        setNotice(error.message, 'error');
+      } finally {
+        state.loading = false;
+        els.refreshButton.disabled = false;
+        render();
+      }
+    }
+
+    function render() {
+      const visible = filteredRecords();
+      if (!visible.some((record) => recordKey(record) === state.selectedKey)) state.selectedKey = visible[0] ? recordKey(visible[0]) : '';
+      renderMetrics();
+      renderLeadList(visible);
+      renderDetail();
+      els.listSubtitle.textContent = state.loading ? 'Loading records from Supabase...' : `${visible.length} visible / ${state.records.length} total`;
+    }
+
+    function filteredRecords() {
+      const q = els.searchBox.value.trim().toLowerCase();
+      return state.records
+        .filter((record) => sourceMatches(record, els.sourceFilter.value))
+        .filter((record) => urgencyMatches(record, els.urgencyFilter.value))
+        .filter((record) => statusMatches(record, els.statusFilter.value))
+        .filter((record) => !q || searchableText(record).includes(q))
+        .sort((a, b) => new Date(value(b.created_at, 0)) - new Date(value(a.created_at, 0)));
+    }
+
+    function renderMetrics() {
+      const total = state.records.length;
+      const newLeads = state.records.filter((r) => ['new', 'priority'].includes(statusBucket(r))).length;
+      const voice = state.records.filter((r) => sourceBucket(r) === 'voice').length;
+      const web = state.records.filter((r) => sourceBucket(r) === 'web').length;
+      const high = state.records.filter((r) => urgencyBucket(r) === 'high').length;
+      setText('metricTotal', total); setText('metricNew', newLeads); setText('metricVoice', voice); setText('metricWeb', web); setText('metricHigh', high);
+    }
+
+    function renderLeadList(visible) {
+      if (state.loading) { els.leadList.innerHTML = '<div class="empty">Loading live FlowDesk records...</div>'; return; }
+      if (state.error) { els.leadList.innerHTML = '<div class="empty">Dashboard could not load records. Check the Netlify function log.</div>'; return; }
+      if (!visible.length) { els.leadList.innerHTML = '<div class="empty">No records match the current filters.</div>'; return; }
+      els.leadList.innerHTML = visible.map((record) => {
+        const key = recordKey(record);
+        const active = key === state.selectedKey ? ' active' : '';
+        return `<button class="lead-card${active}" type="button" data-key="${escapeAttr(key)}"><div class="lead-top"><div><h3>${escapeHtml(displayBusiness(record))}</h3><p>${escapeHtml(displayName(record))} / ${escapeHtml(value(record.email, 'No email'))}</p></div>${statusBadge(record)}</div><div class="chip-row">${sourceBadge(record)}${urgencyBadge(record)}${consentBadge(record)}</div><div class="meta-grid">${meta('Phone', value(record.phone, 'Not provided'))}${meta('Created', formatDate(record.created_at))}${meta('Intake ID', value(record.intake_id, value(record.id, 'None')))}</div></button>`;
+      }).join('');
+      document.querySelectorAll('.lead-card').forEach((card) => card.addEventListener('click', () => { state.selectedKey = card.dataset.key; render(); }));
+    }
+
+    function renderDetail() {
+      const record = state.records.find((item) => recordKey(item) === state.selectedKey);
+      if (!record) { els.detailPanel.innerHTML = '<div class="empty">Select a lead to review details.</div>'; return; }
+      els.detailPanel.innerHTML = `<div class="detail-title"><div><h2>${escapeHtml(displayBusiness(record))}</h2><p>${escapeHtml(displayName(record))} / ${escapeHtml(value(record.email, 'No email'))} / ${escapeHtml(value(record.phone, 'No phone'))}</p><div class="chip-row">${sourceBadge(record)}${urgencyBadge(record)}${statusBadge(record)}${consentBadge(record)}</div></div></div><div class="detail-grid">${meta('Request Type', value(record.request_type, sourceBucket(record) === 'voice' ? 'AI Voice Attendant Call' : 'Not provided'))}${meta('Service Needed', value(record.service_needed, 'Not provided'))}${meta('Preferred Contact', value(record.preferred_contact_method, 'Not provided'))}${meta('Callback Window', value(record.preferred_callback_time, 'Not provided'))}${meta('Category', value(record.category, 'Not provided'))}${meta('Created', formatDate(record.created_at))}</div>${detailSection('Summary', value(record.ai_summary || record.summary, 'No summary available yet.'))}${detailSection(sourceBucket(record) === 'voice' ? 'Voice Transcript / Details' : 'Message / Details', value(record.details || record.message, 'No message captured.'))}${detailSection('Next Action', value(record.next_action, 'Review and decide the next follow-up step.'))}<section class="detail-section"><h3>Status Update</h3><div class="action-grid"><select class="field" id="leadStatusSelect"><option value="New / Needs Review">New / Needs Review</option><option value="New / Priority Review">New / Priority Review</option><option value="In Progress">In Progress</option><option value="Closed / Resolved">Closed / Resolved</option></select><textarea class="field" id="internalNotes" placeholder="Internal notes for the team...">${escapeHtml(value(record.internal_notes, ''))}</textarea><div class="action-row"><button class="btn primary" type="button" id="saveStatusButton">Save Lead Update</button><a class="btn" href="tel:${escapeAttr(value(record.phone, ''))}">Call</a><button class="btn" type="button" id="sendLeadEmailButton">Email Lead</button><button class="btn" type="button" id="callbackTaskButton">Callback Task</button></div></div></section>`;
+      document.getElementById('leadStatusSelect').value = normalizeLeadStatus(record.lead_status);
+      document.getElementById('saveStatusButton').addEventListener('click', () => updateLead(record));
+      document.getElementById('sendLeadEmailButton').addEventListener('click', () => sendLeadEmail(record));
+      document.getElementById('callbackTaskButton').addEventListener('click', () => createCallbackTask(record));
+    }
+
+    async function updateLead(record) {
+      const button = document.getElementById('saveStatusButton');
+      const status = document.getElementById('leadStatusSelect').value;
+      const internalNotes = document.getElementById('internalNotes').value;
+      button.disabled = true;
+      button.textContent = 'Saving...';
+      setNotice('Saving lead update...', '');
+      try {
+        const response = await fetch('/.netlify/functions/flowdesk-update-lead', { method: 'POST', headers: flowdeskHeaders(), body: JSON.stringify({ id: record.id, intake_id: record.intake_id, lead_status: status, internal_notes: internalNotes }) });
+        const payload = await response.json().catch(() => ({}));
+        if (response.status === 401) {
+          promptForAdminKey();
+          throw new Error('Admin key required. Enter the key, then save again.');
+        }
+        if (!response.ok || !payload.ok) throw new Error(payload.error || 'Unable to update lead.');
+        const updated = payload.record || { ...record, lead_status: status, internal_notes: internalNotes };
+        state.records = state.records.map((item) => recordKey(item) === recordKey(record) ? { ...item, ...updated } : item);
+        setNotice('Lead updated successfully.', 'success');
+        render();
+      } catch (error) {
+        setNotice(error.message, 'error');
+      } finally {
+        button.disabled = false;
+        button.textContent = 'Save Lead Update';
+      }
+    }
+
+    async function sendLeadEmail(record) {
+      const button = document.getElementById('sendLeadEmailButton');
+      const email = value(record.email, '');
+      if (!isSendableEmail(email)) {
+        setNotice('This lead does not have a sendable email address yet.', 'error');
+        return;
+      }
+      button.disabled = true;
+      button.textContent = 'Sending...';
+      setNotice('Sending lead follow-up email...', '');
+      try {
+        const response = await fetch('/.netlify/functions/flowdesk-email-lead', {
+          method: 'POST',
+          headers: flowdeskHeaders(),
+          body: JSON.stringify({ lead: record })
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (response.status === 401) {
+          promptForAdminKey();
+          throw new Error('Admin key required. Enter the key, then send again.');
+        }
+        if (!response.ok || !payload.ok) throw new Error(payload.error || 'Unable to send lead email.');
+        setNotice(`Lead email sent to ${payload.email}.`, 'success');
+      } catch (error) {
+        setNotice(error.message || 'Unable to send lead email.', 'error');
+      } finally {
+        button.disabled = false;
+        button.textContent = 'Email Lead';
+      }
+    }
+
+    async function createCallbackTask(record) {
+      const button = document.getElementById('callbackTaskButton');
+      const phone = value(record.phone, '');
+      if (!phone) {
+        setNotice('This lead does not have a phone number for a callback task.', 'error');
+        return;
+      }
+      const now = new Date().toLocaleString();
+      const existingNotes = document.getElementById('internalNotes').value.trim();
+      const note = `[${now}] Callback task created for ${phone}. Preferred window: ${value(record.preferred_callback_time, 'Not provided')}.`;
+      const internalNotes = existingNotes ? `${existingNotes}\n\n${note}` : note;
+      const nextAction = `Call ${displayName(record)} at ${phone}. Preferred window: ${value(record.preferred_callback_time, 'Not provided')}.`;
+      button.disabled = true;
+      button.textContent = 'Creating...';
+      setNotice('Creating callback task...', '');
+      try {
+        const response = await fetch('/.netlify/functions/flowdesk-update-lead', {
+          method: 'POST',
+          headers: flowdeskHeaders(),
+          body: JSON.stringify({
+            id: record.id,
+            intake_id: record.intake_id,
+            lead_status: 'In Progress',
+            internal_notes: internalNotes,
+            next_action: nextAction,
+            follow_up_needed: true
+          })
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (response.status === 401) {
+          promptForAdminKey();
+          throw new Error('Admin key required. Enter the key, then create the callback task again.');
+        }
+        if (!response.ok || !payload.ok) throw new Error(payload.error || 'Unable to create callback task.');
+        const updated = payload.record || { ...record, lead_status: 'In Progress', internal_notes: internalNotes, next_action: nextAction, follow_up_needed: true };
+        state.records = state.records.map((item) => recordKey(item) === recordKey(record) ? { ...item, ...updated } : item);
+        setNotice('Callback task created and lead marked In Progress.', 'success');
+        render();
+      } catch (error) {
+        setNotice(error.message || 'Unable to create callback task.', 'error');
+      } finally {
+        button.disabled = false;
+        button.textContent = 'Callback Task';
+      }
+    }
+
+    function sourceMatches(record, filter) { return filter === 'all' || sourceBucket(record) === filter; }
+    function urgencyMatches(record, filter) { return filter === 'all' || urgencyBucket(record) === filter; }
+    function statusMatches(record, filter) {
+      if (filter === 'all') return true;
+      const bucket = statusBucket(record);
+      if (['contacted', 'scheduled', 'follow-up'].includes(filter)) return bucket === 'contacted';
+      return bucket === filter;
+    }
+    function sourceBucket(record) { const src = String(record.source_page || '').toLowerCase(); if (src.includes('voice')) return 'voice'; if (src.includes('intake-engine') || src.includes('web') || src === '') return 'web'; return 'other'; }
+    function urgencyBucket(record) { const u = String(record.urgency || '').toLowerCase(); if (u.includes('urgent') || u.includes('time')) return 'high'; if (u.includes('normal') || u.includes('medium')) return 'medium'; if (u.includes('low')) return 'low'; return 'unknown'; }
+    function statusBucket(record) { const s = normalizeLeadStatus(record.lead_status); if (s === 'Closed / Resolved') return 'closed'; if (s === 'In Progress') return 'contacted'; if (s === 'New / Priority Review') return 'priority'; return 'new'; }
+    function normalizeLeadStatus(status) { const s = String(status || '').trim(); return ['New / Needs Review','New / Priority Review','In Progress','Closed / Resolved'].includes(s) ? s : 'New / Needs Review'; }
+    function recordKey(record) { return String(record.id || record.intake_id || record.created_at || Math.random()); }
+    function displayBusiness(record) { return value(record.business_name || record.company || record.business, 'Unknown business'); }
+    function displayName(record) { return value(record.full_name || record.name || record.customer_name, 'Unknown contact'); }
+    function searchableText(record) { return [record.id, record.intake_id, record.full_name, record.name, record.customer_name, record.email, record.phone, record.business_name, record.service_needed, record.details, record.message, record.ai_summary, record.summary, record.source_page].map((v) => String(v || '')).join(' ').toLowerCase(); }
+    function isSendableEmail(email) { const e = String(email || '').trim().toLowerCase(); return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e) && !e.endsWith('@flowdesk.local') && !e.endsWith('@example.com'); }
+    function configureAdminKey() {
+      const current = localStorage.getItem('flowdeskAdminKey') || '';
+      const next = prompt('FlowDesk admin key', current);
+      if (next === null) return;
+      if (next.trim()) localStorage.setItem('flowdeskAdminKey', next.trim());
+      else localStorage.removeItem('flowdeskAdminKey');
+      loadRecords();
+    }
+    function promptForAdminKey() { if (!localStorage.getItem('flowdeskAdminKey')) configureAdminKey(); }
+    function flowdeskHeaders() {
+      const headers = { 'Content-Type': 'application/json' };
+      const adminKey = localStorage.getItem('flowdeskAdminKey');
+      if (adminKey) headers['X-FlowDesk-Admin-Key'] = adminKey;
+      return headers;
+    }
+
+    function statusBadge(record) { const s = normalizeLeadStatus(record.lead_status); let cls = 'new'; if (s === 'New / Priority Review') cls = 'priority'; if (s === 'In Progress') cls = 'progress'; if (s === 'Closed / Resolved') cls = 'closed'; return `<span class="badge ${cls}">${escapeHtml(s)}</span>`; }
+    function sourceBadge(record) { const bucket = sourceBucket(record); const label = bucket === 'voice' ? 'Twilio Voice' : bucket === 'web' ? 'Web Intake' : 'Other Source'; return `<span class="badge ${bucket === 'voice' ? 'voice' : bucket === 'web' ? 'web' : 'unknown'}">${label}</span>`; }
+    function urgencyBadge(record) { const bucket = urgencyBucket(record); const cls = bucket === 'high' ? 'priority' : bucket === 'low' ? 'closed' : bucket === 'medium' ? 'new' : 'unknown'; return `<span class="badge ${cls}">${escapeHtml(value(record.urgency, 'Unknown urgency'))}</span>`; }
+    function consentBadge(record) { return `<span class="badge ${record.sms_consent ? 'web' : 'unknown'}">SMS ${record.sms_consent ? 'Opted In' : 'No Consent'}</span>`; }
+    function detailSection(title, text) { return `<section class="detail-section"><h3>${escapeHtml(title)}</h3><p>${escapeHtml(text)}</p></section>`; }
+    function meta(label, val) { return `<div class="meta"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value(val, 'Not provided'))}</strong></div>`; }
+    function formatDate(val) { if (!val) return 'Not provided'; const d = new Date(val); if (Number.isNaN(d.getTime())) return String(val); return new Intl.DateTimeFormat('en-US', { month:'short', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit' }).format(d); }
+    function setNotice(message, type) { els.listNotice.textContent = message; els.listNotice.className = `notice ${type || ''}`.trim(); }
+    function setText(id, text) { document.getElementById(id).textContent = text; }
+    function value(v, fallback) { const s = String(v ?? '').trim(); return s || fallback; }
+    function escapeHtml(v) { return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
+    function escapeAttr(v) { return escapeHtml(v).replace(/`/g, '&#096;'); }
+  </script>
+</body>
+</html>

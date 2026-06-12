@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CapGen — Government Contract Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,700;1,6..96,400;1,6..96,500&family=Cormorant:ital,wght@0,500;1,400;1,500;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:       #0F2A6A;
+  --ink-2:     #163472;
+  --ink-3:     #1C3878;
+  --steel:     #3A5898;
+  --line:      rgba(255,255,255,.12);
+  --line-2:    rgba(255,255,255,.22);
+  --gold:      #FFFFFF;
+  --gold-2:    #EEF3FF;
+  --silver:    #9DB0D4;
+  --mist:      #C3D0E8;
+  --white:     #FFFFFF;
+  --ink-soft:  #1C3878;
+  --ink-muted: #3A5898;
+  --gold-bright:#EEF3FF;
+  --gold-dim:  rgba(255,255,255,.12);
+  --cream:     #FFFFFF;
+  --rule:      rgba(15,42,106,.1);
+  --disp:      'Bodoni Moda', serif;
+  --subdisp:   'Cormorant', serif;
+  --body:      'Jost', sans-serif;
+  --shadow:    0 32px 80px rgba(0,0,0,.40);
+  --r:         4px;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--ink);
+  color:var(--white);
+  font-family:var(--body);
+  font-weight:300;
+  line-height:1.7;
+  overflow-x:hidden;
+}
+
+/* ── NOISE ── */
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  pointer-events:none;z-index:0;
+  opacity:.025;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:180px 180px;
+}
+
+.wrap{max-width:1200px;margin:0 auto;padding:0 clamp(1.5rem,5vw,4rem);position:relative;z-index:1}
+.tracked{letter-spacing:.22em;text-transform:uppercase;font-size:10px;font-family:var(--body);font-weight:500}
+
+/* ══════════════════════════════════
+   HERO
+══════════════════════════════════ */
+.hero{
+  min-height:100vh;
+  background:var(--ink);
+  display:flex;
+  align-items:center;
+  position:relative;
+  overflow:hidden;
+  padding:clamp(5rem,10vh,8rem) 0 clamp(4rem,8vh,6rem);
+}
+.hero::before{
+  content:'';
+  position:absolute;top:-20%;right:-5%;
+  width:60vw;height:130%;
+  background:linear-gradient(145deg,transparent 42%,rgba(255,255,255,.025) 42%,rgba(255,255,255,.015) 100%);
+  pointer-events:none;
+}
+.hero::after{
+  content:'CAP';
+  position:absolute;bottom:-4rem;right:2vw;
+  font-family:var(--subdisp);font-style:italic;
+  font-size:clamp(14rem,28vw,26rem);
+  color:rgba(255,255,255,.03);
+  line-height:1;pointer-events:none;user-select:none;
+}
+
+.hero-inner{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:clamp(3rem,6vw,6rem);
+  align-items:center;
+  position:relative;z-index:2;
+}
+
+/* LEFT */
+.hero-left{}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:.6rem;
+  border:1px solid var(--line-2);
+  border-radius:999px;
+  padding:.35rem 1rem;
+  font-size:10px;font-family:var(--body);font-weight:500;
+  letter-spacing:.2em;text-transform:uppercase;
+  color:rgba(255,255,255,.65);
+  margin-bottom:2rem;
+}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:var(--white)}
+
+.hero-eyebrow{
+  display:flex;align-items:center;gap:.9rem;
+  margin-bottom:1.5rem;
+}
+.eyebrow-line{width:32px;height:1px;background:var(--white)}
+.eyebrow-text{
+  font-size:10px;font-family:var(--body);font-weight:500;
+  letter-spacing:.26em;text-transform:uppercase;
+  color:rgba(255,255,255,.55);
+}
+
+.hero-h1{
+  font-family:var(--disp);
+  font-size:clamp(2.8rem,6vw,6rem);
+  font-weight:400;line-height:.92;
+  letter-spacing:-.02em;
+  color:var(--white);
+  margin-bottom:clamp(1.2rem,2.5vh,2rem);
+}
+.hero-h1 em{
+  font-style:italic;
+  display:block;
+  color:rgba(255,255,255,.55);
+}
+
+.hero-system{
+  font-family:var(--subdisp);font-style:italic;
+  font-size:clamp(1rem,1.8vw,1.4rem);
+  color:rgba(255,255,255,.4);
+  margin-bottom:clamp(1.5rem,3vh,2.5rem);
+  letter-spacing:.02em;
+}
+
+.hero-copy{
+  font-size:clamp(.95rem,1.3vw,1.1rem);
+  color:rgba(255,255,255,.72);
+  line-height:1.8;
+  max-width:520px;
+  margin-bottom:clamp(2rem,4vh,3rem);
+}
+.hero-copy strong{color:var(--white);font-weight:500}
+
+.hero-pills{
+  display:flex;flex-wrap:wrap;gap:.5rem;
+  margin-bottom:clamp(2rem,4vh,3rem);
+}
+.pill{
+  display:inline-flex;align-items:center;gap:.45rem;
+  border:1px solid var(--line-2);
+  border-radius:999px;
+  padding:.35rem 1rem;
+  font-size:10px;font-family:var(--body);font-weight:500;
+  letter-spacing:.12em;text-transform:uppercase;
+  color:rgba(255,255,255,.65);
+}
+.pill-dot{width:5px;height:5px;border-radius:50%;background:var(--white)}
+
+.hero-actions{display:flex;align-items:center;gap:1.8rem;flex-wrap:wrap}
+.btn-primary{
+  display:inline-flex;align-items:center;gap:.6rem;
+  background:var(--white);color:var(--ink);
+  font-family:var(--body);font-size:.78rem;font-weight:600;
+  letter-spacing:.18em;text-transform:uppercase;
+  text-decoration:none;
+  padding:.85rem 1.8rem;border-radius:var(--r);
+  transition:background .25s,transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .22s;
+  box-shadow:0 2px 8px rgba(0,0,0,.12);
+}
+.btn-primary:hover{
+  background:var(--gold-2);
+  transform:translateY(-4px) scale(1.04);
+  box-shadow:0 12px 28px rgba(0,0,0,.22);
+}
+.btn-member{
+  display:inline-flex;align-items:center;gap:.6rem;
+  background:rgba(255,255,255,.12);color:var(--white);
+  font-family:var(--body);font-size:.78rem;font-weight:600;
+  letter-spacing:.18em;text-transform:uppercase;
+  text-decoration:none;
+  padding:.85rem 1.8rem;border-radius:var(--r);
+  border:1px solid rgba(255,255,255,.3);
+  transition:background .25s,transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .22s,border-color .25s;
+  box-shadow:0 2px 8px rgba(0,0,0,.1);
+}
+.btn-member:hover{
+  background:rgba(255,255,255,.22);
+  border-color:rgba(255,255,255,.7);
+  transform:translateY(-4px) scale(1.04);
+  box-shadow:0 12px 28px rgba(0,0,0,.2);
+}
+.btn-ghost{
+  font-family:var(--body);font-size:.75rem;font-weight:500;
+  letter-spacing:.15em;text-transform:uppercase;
+  color:rgba(255,255,255,.5);text-decoration:none;
+  border-bottom:1px solid rgba(255,255,255,.2);padding-bottom:2px;
+  transition:color .25s,border-color .25s;
+}
+.btn-ghost:hover{color:var(--white);border-color:var(--white)}
+
+/* RIGHT — DASHBOARD MOCK */
+.hero-right{position:relative}
+.dashboard-mock{
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--line-2);
+  border-radius:8px;
+  overflow:hidden;
+  box-shadow:var(--shadow);
+}
+.dash-header{
+  background:rgba(255,255,255,.07);
+  border-bottom:1px solid var(--line);
+  padding:.85rem 1.2rem;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.dash-title{
+  font-family:var(--body);font-size:.72rem;font-weight:600;
+  letter-spacing:.2em;text-transform:uppercase;
+  color:rgba(255,255,255,.8);
+}
+.dash-naics{
+  font-family:var(--body);font-size:.68rem;font-weight:500;
+  letter-spacing:.12em;text-transform:uppercase;
+  color:rgba(255,255,255,.4);
+  background:rgba(255,255,255,.07);
+  border:1px solid var(--line);
+  padding:.2rem .6rem;border-radius:999px;
+}
+.dash-meta{
+  padding:.6rem 1.2rem;
+  border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:1.5rem;
+}
+.dash-stat{
+  font-size:.68rem;font-family:var(--body);
+  color:rgba(255,255,255,.45);
+}
+.dash-stat strong{color:var(--white);font-weight:500;font-size:.82rem}
+
+/* contract rows */
+.dash-rows{padding:.5rem 0}
+.dash-row{
+  display:grid;
+  grid-template-columns:1fr auto auto;
+  gap:1rem;align-items:center;
+  padding:.65rem 1.2rem;
+  border-bottom:1px solid rgba(255,255,255,.05);
+  transition:background .2s;
+  cursor:default;
+}
+.dash-row:last-child{border-bottom:none}
+.dash-row:hover{background:rgba(255,255,255,.04)}
+.row-agency{
+  font-family:var(--body);font-size:.8rem;font-weight:500;
+  color:rgba(255,255,255,.85);
+  margin-bottom:.15rem;
+}
+.row-title{
+  font-family:var(--body);font-size:.72rem;
+  color:rgba(255,255,255,.45);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  max-width:200px;
+}
+.row-naics-tag{
+  font-size:.62rem;font-family:var(--body);font-weight:500;
+  letter-spacing:.1em;
+  background:rgba(255,255,255,.1);
+  color:rgba(255,255,255,.7);
+  padding:.18rem .55rem;border-radius:999px;
+  white-space:nowrap;
+}
+.deadline{
+  font-size:.72rem;font-family:var(--body);font-weight:500;
+  padding:.28rem .7rem;border-radius:999px;
+  white-space:nowrap;
+}
+.deadline.hot{background:rgba(220,60,60,.25);color:#FF9090;border:1px solid rgba(220,60,60,.3)}
+.deadline.warm{background:rgba(220,150,40,.2);color:#FFCF70;border:1px solid rgba(220,150,40,.3)}
+.deadline.cool{background:rgba(60,180,120,.15);color:#80DDAA;border:1px solid rgba(60,180,120,.25)}
+
+.dash-footer{
+  background:rgba(255,255,255,.04);
+  border-top:1px solid var(--line);
+  padding:.6rem 1.2rem;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.dash-footer-note{font-size:.65rem;color:rgba(255,255,255,.3);font-style:italic;font-family:var(--subdisp)}
+.dash-footer-count{font-size:.68rem;font-family:var(--body);font-weight:500;color:rgba(255,255,255,.5)}
+
+/* ══════════════════════════════════
+   HOW IT WORKS
+══════════════════════════════════ */
+.how{
+  background:var(--ink-2);
+  padding:clamp(5rem,9vh,8rem) 0;
+  border-top:1px solid var(--line);
+}
+.section-head{text-align:center;margin-bottom:clamp(3.5rem,6vh,5rem)}
+.section-head .eyebrow-text{color:rgba(255,255,255,.5);margin-bottom:1.2rem;display:block}
+.section-head h2{
+  font-family:var(--disp);
+  font-size:clamp(2rem,4vw,3.6rem);
+  font-weight:400;line-height:1.05;
+  letter-spacing:-.02em;color:var(--white);
+}
+.section-head h2 em{font-style:italic;color:rgba(255,255,255,.5)}
+.section-head p{
+  font-size:1rem;color:rgba(255,255,255,.5);
+  max-width:580px;margin:.9rem auto 0;line-height:1.75;
+}
+
+.steps{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:2px;
+  background:var(--line);
+  border:1px solid var(--line);
+}
+.step{
+  background:var(--ink-2);
+  padding:clamp(2rem,3.5vw,3rem) clamp(1.5rem,2.5vw,2.5rem);
+  position:relative;
+}
+.step::before{
+  content:'';
+  position:absolute;top:0;left:0;right:0;height:2px;
+  background:var(--white);
+  transform:scaleX(0);transform-origin:left;
+  transition:transform .4s ease;
+}
+.step:hover::before{transform:scaleX(1)}
+.step-num{
+  font-family:var(--subdisp);font-style:italic;
+  font-size:clamp(4rem,7vw,5.5rem);
+  color:rgba(255,255,255,.08);
+  line-height:1;margin-bottom:1.2rem;
+}
+.step-label{
+  font-size:10px;font-family:var(--body);font-weight:500;
+  letter-spacing:.22em;text-transform:uppercase;
+  color:rgba(255,255,255,.4);margin-bottom:.8rem;
+}
+.step h3{
+  font-family:var(--disp);
+  font-size:clamp(1.1rem,1.8vw,1.45rem);
+  font-weight:400;line-height:1.15;
+  letter-spacing:-.01em;color:var(--white);
+  margin-bottom:.8rem;
+}
+.step h3 em{font-style:italic;color:rgba(255,255,255,.55)}
+.step p{
+  font-size:.88rem;color:rgba(255,255,255,.5);
+  line-height:1.7;
+}
+
+/* connector arrows */
+.steps-wrap{position:relative}
+
+/* ══════════════════════════════════
+   WHY CAPGEN — FOUR BENEFITS
+══════════════════════════════════ */
+.benefits{
+  background:var(--ink);
+  padding:clamp(5rem,9vh,8rem) 0;
+  border-top:1px solid var(--line);
+}
+
+.benefits-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:2px;
+  background:var(--line);
+  border:1px solid var(--line);
+}
+.benefit{
+  background:var(--ink);
+  padding:clamp(2.5rem,4vw,3.5rem) clamp(2rem,3vw,3rem);
+  position:relative;
+  overflow:hidden;
+}
+.benefit::after{
+  content:'';
+  position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:var(--line);
+}
+.benefit-icon{
+  font-family:var(--subdisp);font-style:italic;
+  font-size:clamp(3.5rem,6vw,5rem);
+  color:rgba(255,255,255,.07);
+  line-height:1;margin-bottom:1.5rem;
+}
+.benefit-tag{
+  font-size:10px;font-family:var(--body);font-weight:500;
+  letter-spacing:.22em;text-transform:uppercase;
+  color:rgba(255,255,255,.35);margin-bottom:.9rem;
+}
+.benefit h3{
+  font-family:var(--disp);
+  font-size:clamp(1.2rem,2vw,1.7rem);
+  font-weight:400;line-height:1.1;
+  letter-spacing:-.01em;color:var(--white);
+  margin-bottom:.9rem;
+}
+.benefit h3 em{font-style:italic;color:rgba(255,255,255,.55)}
+.benefit p{
+  font-size:.92rem;color:rgba(255,255,255,.55);line-height:1.75;
+}
+.benefit p strong{color:var(--white);font-weight:500}
+
+/* ══════════════════════════════════
+   MARKET PROOF STRIP
+══════════════════════════════════ */
+.proof{
+  background:var(--ink-3);
+  padding:clamp(3.5rem,6vh,5rem) 0;
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+}
+.proof-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:2px;
+  background:var(--line);
+  border:1px solid var(--line);
+}
+.proof-stat{
+  background:var(--ink-3);
+  padding:2rem 1.5rem;
+  text-align:center;
+}
+.proof-val{
+  font-family:var(--disp);
+  font-size:clamp(2rem,3.8vw,3.2rem);
+  font-weight:400;color:var(--white);
+  line-height:1;margin-bottom:.4rem;
+}
+.proof-label{
+  font-size:.72rem;font-family:var(--body);font-weight:500;
+  letter-spacing:.18em;text-transform:uppercase;
+  color:rgba(255,255,255,.4);
+}
+.proof-sub{
+  font-size:.78rem;color:rgba(255,255,255,.28);
+  margin-top:.3rem;font-style:italic;font-family:var(--subdisp);
+}
+
+/* ══════════════════════════════════
+   MANAGED SERVICE CALLOUT
+══════════════════════════════════ */
+.managed{
+  background:var(--ink-2);
+  padding:clamp(5rem,9vh,8rem) 0;
+  border-top:1px solid var(--line);
+}
+.managed-inner{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:clamp(3rem,6vw,6rem);
+  align-items:center;
+}
+.managed-left .eyebrow-text{color:rgba(255,255,255,.45);display:block;margin-bottom:1.2rem}
+.managed-left h2{
+  font-family:var(--disp);
+  font-size:clamp(1.8rem,3.5vw,3.2rem);
+  font-weight:400;line-height:1.08;
+  letter-spacing:-.02em;color:var(--white);
+  margin-bottom:1.2rem;
+}
+.managed-left h2 em{font-style:italic;color:rgba(255,255,255,.5)}
+.managed-left p{
+  font-size:.96rem;color:rgba(255,255,255,.58);
+  line-height:1.8;margin-bottom:1rem;
+}
+.managed-left p strong{color:var(--white);font-weight:500}
+
+.managed-right{
+  display:flex;flex-direction:column;gap:1px;
+  background:var(--line);border:1px solid var(--line);
+}
+.managed-item{
+  background:var(--ink-2);
+  padding:1.4rem 1.8rem;
+  display:grid;grid-template-columns:auto 1fr;
+  gap:1.2rem;align-items:start;
+  transition:background .25s;
+}
+.managed-item:hover{background:rgba(255,255,255,.04)}
+.managed-item-num{
+  font-family:var(--subdisp);font-style:italic;
+  font-size:1.4rem;color:rgba(255,255,255,.2);
+  line-height:1;min-width:1.8rem;
+}
+.managed-item-title{
+  font-family:var(--body);font-size:.88rem;font-weight:500;
+  color:var(--white);margin-bottom:.25rem;
+}
+.managed-item-desc{
+  font-size:.78rem;color:rgba(255,255,255,.42);line-height:1.5;
+}
+
+/* ══════════════════════════════════
+   CLOSING CTA
+══════════════════════════════════ */
+.cta-section{
+  background:var(--ink);
+  padding:clamp(6rem,10vh,9rem) 0;
+  text-align:center;
+  position:relative;overflow:hidden;
+  border-top:1px solid var(--line);
+}
+.cta-section::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 55% 55% at 50% 110%,rgba(255,255,255,.05),transparent 70%);
+  pointer-events:none;
+}
+.cta-section .eyebrow-text{color:rgba(255,255,255,.4);display:block;margin-bottom:1.5rem}
+.cta-section h2{
+  font-family:var(--disp);
+  font-size:clamp(2.2rem,5vw,5rem);
+  font-weight:400;line-height:.95;
+  color:var(--white);letter-spacing:-.03em;
+  margin-bottom:1.2rem;
+}
+.cta-section h2 em{font-style:italic;color:rgba(255,255,255,.45)}
+.cta-section p{
+  font-size:1rem;color:rgba(255,255,255,.5);
+  max-width:520px;margin:0 auto 2.5rem;line-height:1.75;
+}
+.cta-actions{
+  display:flex;align-items:center;justify-content:center;
+  gap:2rem;flex-wrap:wrap;
+}
+
+/* ── FOOTER ── */
+footer{
+  background:var(--ink);
+  border-top:1px solid var(--line);
+  padding:2rem 0;text-align:center;
+  position:relative;z-index:1;
+}
+footer p{
+  font-size:.72rem;font-family:var(--body);font-weight:400;
+  letter-spacing:.16em;text-transform:uppercase;
+  color:rgba(255,255,255,.2);
+}
+footer span{color:rgba(255,255,255,.55)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1024px){
+  .hero-inner{grid-template-columns:1fr}
+  .hero-right{display:none}
+  .steps{grid-template-columns:1fr}
+  .benefits-grid{grid-template-columns:1fr}
+  .proof-grid{grid-template-columns:repeat(2,1fr)}
+  .managed-inner{grid-template-columns:1fr}
+}
+@media(max-width:600px){
+  .proof-grid{grid-template-columns:1fr 1fr}
+  .cta-actions{flex-direction:column;align-items:center}
+}
+
+/* ── ENTRANCE ANIMATIONS ── */
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(24px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.hero-badge{animation:fadeUp .5s .05s both}
+.hero-eyebrow{animation:fadeUp .5s .15s both}
+.hero-h1{animation:fadeUp .6s .22s both}
+.hero-system{animation:fadeUp .5s .32s both}
+.hero-copy{animation:fadeUp .5s .4s both}
+.hero-pills{animation:fadeUp .5s .48s both}
+.hero-actions{animation:fadeUp .5s .56s both}
+.hero-right{animation:fadeUp .7s .35s both}
+
+/* dashboard row pulse on hover */
+.dash-row{cursor:default}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════
+     HERO
+══════════════════════════════════ -->
+<section class="hero">
+ <div class="wrap">
+  <div class="hero-inner">
+
+   <!-- LEFT COPY -->
+   <div class="hero-left">
+    <div class="hero-badge">
+     <span class="badge-dot"></span>
+     Managed Contract Intelligence &nbsp;·&nbsp; Federal Marketplace
+    </div>
+
+    <div class="hero-eyebrow">
+     <div class="eyebrow-line"></div>
+     <span class="eyebrow-text">Apropos Group LLC &nbsp;·&nbsp; CapGen</span>
+    </div>
+
+    <h1 class="hero-h1">
+     Every contract
+     <em>built for your business.</em>
+    </h1>
+
+    <div class="hero-system">
+     Contract Intelligence &nbsp;|&nbsp; NAICS Filtering &nbsp;|&nbsp; Live Opportunity Dashboard
+    </div>
+
+    <p class="hero-copy">
+     CapGen is a <strong>fully managed government contract intelligence service.</strong>
+     We tune our search engine to your exact NAICS codes, filter the federal marketplace
+     in real time, and deliver a personalized opportunity dashboard — so you only ever
+     see the contracts your business can actually win.
+    </p>
+
+    <div class="hero-pills">
+     <span class="pill"><span class="pill-dot"></span>NAICS-Matched Opportunities</span>
+     <span class="pill"><span class="pill-dot"></span>Live Federal Marketplace</span>
+     <span class="pill"><span class="pill-dot"></span>Done-For-You Service</span>
+     <span class="pill"><span class="pill-dot"></span>Custom Dashboard</span>
+    </div>
+
+    <div class="hero-actions">
+     <a href="/demo" class="btn-primary">See A Live Demo →</a>
+     <a href="/onboarding" class="btn-member">Member Login →</a>
+    </div>
+   </div>
+
+   <!-- RIGHT — LIVE DASHBOARD MOCK -->
+   <div class="hero-right">
+    <div class="dashboard-mock">
+     <div class="dash-header">
+      <span class="dash-title">Opportunity Dashboard</span>
+      <span class="dash-naics">NAICS · 541512 · 541519 · 561110</span>
+     </div>
+     <div class="dash-meta">
+      <div class="dash-stat"><strong>14</strong> matched this week</div>
+      <div class="dash-stat"><strong>3</strong> closing in 7 days</div>
+      <div class="dash-stat"><strong>$4.2M</strong> total value</div>
+     </div>
+     <div class="dash-rows">
+      <div class="dash-row">
+       <div>
+        <div class="row-agency">Department of Veterans Affairs</div>
+        <div class="row-title">IT Systems Integration &amp; Support Services</div>
+       </div>
+       <span class="row-naics-tag">541512</span>
+       <span class="deadline hot">3 days</span>
+      </div>
+      <div class="dash-row">
+       <div>
+        <div class="row-agency">GSA Federal Acquisition</div>
+        <div class="row-title">Administrative Support &amp; Records Management</div>
+       </div>
+       <span class="row-naics-tag">561110</span>
+       <span class="deadline hot">5 days</span>
+      </div>
+      <div class="dash-row">
+       <div>
+        <div class="row-agency">State of Nevada Procurement</div>
+        <div class="row-title">Network Infrastructure Consulting Services</div>
+       </div>
+       <span class="row-naics-tag">541519</span>
+       <span class="deadline warm">12 days</span>
+      </div>
+      <div class="dash-row">
+       <div>
+        <div class="row-agency">County Procurement Office</div>
+        <div class="row-title">Technology Staffing &amp; Workforce Solutions</div>
+       </div>
+       <span class="row-naics-tag">541512</span>
+       <span class="deadline warm">18 days</span>
+      </div>
+      <div class="dash-row">
+       <div>
+        <div class="row-agency">Federal Civilian Agency</div>
+        <div class="row-title">Cloud Migration &amp; Managed IT Operations</div>
+       </div>
+       <span class="row-naics-tag">541519</span>
+       <span class="deadline cool">31 days</span>
+      </div>
+     </div>
+     <div class="dash-footer">
+      <span class="dash-footer-note">Filtered to your codes · updated daily</span>
+      <span class="dash-footer-count">Showing 5 of 14 matched →</span>
+     </div>
+    </div>
+   </div>
+
+  </div>
+ </div>
+</section>
+
+<!-- ══════════════════════════════════
+     HOW IT WORKS
+══════════════════════════════════ -->
+<section class="how" id="how">
+ <div class="wrap">
+  <div class="section-head">
+   <span class="tracked eyebrow-text">How It Works</span>
+   <h2>Three steps to your<br><em>personalized pipeline.</em></h2>
+   <p>We do the heavy lifting. You review the opportunities and decide which ones to pursue. That's the entire workflow.</p>
+  </div>
+
+  <div class="steps">
+   <div class="step">
+    <div class="step-num">I</div>
+    <div class="step-label">Step One</div>
+    <h3>Share your<br><em>business codes.</em></h3>
+    <p>Tell us your NAICS codes and the types of work your business performs. If you don't know your codes yet, we'll help you identify them. This is the only thing we need from you to get started.</p>
+   </div>
+   <div class="step">
+    <div class="step-num">II</div>
+    <div class="step-label">Step Two</div>
+    <h3>We tune<br><em>your engine.</em></h3>
+    <p>Our intelligence engine is calibrated to your exact profile. We configure your dashboard, set your filters across the full federal marketplace, and establish your deadline alert thresholds — all done for you, before you log in for the first time.</p>
+   </div>
+   <div class="step">
+    <div class="step-num">III</div>
+    <div class="step-label">Step Three</div>
+    <h3>Review, decide,<br><em>and bid.</em></h3>
+    <p>Your personalized dashboard updates daily with matched opportunities, color-coded by deadline urgency. You review what fits, pass on what doesn't, and focus your time on writing winning proposals — not searching for them.</p>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ══════════════════════════════════
+     MARKET PROOF STRIP
+══════════════════════════════════ -->
+<section class="proof">
+ <div class="wrap">
+  <div class="proof-grid">
+   <div class="proof-stat">
+    <div class="proof-val">$750B+</div>
+    <div class="proof-label">Federal Contracts Awarded Annually</div>
+    <div class="proof-sub">Across all agency levels</div>
+   </div>
+   <div class="proof-stat">
+    <div class="proof-val">500K+</div>
+    <div class="proof-label">Active Opportunities at Any Time</div>
+    <div class="proof-sub">Federal marketplace depth</div>
+   </div>
+   <div class="proof-stat">
+    <div class="proof-val">23%</div>
+    <div class="proof-label">Set-Aside Goal for Small Business</div>
+    <div class="proof-sub">Federal mandate — the floor, not the ceiling</div>
+   </div>
+   <div class="proof-stat">
+    <div class="proof-val">Daily</div>
+    <div class="proof-label">Dashboard Refresh Rate</div>
+    <div class="proof-sub">Never miss a new posting</div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ══════════════════════════════════
+     WHY CAPGEN — FOUR BENEFITS
+══════════════════════════════════ -->
+<section class="benefits" id="why">
+ <div class="wrap">
+  <div class="section-head">
+   <span class="tracked eyebrow-text">Why CapGen</span>
+   <h2>Not a search tool.<br><em>A managed service.</em></h2>
+   <p>Anyone can search a public database. CapGen is the intelligence layer between the raw data and a bid-ready opportunity — built, maintained, and delivered by people who have won federal contracts.</p>
+  </div>
+
+  <div class="benefits-grid">
+
+   <div class="benefit">
+    <div class="benefit-icon">I</div>
+    <div class="benefit-tag">Precision Filter</div>
+    <h3>Only what<br><em>fits your business.</em></h3>
+    <p>Every result in your dashboard passed through your exact NAICS profile. No noise. No irrelevant postings. <strong>No time wasted.</strong> You see the federal marketplace as if it were built specifically around what your company does.</p>
+   </div>
+
+   <div class="benefit">
+    <div class="benefit-icon">II</div>
+    <div class="benefit-tag">Deadline Intelligence</div>
+    <h3>Never miss<br><em>a deadline again.</em></h3>
+    <p>Color-coded urgency indicators flag every opportunity by time remaining. <strong>Red means act now. Amber means this week. Green means you have runway.</strong> No spreadsheet. No calendar juggling. The system tells you what needs your attention today.</p>
+   </div>
+
+   <div class="benefit">
+    <div class="benefit-icon">III</div>
+    <div class="benefit-tag">Built-In Credibility</div>
+    <h3>Built by a<br><em>federal contractor.</em></h3>
+    <p>CapGen was built by Apropos Group LLC — a <strong>SAM.gov registered, UEI-issued federal contractor</strong> with direct experience navigating the government procurement process. We built this system because we needed it ourselves. Now it's yours.</p>
+   </div>
+
+   <div class="benefit">
+    <div class="benefit-icon">IV</div>
+    <div class="benefit-tag">Zero Setup Work</div>
+    <h3>Completely<br><em>done for you.</em></h3>
+    <p>You don't configure anything. You don't learn a new platform. You don't maintain search filters. <strong>We handle all of it.</strong> Your dashboard is ready before you log in, and our team keeps it tuned as your business evolves.</p>
+   </div>
+
+  </div>
+ </div>
+</section>
+
+<!-- ══════════════════════════════════
+     MANAGED SERVICE CALLOUT
+══════════════════════════════════ -->
+<section class="managed">
+ <div class="wrap">
+  <div class="managed-inner">
+   <div class="managed-left">
+    <span class="tracked eyebrow-text">The CapGen Difference</span>
+    <h2>The federal marketplace<br>is vast. <em>Your dashboard isn't.</em></h2>
+    <p>
+     The government publishes hundreds of thousands of contract opportunities across agencies, states, counties, and municipalities every year. Most businesses either miss them entirely or spend hours filtering through postings that were never relevant to them.
+    </p>
+    <p>
+     <strong>CapGen solves both problems.</strong> Our intelligence engine continuously monitors the full federal marketplace and surfaces only the opportunities matched to your business profile — so your team spends zero time searching and 100% of their time bidding.
+    </p>
+    <p>
+     This is a managed service, not a subscription to a database. You get a dedicated dashboard, a tuned engine, and a team that keeps it working — without any of the technical overhead.
+    </p>
+   </div>
+
+   <div class="managed-right">
+    <div class="managed-item">
+     <div class="managed-item-num">I</div>
+     <div>
+      <div class="managed-item-title">NAICS Code Matching</div>
+      <div class="managed-item-desc">Every opportunity filtered against your registered business codes — primary and secondary classifications included.</div>
+     </div>
+    </div>
+    <div class="managed-item">
+     <div class="managed-item-num">II</div>
+     <div>
+      <div class="managed-item-title">Custom Dashboard Build</div>
+      <div class="managed-item-desc">Personalized interface built before your first login. Laid out around your codes, your deadlines, your priorities.</div>
+     </div>
+    </div>
+    <div class="managed-item">
+     <div class="managed-item-num">III</div>
+     <div>
+      <div class="managed-item-title">Daily Intelligence Refresh</div>
+      <div class="managed-item-desc">New postings surface automatically. Expired opportunities are removed. Your view stays current without any action on your part.</div>
+     </div>
+    </div>
+    <div class="managed-item">
+     <div class="managed-item-num">IV</div>
+     <div>
+      <div class="managed-item-title">Deadline Alert System</div>
+      <div class="managed-item-desc">Color-coded urgency across all matched opportunities. Hot, warm, and available — always visible at a glance.</div>
+     </div>
+    </div>
+    <div class="managed-item">
+     <div class="managed-item-num">V</div>
+     <div>
+      <div class="managed-item-title">Ongoing Engine Tuning</div>
+      <div class="managed-item-desc">As your business grows and your codes evolve, we update your profile and recalibrate your filters — no extra charge.</div>
+     </div>
+    </div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ══════════════════════════════════
+     CLOSING CTA
+══════════════════════════════════ -->
+<section class="cta-section" id="request">
+ <div class="wrap">
+  <span class="tracked eyebrow-text">Get Started</span>
+  <h2>Ready to see the contracts<br><em>meant for you?</em></h2>
+  <p>Tell us your business type and we'll show you exactly what's in the federal marketplace right now that matches your profile. No commitment required.</p>
+  <div class="cta-actions">
+   <a href="/offer" class="btn-primary">Subscribe Now →</a>
+   <a href="/demo" class="btn-ghost">See A Live Demo First</a>
+  </div>
+ </div>
+</section>
+
+<footer>
+ <p>
+  <span>CapGen</span> &nbsp;·&nbsp; Government Contract Intelligence &nbsp;·&nbsp;
+  <span>Apropos Group LLC</span> &nbsp;·&nbsp; SAM.gov Registered &nbsp;·&nbsp; 2026
+ </p>
+</footer>
+
+</body>
+</html>

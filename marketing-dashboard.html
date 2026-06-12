@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Marketing Dashboard — CapGen</title>
+<style>
+:root{
+  --bg:#0A1A3A;--surface:#0f2244;--panel:#132954;--line:rgba(91,175,255,.15);
+  --line2:rgba(91,175,255,.28);--text:#f0f6ff;--muted:#8facd0;--soft:#5a7899;
+  --cyan:#5BD3FF;--green:#2ecc8a;--amber:#f0a500;--red:#e05555;
+  font-family:Arial,Helvetica,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
+
+/* Toggle bar */
+.toggle-bar{background:rgba(46,204,138,.07);border-bottom:1px solid rgba(46,204,138,.2);
+  padding:9px 28px;display:flex;align-items:center;gap:12px}
+.toggle-link{color:var(--cyan);font-size:.82rem;font-weight:700;text-decoration:none}
+.toggle-link:hover{opacity:.8}
+.toggle-sep{color:var(--soft);font-size:.78rem}
+
+header{background:var(--surface);border-bottom:1px solid var(--line);padding:14px 28px;
+  display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-mark{width:40px;height:40px;border-radius:10px;background:var(--bg);border:1px solid var(--line2);
+  display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;color:var(--cyan)}
+.brand-name{font-size:1rem;font-weight:700}
+.brand-sub{font-size:.72rem;color:var(--muted);letter-spacing:.04em}
+.refresh-info{font-size:.72rem;color:var(--soft);display:flex;align-items:center;gap:6px}
+.pulse{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+.page{max-width:1200px;margin:0 auto;padding:24px 20px 40px}
+
+/* Metric cards */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px}
+.metric{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 20px;
+  display:flex;align-items:stretch;gap:10px}
+.metric-accent{width:3px;border-radius:2px;flex-shrink:0}
+.metric-body{flex:1}
+.metric-label{font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600;margin-bottom:6px}
+.metric-value{font-size:2.2rem;font-weight:900;line-height:1;color:var(--text)}
+.metric-sub{font-size:.72rem;color:var(--soft);margin-top:5px}
+
+/* Section */
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.section-title{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+
+/* Table */
+.table-wrap{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+table{width:100%;border-collapse:collapse}
+th{font-size:.62rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);
+  padding:11px 16px;text-align:left;border-bottom:1px solid var(--line);background:rgba(255,255,255,.03)}
+td{padding:11px 16px;font-size:.84rem;color:var(--text);border-bottom:1px solid rgba(91,175,255,.06);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(91,175,255,.04)}
+.company-name{font-weight:600;font-size:.86rem;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.contact-title{font-size:.72rem;color:var(--muted);margin-top:2px}
+.naics-pill{display:inline-block;background:var(--panel);color:var(--cyan);padding:2px 7px;
+  border-radius:4px;font-size:.68rem;font-weight:700;font-family:monospace}
+.badge-opens{background:rgba(46,204,138,.15);color:var(--green);padding:2px 8px;border-radius:4px;font-size:.72rem;font-weight:700}
+.badge-clicks{background:rgba(240,165,0,.15);color:var(--amber);padding:2px 8px;border-radius:4px;font-size:.72rem;font-weight:700}
+.empty-state{padding:48px;text-align:center;color:var(--muted)}
+
+/* Error */
+.error-banner{background:rgba(224,85,85,.12);border:1px solid rgba(224,85,85,.25);
+  color:#ff9999;padding:12px 16px;border-radius:8px;font-size:.84rem;margin-bottom:16px;display:none}
+
+@media(max-width:700px){
+  .metrics{grid-template-columns:1fr 1fr}
+  th:nth-child(4),td:nth-child(4),th:nth-child(5),td:nth-child(5){display:none}
+}
+@media(max-width:480px){.metrics{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="toggle-bar">
+  <a href="/apropos" class="toggle-link">← Return to Contract Dashboard</a>
+  <span class="toggle-sep">·</span>
+  <span style="font-size:.78rem;color:var(--soft)">Marketing Pipeline</span>
+</div>
+
+<header>
+  <div class="brand">
+    <div class="brand-mark">AG</div>
+    <div>
+      <div class="brand-name">APROPOS GROUP LLC</div>
+      <div class="brand-sub">Marketing Dashboard · CapGen</div>
+    </div>
+  </div>
+  <div class="refresh-info">
+    <div class="pulse"></div>
+    <span id="refreshLabel">Loading…</span>
+  </div>
+</header>
+
+<div class="page">
+  <div class="error-banner" id="errBanner"></div>
+
+  <!-- Metric cards -->
+  <div class="metrics">
+    <div class="metric">
+      <div class="metric-accent" style="background:var(--cyan)"></div>
+      <div class="metric-body">
+        <div class="metric-label">Total Contractors</div>
+        <div class="metric-value" id="m-contractors">—</div>
+        <div class="metric-sub">SAM.gov registered</div>
+      </div>
+    </div>
+    <div class="metric">
+      <div class="metric-accent" style="background:var(--green)"></div>
+      <div class="metric-body">
+        <div class="metric-label">Emails Sent</div>
+        <div class="metric-value" id="m-sent">—</div>
+        <div class="metric-sub">Via Resend</div>
+      </div>
+    </div>
+    <div class="metric">
+      <div class="metric-accent" style="background:var(--green)"></div>
+      <div class="metric-body">
+        <div class="metric-label">Open Rate</div>
+        <div class="metric-value" id="m-rate" style="font-size:1.8rem">—</div>
+        <div class="metric-sub">Unique opens</div>
+      </div>
+    </div>
+    <div class="metric">
+      <div class="metric-accent" style="background:var(--amber)"></div>
+      <div class="metric-body">
+        <div class="metric-label">Warm Leads</div>
+        <div class="metric-value" id="m-leads">—</div>
+        <div class="metric-sub">Opened or clicked</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Warm leads table -->
+  <div class="section-head">
+    <span class="section-title">Warm Leads <span id="leadCount"></span></span>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Company</th>
+          <th>Contact</th>
+          <th>NAICS</th>
+          <th>Location</th>
+          <th style="text-align:center">Opens</th>
+          <th style="text-align:center">Clicks</th>
+          <th>Last Engagement</th>
+        </tr>
+      </thead>
+      <tbody id="leadsBody">
+        <tr><td colspan="7" class="empty-state">Loading warm leads…</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+'use strict';
+const SUPABASE_URL = 'https://judislfknmhofcgzyozc.supabase.co';
+const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp1ZGlzbGZrbm1ob2ZjZ3p5b3pjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMDI3ODAsImV4cCI6MjA5Mjc3ODc4MH0.Kxpe0kJt0k7ZchYu70BOwm4KdT0C5aSsyeR1ov6NlQ0';
+
+function sbFetch(path, extra) {
+  return fetch(SUPABASE_URL + '/rest/v1/' + path, {
+    headers: Object.assign({ apikey: ANON_KEY, Authorization: 'Bearer ' + ANON_KEY }, extra || {})
+  });
+}
+
+function fmtDate(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+async function load() {
+  const errBanner = document.getElementById('errBanner');
+  try {
+    const [contractorsRes, emailBatchRes, leadsRes] = await Promise.all([
+      sbFetch('contractors?select=id', { Prefer: 'count=exact' }),
+      sbFetch('email_batch?select=id,status'),
+      sbFetch('warm_leads?select=contractor_id,legal_name,primary_naics,address_city,address_state,contact_email,first_name,last_name,title,last_engagement,open_count,click_count&order=last_engagement.desc&limit=200'),
+    ]);
+
+    // Contractors count — from Content-Range header (Prefer: count=exact)
+    let totalContractors = 0;
+    if (contractorsRes.ok) {
+      const cr = contractorsRes.headers.get('content-range');
+      totalContractors = cr ? parseInt((cr.split('/')[1] || '0'), 10) : 0;
+      if (isNaN(totalContractors)) totalContractors = 0;
+    }
+
+    // Emails sent
+    let emailsSent = 0;
+    if (emailBatchRes.ok) {
+      const batches = await emailBatchRes.json();
+      emailsSent = Array.isArray(batches)
+        ? batches.filter(function(b) { return b.status === 'sent'; }).length
+        : 0;
+    }
+
+    // Warm leads
+    let leads = [];
+    if (leadsRes.ok) {
+      const raw = await leadsRes.json();
+      leads = Array.isArray(raw) ? raw : [];
+    }
+
+    const openCount = leads.filter(function(l) { return (l.open_count || 0) > 0; }).length;
+    const openRate  = emailsSent > 0 ? ((openCount / emailsSent) * 100).toFixed(1) + '%' : '—';
+
+    // Safe display — all values guaranteed to be numbers before toLocaleString
+    document.getElementById('m-contractors').textContent = (totalContractors || 0).toLocaleString();
+    document.getElementById('m-sent').textContent        = (emailsSent || 0).toLocaleString();
+    document.getElementById('m-rate').textContent        = openRate || '—';
+    document.getElementById('m-leads').textContent       = (leads.length || 0).toLocaleString();
+    document.getElementById('leadCount').textContent     = leads.length ? '(' + leads.length + ')' : '';
+    document.getElementById('refreshLabel').textContent  = 'Last updated ' + new Date().toLocaleTimeString() + ' · Auto-refreshes every 30s';
+
+    // Render leads table
+    const tbody = document.getElementById('leadsBody');
+    if (!leads.length) {
+      tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No warm leads yet — send some emails to get started.</td></tr>';
+    } else {
+      tbody.innerHTML = leads.map(function(l, i) {
+        var contact = [l.first_name, l.last_name].filter(Boolean).join(' ') || '—';
+        var location = [l.address_city, l.address_state].filter(Boolean).join(', ') || '—';
+        var bg = i % 2 === 0 ? '' : 'background:rgba(255,255,255,.015)';
+        return '<tr style="' + bg + '">'
+          + '<td><div class="company-name" title="' + (l.legal_name||'') + '">' + (l.legal_name || '—') + '</div></td>'
+          + '<td><div>' + contact + '</div><div class="contact-title">' + (l.title || '') + '</div></td>'
+          + '<td>' + (l.primary_naics ? '<span class="naics-pill">' + l.primary_naics + '</span>' : '—') + '</td>'
+          + '<td style="font-size:.78rem;color:var(--muted)">' + location + '</td>'
+          + '<td style="text-align:center"><span class="badge-opens">' + (l.open_count || 0) + '</span></td>'
+          + '<td style="text-align:center"><span class="badge-clicks">' + (l.click_count || 0) + '</span></td>'
+          + '<td style="font-size:.76rem;color:var(--muted);white-space:nowrap">' + fmtDate(l.last_engagement) + '</td>'
+          + '</tr>';
+      }).join('');
+    }
+
+    errBanner.style.display = 'none';
+  } catch(e) {
+    errBanner.textContent = 'Error loading data: ' + e.message;
+    errBanner.style.display = 'block';
+    document.getElementById('refreshLabel').textContent = 'Load failed';
+  }
+}
+
+load();
+setInterval(load, 30000);
+</script>
+</body>
+</html>

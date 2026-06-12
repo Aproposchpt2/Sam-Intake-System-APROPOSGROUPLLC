@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CapGen Pro — Complete Your Setup</title>
+<style>
+:root{--bg:#0A1A3A;--surface:#0f2244;--line:rgba(91,175,255,.15);--line2:rgba(91,175,255,.32);--text:#f0f6ff;--muted:#8facd0;--soft:#5a7899;--cyan:#5BD3FF;--green:#2ecc8a;font-family:Arial,Helvetica,sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 20px}
+.card{background:var(--surface);border:1px solid var(--line2);border-radius:24px;padding:48px 44px;max-width:520px;width:100%;box-shadow:0 40px 100px rgba(0,0,0,.5)}
+.logo{display:flex;align-items:center;gap:10px;margin-bottom:28px}
+.logo-mark{background:var(--bg);border:1px solid var(--line2);border-radius:8px;padding:7px 11px;font-weight:900;color:var(--cyan);font-family:monospace;font-size:14px}
+.logo-name{font-weight:700;font-size:.95rem}
+.eyebrow{font-size:.7rem;text-transform:uppercase;letter-spacing:.14em;color:var(--cyan);font-weight:700;margin-bottom:10px}
+h1{font-size:1.6rem;font-weight:900;line-height:1.1;letter-spacing:-.02em;margin-bottom:8px}
+.sub{font-size:.9rem;color:var(--muted);line-height:1.7;margin-bottom:32px}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:0}
+label{font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);font-weight:700}
+input{background:rgba(255,255,255,.07);border:1px solid var(--line2);border-radius:10px;color:var(--text);padding:12px 14px;font-size:.92rem;outline:none;transition:.18s;width:100%}
+input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(91,211,255,.1)}
+input::placeholder{color:var(--soft)}
+.opt{font-size:.68rem;color:var(--soft);font-weight:400;text-transform:none;margin-left:4px}
+.btn{width:100%;background:var(--cyan);color:#0A1A3A;border:none;border-radius:10px;padding:15px;font-weight:700;font-size:1rem;cursor:pointer;margin-top:8px;transition:.18s}
+.btn:hover:not(:disabled){opacity:.88}
+.btn:disabled{opacity:.5;cursor:wait}
+.notice{margin-top:14px;font-size:.82rem;color:var(--muted);text-align:center;display:none}
+.notice.err{color:#ff9999}
+.notice.ok{color:var(--green)}
+.success{display:none;text-align:center;padding:8px 0}
+.success-icon{font-size:2.5rem;margin-bottom:12px;display:block}
+footer{margin-top:28px;font-size:.74rem;color:var(--soft)}
+@media(max-width:500px){.card{padding:32px 24px}.field-row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo"><div class="logo-mark">CG</div><div class="logo-name">CapGen Pro</div></div>
+
+  <div id="form-view">
+    <div class="eyebrow">Payment Confirmed</div>
+    <h1>Complete your setup</h1>
+    <p class="sub">Tell us about your business. We'll pull your SAM.gov data and have your pipeline ready within 24 hours.</p>
+
+    <form id="setupForm" novalidate>
+      <div class="field-row">
+        <div class="field" style="margin-bottom:16px">
+          <label for="firstName">First Name</label>
+          <input id="firstName" type="text" placeholder="Lori" required autocomplete="given-name"/>
+        </div>
+        <div class="field" style="margin-bottom:16px">
+          <label for="lastName">Last Name</label>
+          <input id="lastName" type="text" placeholder="Johnson" required autocomplete="family-name"/>
+        </div>
+      </div>
+      <div class="field">
+        <label for="bizName">Business Name <span class="opt">(exactly as registered in SAM.gov)</span></label>
+        <input id="bizName" type="text" placeholder="Custom IT Services LLC" required autocomplete="organization"/>
+      </div>
+      <div class="field">
+        <label for="email">Email Address</label>
+        <input id="email" type="email" placeholder="you@yourbusiness.com" required autocomplete="email"/>
+      </div>
+      <div class="field">
+        <label for="phone">Phone Number <span class="opt">(optional)</span></label>
+        <input id="phone" type="tel" placeholder="(702) 555-0100" autocomplete="tel"/>
+      </div>
+      <button class="btn" type="submit" id="submitBtn">Build My Pipeline →</button>
+    </form>
+    <div class="notice" id="notice"></div>
+  </div>
+
+  <div class="success" id="success-view">
+    <span class="success-icon">🚀</span>
+    <h2 style="font-size:1.4rem;font-weight:900;margin-bottom:10px">You're all set!</h2>
+    <p style="color:var(--muted);font-size:.92rem;line-height:1.7;margin-bottom:20px">
+      We're pulling your SAM.gov data and building your pipeline now.<br/>
+      Check your email — your onboarding steps are on their way.
+    </p>
+    <a href="/onboarding.html" style="display:block;background:var(--cyan);color:#0A1A3A;border-radius:10px;padding:14px;font-weight:700;text-decoration:none;text-align:center">Go to My Dashboard →</a>
+  </div>
+</div>
+<footer>CapGen Pro · AI4 Businesses · Apropos Group LLC</footer>
+
+<script>
+'use strict';
+// Read plan_type from URL if passed from Stripe
+const params    = new URLSearchParams(location.search);
+const planType  = params.get('plan') || 'monthly';
+const planAmt   = params.get('amount') || null;
+
+document.getElementById('setupForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const btn     = document.getElementById('submitBtn');
+  const notice  = document.getElementById('notice');
+  const fn      = document.getElementById('firstName').value.trim();
+  const ln      = document.getElementById('lastName').value.trim();
+  const biz     = document.getElementById('bizName').value.trim();
+  const email   = document.getElementById('email').value.trim();
+  const phone   = document.getElementById('phone').value.trim();
+
+  if (!fn || !ln || !biz || !email) {
+    notice.className = 'notice err'; notice.style.display = 'block';
+    notice.textContent = 'Please complete all required fields.'; return;
+  }
+
+  btn.disabled = true; btn.textContent = 'Setting up your pipeline…';
+  notice.style.display = 'none';
+
+  try {
+    const res = await fetch('/.netlify/functions/capgen-onboard', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ first_name: fn, last_name: ln, business_name: biz, email, phone, plan_type: planType, plan_amount: planAmt }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Setup failed.');
+    document.getElementById('form-view').style.display = 'none';
+    document.getElementById('success-view').style.display = 'block';
+  } catch(err) {
+    notice.className = 'notice err'; notice.style.display = 'block';
+    notice.textContent = err.message || 'Something went wrong. Please try again.';
+    btn.disabled = false; btn.textContent = 'Build My Pipeline →';
+  }
+});
+</script>
+</body>
+</html>

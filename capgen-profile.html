@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Company Profile — CapGen Pro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,700;1,400&family=Cormorant+Garamond:ital@1&family=Jost:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--sap:#0F2A6A;--sap2:#163472;--sap3:#1C3878;--white:#fff;--off:#e8edf8;
+  --green:#6EE7A8;--amber:#F59E0B;--muted:rgba(255,255,255,.55);--err:#F87171;
+  font-family:'Jost',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--sap);color:var(--white);min-height:100vh}
+
+/* Nav */
+nav{background:rgba(0,0,0,.2);border-bottom:1px solid rgba(255,255,255,.08);padding:13px 5vw;
+  display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:50;backdrop-filter:blur(12px)}
+.nav-brand{font-family:'Bodoni Moda',serif;font-size:1.1rem;color:var(--white);text-decoration:none;margin-right:4px}
+.nav-sep{color:rgba(255,255,255,.2)}
+.nav-link{font-size:.82rem;color:var(--muted);text-decoration:none;padding:5px 10px;border-radius:7px;transition:.15s}
+.nav-link:hover{color:var(--white);background:rgba(255,255,255,.07)}
+.nav-link.active{color:var(--green)}
+.nav-spacer{flex:1}
+.nav-version{font-size:.7rem;color:rgba(255,255,255,.25);font-family:'Cormorant Garamond',serif;font-style:italic}
+
+/* Page */
+.page{max-width:760px;margin:0 auto;padding:36px 5vw 80px}
+.page-heading{font-family:'Bodoni Moda',serif;font-size:1.8rem;margin-bottom:4px}
+.page-sub{font-size:.88rem;color:var(--muted);margin-bottom:6px}
+.page-rule{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.8rem;color:rgba(255,255,255,.3);display:block;margin-bottom:28px}
+
+/* Registration card */
+.reg-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:18px 22px;margin-bottom:28px;display:flex;flex-wrap:wrap;gap:16px}
+.reg-field{flex:1;min-width:120px}
+.reg-label{font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.4);margin-bottom:3px;font-weight:700}
+.reg-value{font-size:.9rem;font-weight:700;color:var(--white)}
+.reg-value.active{color:var(--green)}
+.naics-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.naics-chip{display:inline-block;background:rgba(110,231,168,.12);border:1px solid rgba(110,231,168,.22);color:var(--green);padding:3px 9px;border-radius:5px;font-size:.7rem;font-weight:700}
+.naics-chip.primary{background:var(--green);color:var(--sap)}
+.cert-chip{display:inline-block;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);color:var(--white);padding:3px 9px;border-radius:5px;font-size:.7rem;font-weight:600}
+
+/* Form sections */
+.section-head{font-family:'Bodoni Moda',serif;font-size:1rem;margin-bottom:3px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.08)}
+.section-rule{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.76rem;color:rgba(255,255,255,.3);display:block;margin-bottom:16px}
+.section{margin-bottom:28px}
+.field{margin-bottom:16px}
+label{display:block;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.48);margin-bottom:5px}
+input[type=text],input[type=number],textarea,select{width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);border-radius:10px;color:var(--white);padding:11px 14px;font-size:.9rem;outline:none;font-family:'Jost',sans-serif;transition:.15s;resize:vertical}
+input:focus,textarea:focus,select:focus{border-color:var(--green)}
+input::placeholder,textarea::placeholder{color:rgba(255,255,255,.25)}
+select option{background:#163472}
+textarea{min-height:90px}
+.helper{font-size:.72rem;color:rgba(255,255,255,.32);margin-top:4px;line-height:1.4}
+
+/* Checkboxes */
+.check-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
+.check-item{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:8px 12px;cursor:pointer;transition:.15s}
+.check-item:hover{background:rgba(255,255,255,.09)}
+.check-item input[type=checkbox]{accent-color:var(--green);width:15px;height:15px;flex-shrink:0}
+.check-item span{font-size:.8rem}
+
+/* Save bar */
+.save-bar{position:fixed;bottom:0;left:0;right:0;background:var(--sap2);border-top:1px solid rgba(255,255,255,.1);padding:14px 5vw;display:flex;align-items:center;justify-content:space-between;gap:16px;z-index:100;flex-wrap:wrap}
+.save-status{font-size:.82rem;color:var(--muted)}
+.save-status.saved{color:var(--green)}
+.save-status.saving{color:var(--amber)}
+.save-btn{background:var(--white);color:var(--sap);font-family:'Jost',sans-serif;font-weight:700;font-size:.9rem;padding:10px 26px;border:none;border-radius:9px;cursor:pointer;transition:.15s}
+.save-btn:hover{background:var(--off)}
+.save-btn:disabled{opacity:.55;cursor:wait}
+
+.loading{text-align:center;padding:60px;color:var(--muted)}
+
+@media(max-width:600px){.check-grid{grid-template-columns:1fr}.reg-card{flex-direction:column;gap:10px}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-brand">CapGen Pro</a>
+  <span class="nav-sep">·</span>
+  <a href="/pipeline" class="nav-link">Pipeline</a>
+  <a href="/apropos" class="nav-link">Dashboard</a>
+  <a href="/profile" class="nav-link active">Profile</a>
+  <span class="nav-spacer"></span>
+  <span class="nav-version" id="versionBadge"></span>
+</nav>
+
+<div class="page">
+  <h1 class="page-heading">Company Profile</h1>
+  <p class="page-sub">Your profile powers Analyze Fit scores and opportunity matching.</p>
+  <span class="page-rule">Sourced from official public records — augmented by your expertise.</span>
+
+  <div id="loadingEl" class="loading">Loading profile…</div>
+  <div id="profileEl" style="display:none"></div>
+</div>
+
+<div class="save-bar" style="display:none" id="saveBar">
+  <span class="save-status" id="saveStatus">Unsaved changes</span>
+  <button class="save-btn" id="saveBtn" onclick="saveProfile()">Save Profile</button>
+</div>
+
+<script>
+'use strict';
+const BASE     = '/.netlify/functions';
+const SUPABASE = 'https://judislfknmhofcgzyozc.supabase.co';
+const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp1ZGlzbGZrbm1ob2ZjZ3p5b3pjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMDI3ODAsImV4cCI6MjA5Mjc3ODc4MH0.Kxpe0kJt0k7ZchYu70BOwm4KdT0C5aSsyeR1ov6NlQ0';
+
+let sessionToken = null;
+let profileData = null;
+let dirty = false;
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+(async function() {
+  const stored = sessionStorage.getItem('pipeline_session');
+  if (!stored) { window.location.href = '/onboarding'; return; }
+  sessionToken = stored;
+
+  try {
+    const email = JSON.parse(atob(stored.split('.')[0] || stored)).email ||
+      sessionStorage.getItem('capgen_email') || '';
+    const res = await fetch(`${SUPABASE}/rest/v1/capgen_subscriptions?email=eq.${encodeURIComponent(email)}&select=*&limit=1`,
+      { headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` } });
+    if (!res.ok) throw new Error('DB error');
+    const rows = await res.json();
+    if (!rows.length) throw new Error('Profile not found');
+    profileData = rows[0];
+    renderProfile(profileData);
+  } catch(e) {
+    // Try via signed token endpoint
+    try {
+      const res2 = await fetch(`${BASE}/capgen-get-profile`,
+        { headers: { Authorization: 'Bearer ' + stored } });
+      if (res2.ok) {
+        profileData = await res2.json();
+        renderProfile(profileData);
+      } else {
+        document.getElementById('loadingEl').textContent = 'Could not load profile — ' + e.message;
+      }
+    } catch(e2) {
+      document.getElementById('loadingEl').textContent = 'Could not load profile.';
+    }
+  }
+})();
+
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function renderProfile(p) {
+  document.getElementById('loadingEl').style.display = 'none';
+  const el = document.getElementById('profileEl');
+  el.style.display = 'block';
+
+  // Version badge
+  const vb = document.getElementById('versionBadge');
+  if (vb) vb.textContent = 'Profile v' + (p.profile_version || 1);
+
+  // Registration card (read-only)
+  const naicsHtml = (p.naics || []).map(code =>
+    `<span class="naics-chip${code === p.primary_naics ? ' primary' : ''}">${esc(code)}</span>`
+  ).join('');
+  const certHtml = (p.set_asides || []).map(c => `<span class="cert-chip">${esc(c)}</span>`).join('');
+
+  el.innerHTML = `
+    <div class="reg-card">
+      <div class="reg-field"><div class="reg-label">Business</div><div class="reg-value">${esc(p.business_name||'—')}</div></div>
+      <div class="reg-field"><div class="reg-label">UEI</div><div class="reg-value">${esc(p.uei||'Not set')}</div></div>
+      <div class="reg-field"><div class="reg-label">CAGE</div><div class="reg-value">${esc(p.cage||'—')}</div></div>
+      <div class="reg-field"><div class="reg-label">Registration</div><div class="reg-value active">${esc(p.sam_status||'Active')}</div></div>
+      <div class="reg-field" style="width:100%;flex-basis:100%">
+        <div class="reg-label">NAICS Codes</div>
+        <div class="naics-chips">${naicsHtml || '<span style="color:var(--muted);font-size:.8rem">None on file</span>'}</div>
+      </div>
+      ${certHtml ? `<div class="reg-field" style="width:100%;flex-basis:100%"><div class="reg-label">Set-Asides</div><div class="naics-chips">${certHtml}</div></div>` : ''}
+    </div>
+
+    <div class="section">
+      <div class="section-head">Capabilities</div>
+      <span class="section-rule">Describe your core services — this is what appears in Analyze Fit scores</span>
+      <div class="field">
+        <label>Core Capabilities</label>
+        <textarea id="capabilities" oninput="markDirty()">${esc(p.capabilities||'')}</textarea>
+        <p class="helper">2–4 sentences. Be specific about technical services, platforms, and delivery methods.</p>
+      </div>
+      <div class="field">
+        <label>Past Performance</label>
+        <textarea id="pastPerf" oninput="markDirty()">${esc(p.past_performance||'')}</textarea>
+        <p class="helper">Summarize relevant contracts, clients, or key deliveries. Used for capability alignment scoring.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head">Team & Certifications</div>
+      <span class="section-rule">Affects set-aside eligibility matching</span>
+      <div class="field">
+        <label>Team Size</label>
+        <select id="teamSize" onchange="markDirty()">
+          <option value="">— Select —</option>
+          <option value="1" ${p.team_size<=1?'selected':''}>Solo / 1 person</option>
+          <option value="2" ${p.team_size>=2&&p.team_size<=5?'selected':''}>2–5</option>
+          <option value="10" ${p.team_size>=6&&p.team_size<=15?'selected':''}>6–15</option>
+          <option value="25" ${p.team_size>=16&&p.team_size<=50?'selected':''}>16–50</option>
+          <option value="75" ${p.team_size>=51&&p.team_size<=100?'selected':''}>51–100</option>
+          <option value="150" ${p.team_size>100?'selected':''}>100+</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Active Set-Aside Certifications</label>
+        <div class="check-grid">
+          ${['WOSB','EDWOSB','SDVOSB','8(a)','HUBZone','Small Business'].map(c =>
+            `<label class="check-item"><input type="checkbox" value="${c}" ${(p.set_asides||[]).includes(c)?'checked':''} onchange="markDirty()"><span>${c}</span></label>`
+          ).join('')}
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head">Keywords</div>
+      <span class="section-rule">Used to improve opportunity matching relevance</span>
+      <div class="field">
+        <label>Keywords (comma-separated)</label>
+        <input type="text" id="keywords" value="${esc((p.keywords||[]).join(', '))}" oninput="markDirty()"
+          placeholder="AI automation, federal IT, cloud migration, UCCX, managed services"/>
+        <p class="helper">Technical skills, platforms, contract vehicles, industries you work in.</p>
+      </div>
+    </div>`;
+
+  document.getElementById('saveBar').style.display = 'flex';
+  document.getElementById('saveStatus').textContent = 'Profile up to date';
+  document.getElementById('saveStatus').className = 'save-status saved';
+}
+
+function markDirty() {
+  if (!dirty) {
+    dirty = true;
+    document.getElementById('saveStatus').textContent = 'Unsaved changes';
+    document.getElementById('saveStatus').className = 'save-status';
+  }
+}
+
+async function saveProfile() {
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true;
+  document.getElementById('saveStatus').textContent = 'Saving…';
+  document.getElementById('saveStatus').className = 'save-status saving';
+
+  const capabilities     = document.getElementById('capabilities').value.trim();
+  const pastPerf         = document.getElementById('pastPerf').value.trim();
+  const teamSizeVal      = document.getElementById('teamSize').value;
+  const setAsides        = Array.from(document.querySelectorAll('.check-grid input:checked')).map(c => c.value);
+  const keywordsRaw      = document.getElementById('keywords').value;
+  const keywords         = keywordsRaw.split(',').map(s => s.trim()).filter(Boolean);
+
+  try {
+    const res = await fetch(`${BASE}/capgen-enrich-profile`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + sessionToken },
+      body: JSON.stringify({
+        capabilities:    capabilities || null,
+        past_performance: pastPerf || null,
+        team_size:       teamSizeVal ? parseInt(teamSizeVal, 10) : null,
+        set_asides:      setAsides,
+        keywords:        keywords,
+      }),
+    });
+    if (!res.ok) throw new Error((await res.json()).error || 'Save failed');
+    dirty = false;
+    document.getElementById('saveStatus').textContent = 'Saved ✓';
+    document.getElementById('saveStatus').className = 'save-status saved';
+    // Refresh version badge
+    const vb = document.getElementById('versionBadge');
+    if (vb && profileData) vb.textContent = 'Profile v' + ((profileData.profile_version || 1) + 1);
+  } catch(e) {
+    document.getElementById('saveStatus').textContent = 'Save failed: ' + e.message;
+    document.getElementById('saveStatus').className = 'save-status';
+  }
+  btn.disabled = false;
+}
+
+// Warn on unsaved leave
+window.addEventListener('beforeunload', function(e) {
+  if (dirty) { e.preventDefault(); e.returnValue = ''; }
+});
+</script>
+</body>
+</html>

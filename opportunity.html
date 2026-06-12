@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Top 5 Best Matches — CapGen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital@1&family=Jost:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0A1A3A;--surface:#0f2244;--panel:#132954;--line:rgba(91,175,255,.15);
+  --line2:rgba(91,175,255,.28);--text:#f0f6ff;--muted:#8facd0;--soft:#5a7899;
+  --gold:#d9a45b;--green:#2ecc8a;--amber:#f0a500;--red:#e05555;--cyan:#5BD3FF;
+  font-family:'Jost',Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.6}
+
+/* Banner */
+.top-banner{background:var(--surface);border-bottom:1px solid var(--line2);
+  padding:11px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.banner-biz{font-size:.88rem;font-weight:700;color:var(--text)}
+.back-btn{background:var(--cyan);color:#0A1A3A;font-family:'Jost',sans-serif;font-weight:700;
+  font-size:.78rem;padding:7px 16px;border-radius:8px;text-decoration:none;white-space:nowrap;transition:.15s}
+.back-btn:hover{opacity:.88}
+
+header{background:var(--surface);border-bottom:1px solid var(--line);padding:14px 28px;
+  display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-mark{width:40px;height:40px;border-radius:10px;background:var(--bg);border:1px solid var(--line2);
+  display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;color:var(--cyan)}
+.brand-name{font-size:1rem;font-weight:700}
+.brand-sub{font-size:.72rem;color:var(--muted)}
+.badge-top5{background:rgba(217,164,91,.12);border:1px solid rgba(217,164,91,.3);color:var(--gold);
+  padding:4px 10px;border-radius:20px;font-size:.68rem;font-weight:700;letter-spacing:.04em}
+
+.page{max-width:860px;margin:0 auto;padding:28px 20px 100px}
+
+/* Rank cards */
+.rank-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;
+  padding:22px 26px;margin-bottom:14px;position:relative}
+.rank-card.rank-1{border-color:var(--cyan);border-width:2px}
+.rank-badge{position:absolute;top:-12px;left:20px;font-family:'Jost',sans-serif;font-weight:700;
+  font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;padding:3px 12px;border-radius:20px}
+.rank-badge.r1{background:var(--cyan);color:#0A1A3A}
+.rank-badge.r2{background:rgba(46,204,138,.9);color:#0A1A3A}
+.rank-badge.r3{background:var(--surface);border:1px solid var(--gold);color:var(--gold)}
+.rank-badge.r4,.rank-badge.r5{background:var(--surface);border:1px solid var(--line2);color:var(--muted)}
+
+.opp-title{font-size:1rem;font-weight:700;line-height:1.35;margin-bottom:4px;margin-top:4px}
+.opp-agency{font-size:.78rem;color:var(--muted);margin-bottom:14px}
+.opp-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px;align-items:center}
+.chip{display:inline-flex;align-items:center;padding:4px 10px;border-radius:6px;font-size:.7rem;font-weight:700}
+.chip-naics{background:rgba(91,211,255,.1);border:1px solid rgba(91,211,255,.22);color:var(--cyan)}
+.chip-hot{background:rgba(224,85,85,.18);border:1px solid rgba(224,85,85,.3);color:#ff9999}
+.chip-warm{background:rgba(240,165,0,.14);border:1px solid rgba(240,165,0,.28);color:#ffc96b}
+.chip-ok{background:rgba(46,204,138,.12);border:1px solid rgba(46,204,138,.25);color:#7eedc0}
+.chip-neutral{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);color:var(--muted)}
+
+/* Fit score (rank 1) */
+.fit-row{display:flex;align-items:center;gap:14px;background:var(--panel);border-radius:10px;
+  padding:14px 16px;margin-bottom:14px}
+.score-num{font-size:2.2rem;font-weight:900;line-height:1}
+.score-num.bid{color:var(--green)}.score-num.conditional{color:var(--amber)}.score-num.no_bid{color:var(--red)}
+.rec-badge{display:inline-block;padding:3px 10px;border-radius:5px;font-size:.65rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.08em;margin-top:5px}
+.rec-badge.bid{background:rgba(46,204,138,.18);color:var(--green);border:1px solid rgba(46,204,138,.3)}
+.rec-badge.conditional{background:rgba(240,165,0,.15);color:var(--amber);border:1px solid rgba(240,165,0,.28)}
+.rec-badge.no_bid{background:rgba(224,85,85,.14);color:var(--red);border:1px solid rgba(224,85,85,.27)}
+.rationale{font-size:.82rem;color:rgba(255,255,255,.8);line-height:1.55;flex:1}
+
+/* Pagination + filter controls */
+.opp-controls{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:18px}
+.filter-btns{display:flex;border:1px solid rgba(255,255,255,.15);border-radius:10px;overflow:hidden}
+.filter-btn{background:rgba(255,255,255,.04);border:none;border-right:1px solid rgba(255,255,255,.1);
+  color:rgba(255,255,255,.5);padding:7px 14px;font-size:.76rem;font-weight:700;cursor:pointer;
+  transition:.15s;font-family:'Jost',sans-serif;white-space:nowrap}
+.filter-btn:last-child{border-right:none}
+.filter-btn.active{background:rgba(91,211,255,.18);color:var(--cyan)}
+.page-info{font-size:.76rem;color:rgba(255,255,255,.4);margin-left:auto}
+.page-btns{display:flex;gap:6px}
+.page-btn{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:var(--white);
+  font-family:'Jost',sans-serif;font-size:.76rem;font-weight:700;padding:6px 14px;border-radius:7px;
+  cursor:pointer;transition:.15s}
+.page-btn:hover:not(:disabled){background:rgba(255,255,255,.14)}
+.page-btn:disabled{opacity:.3;cursor:default}
+.btn-ignore{background:none;border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.35);
+  font-family:'Jost',sans-serif;font-size:.72rem;padding:5px 10px;border-radius:6px;cursor:pointer;transition:.15s}
+.btn-ignore:hover{border-color:var(--red);color:var(--red)}
+.btn-signout{background:var(--white);color:var(--sap);font-family:'Jost',sans-serif;font-weight:700;
+  font-size:.76rem;padding:6px 14px;border-radius:7px;text-decoration:none;border:none;cursor:pointer;transition:.15s;white-space:nowrap}
+.btn-signout:hover{opacity:.88}
+.card-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn-view{display:inline-block;background:var(--cyan);color:#0A1A3A;font-family:'Jost',sans-serif;
+  font-weight:700;font-size:.8rem;padding:8px 18px;border-radius:8px;text-decoration:none;transition:.15s}
+.btn-view:hover{opacity:.88}
+.btn-capgen{display:inline-block;background:rgba(91,211,255,.1);border:1px solid rgba(91,211,255,.28);
+  color:var(--cyan);font-family:'Jost',sans-serif;font-weight:700;font-size:.8rem;
+  padding:8px 16px;border-radius:8px;text-decoration:none;transition:.18s}
+.btn-capgen:hover{background:rgba(91,211,255,.2)}
+
+/* Subscribe bar */
+.sub-bar{position:fixed;bottom:0;left:0;right:0;background:var(--panel);border-top:1px solid var(--line2);
+  padding:12px 28px;display:flex;align-items:center;justify-content:space-between;gap:14px;
+  z-index:100;flex-wrap:wrap}
+.sub-bar-text{font-size:.84rem;color:var(--muted)}
+.sub-bar-text strong{color:var(--text)}
+.sub-cta{background:#fff;color:#0A1A3A;font-family:'Jost',sans-serif;font-weight:700;
+  font-size:.88rem;padding:10px 22px;border-radius:8px;text-decoration:none;white-space:nowrap}
+.sub-cta:hover{background:#e8edf8}
+
+.loading-state{text-align:center;padding:60px;color:var(--muted)}
+
+@media(max-width:600px){
+  .top-banner{padding:10px 14px}
+  .page{padding:14px 12px 100px}
+  .rank-card{padding:18px 16px}
+  .fit-row{flex-wrap:wrap;gap:10px}
+  .sub-bar{flex-direction:column;align-items:stretch;text-align:center}
+}
+</style>
+</head>
+<body>
+
+<div class="top-banner">
+  <span class="banner-biz" id="bannerBiz">Top 5 Best Matches</span>
+  <a href="#" class="back-btn" id="backBtn">← Return to All Contracts</a>
+  <a href="#" id="reportBtn" style="background:rgba(217,164,91,.15);border:1px solid rgba(217,164,91,.35);color:#d9a45b;font-family:'Jost',sans-serif;font-weight:700;font-size:.78rem;padding:7px 16px;border-radius:8px;text-decoration:none;white-space:nowrap">Capability Report ↓</a>
+  <button class="btn-signout" id="signOutBtn" onclick="signOut()" style="display:none">Sign Out</button>
+</div>
+
+<header>
+  <div class="brand">
+    <div class="brand-mark">CG</div>
+    <div>
+      <div class="brand-name">CapGen</div>
+      <div class="brand-sub">Best Match Contracts</div>
+    </div>
+  </div>
+  <span class="badge-top5">Top 5</span>
+</header>
+
+<div class="page">
+  <div class="loading-state" id="loadingEl">Finding your best matches…</div>
+
+  <div class="opp-controls" id="controlsEl" style="display:none">
+    <div class="filter-btns">
+      <button class="filter-btn active" data-filter="best" onclick="setFilter('best')">Best Match</button>
+      <button class="filter-btn" data-filter="60" onclick="setFilter('60')">60 Days</button>
+      <button class="filter-btn" data-filter="30" onclick="setFilter('30')">30 Days</button>
+      <button class="filter-btn" data-filter="7" onclick="setFilter('7')">7 Days</button>
+    </div>
+    <span class="page-info" id="pageInfo"></span>
+    <div class="page-btns">
+      <button class="page-btn" id="prevBtn" onclick="changePage(-1)" disabled>← Prev</button>
+      <button class="page-btn" id="nextBtn" onclick="changePage(1)" disabled>Next →</button>
+    </div>
+  </div>
+
+  <div id="cardsEl"></div>
+</div>
+
+<div class="sub-bar">
+  <div class="sub-bar-text"><strong>Subscribe for permanent access.</strong> Daily updates, every matched opportunity, Analyze Fit on every contract.</div>
+  <a href="#" id="subCta" class="sub-cta">Subscribe Now →</a>
+</div>
+
+<script>
+'use strict';
+const STRIPE_BASE = 'https://ai4-product-purchasing.ai4businesses.org/capgen-offer.html';
+const q     = new URLSearchParams(location.search);
+const token = q.get('t') || localStorage.getItem('demo_view_token') || '';
+
+document.getElementById('backBtn').href = token ? '/demo/snapshot?t=' + encodeURIComponent(token) : '/demo';
+document.getElementById('subCta').href  = STRIPE_BASE; // token stays in DB — fetched by email at onboarding
+if (token) localStorage.setItem('demo_view_token', token);
+const reportBtn = document.getElementById('reportBtn');
+if (reportBtn) reportBtn.href = token ? '/demo/report?t=' + encodeURIComponent(token) : '/demo';
+if (localStorage.getItem('is_subscriber')) {
+  const bar = document.querySelector('.sub-bar');
+  if (bar) bar.style.display = 'none';
+}
+
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function fmtDate(iso){ if(!iso) return '—'; return new Date(iso).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
+
+function deadlineChip(opp) {
+  const dl = opp.response_deadline
+    ? Math.floor((new Date(opp.response_deadline) - new Date()) / 86400000)
+    : null;
+  if (dl === null) return '<span class="chip chip-neutral">No deadline</span>';
+  if (dl < 1)   return '<span class="chip chip-hot">Closed</span>';
+  if (dl <= 7)  return '<span class="chip chip-hot">' + dl + ' days left</span>';
+  if (dl <= 30) return '<span class="chip chip-warm">' + dl + ' days left</span>';
+  return '<span class="chip chip-ok">' + dl + ' days left · ' + fmtDate(opp.response_deadline) + '</span>';
+}
+
+const RANK_LABELS = ['#1 Best Match', '#2 Strong Match', '#3 Match', '#4 Match', '#5 Match'];
+const RANK_CSS    = ['r1', 'r2', 'r3', 'r4', 'r5'];
+
+// 7-criteria badge row
+function criteriaHtml(opp, analysis) {
+  var c = (opp.match_criteria) || {};
+  if (analysis && analysis.match) {
+    var m = analysis.match;
+    c = {
+      naics:           m.naics_match ? 'aligned' : 'gap',
+      setaside:        m.set_aside_eligible ? 'eligible' : ((!opp.set_aside || opp.set_aside === 'Unrestricted') ? 'open' : 'ineligible'),
+      capability:      m.capability_alignment === 'HIGH' ? 'high' : m.capability_alignment === 'MEDIUM' ? 'medium' : 'low',
+      risk:            (opp.days_left || 99) >= 30 ? 'low' : (opp.days_left || 0) >= 14 ? 'medium' : 'high',
+      past_performance:'relevant',
+      location:        'national',
+      certifications:  m.set_aside_eligible ? 'verified' : 'standard',
+    };
+  }
+  var GOOD  = 'background:rgba(110,231,168,.15);color:#6EE7A8;border:1px solid rgba(110,231,168,.28)';
+  var WARN  = 'background:rgba(245,158,11,.12);color:#F59E0B;border:1px solid rgba(245,158,11,.22)';
+  var BAD   = 'background:rgba(248,113,113,.12);color:#F87171;border:1px solid rgba(248,113,113,.22)';
+  var base  = 'padding:3px 8px;border-radius:5px;font-size:.64rem;font-weight:700;white-space:nowrap';
+
+  function chip(label, val, goodVals, badVals) {
+    var st = goodVals.includes(val) ? GOOD : badVals.includes(val) ? BAD : WARN;
+    var icon = goodVals.includes(val) ? '✓ ' : badVals.includes(val) ? '✗ ' : '~ ';
+    return '<span style="' + base + ';' + st + '">' + icon + label + '</span>';
+  }
+
+  return '<div style="display:flex;flex-wrap:wrap;gap:5px;margin:10px 0 12px">'
+    + chip('NAICS',         c.naics||'—',            ['aligned','primary','secondary'], ['gap','none'])
+    + chip('Set-Aside',     c.setaside||'—',         ['eligible','open'],               ['ineligible'])
+    + chip('Capability',    c.capability||'—',       ['high','aligned'],                ['low'])
+    + chip('Risk',          c.risk||'—',             ['low','no_deadline'],             ['high','critical'])
+    + chip('Past Perf.',    c.past_performance||'—', ['relevant'],                      [])
+    + chip('Location',      c.location||'—',         ['national'],                      [])
+    + chip('Certifications',c.certifications||'—',   ['verified','eligible'],           [])
+    + '</div>';
+}
+
+function renderCard(opp, rank, analysis, capgenUrl) {
+  const isTop = rank === 0;
+  const displayScore = analysis ? (analysis.fit_score != null ? analysis.fit_score : '—') : (opp.match_score != null ? opp.match_score : '—');
+  let fitHtml = '';
+  if (isTop && analysis) {
+    const rec   = (analysis.recommendation || '').toLowerCase().replace(' ', '_');
+    const score = analysis.fit_score != null ? analysis.fit_score : displayScore;
+    fitHtml = '<div class="fit-row">'
+      + '<div style="text-align:center;flex-shrink:0">'
+      + '<div class="score-num ' + rec + '">' + score + '</div>'
+      + '<div class="rec-badge ' + rec + '">' + (analysis.recommendation || '—') + '</div>'
+      + '</div>'
+      + '<div class="rationale">' + esc(analysis.rationale || '') + '</div>'
+      + '</div>';
+  } else if (displayScore !== '—') {
+    fitHtml = '<div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.05);'
+      + 'border-radius:8px;padding:7px 12px;margin-bottom:8px">'
+      + '<span style="font-family:\'Jost\',sans-serif;font-size:1.4rem;font-weight:900;color:#6EE7A8;line-height:1">' + displayScore + '</span>'
+      + '<span style="font-size:.68rem;color:rgba(255,255,255,.5)">Match Score</span>'
+      + '</div>';
+  }
+  fitHtml += criteriaHtml(opp, analysis);
+
+  return '<div class="rank-card' + (isTop ? ' rank-1' : '') + '" id="card-' + esc(opp.notice_id || rank) + '">'
+    + '<div class="rank-badge ' + RANK_CSS[Math.min(rank, 4)] + '">' + RANK_LABELS[Math.min(rank, 4)] + '</div>'
+    + '<h3 class="opp-title">' + esc(opp.title || 'Untitled') + '</h3>'
+    + '<div class="opp-agency">' + esc(opp.agency || '—') + '</div>'
+    + '<div class="opp-chips">'
+    + (opp.naics ? '<span class="chip chip-naics">NAICS ' + esc(opp.naics) + '</span>' : '')
+    + deadlineChip(opp)
+    + (opp.set_aside && opp.set_aside !== 'None' && opp.set_aside !== 'Unrestricted'
+        ? '<span class="chip chip-neutral">' + esc(opp.set_aside.slice(0, 40)) + '</span>' : '')
+    + '</div>'
+    + fitHtml
+    + '<div class="card-actions">'
+    + (opp.url ? '<a href="' + esc(opp.url) + '" target="_blank" rel="noopener" class="btn-view">View Opportunity →</a>' : '')
+    + '<a href="' + esc(capgenUrl) + '" class="btn-capgen">Generate CapGen Statement</a>'
+    + '<button class="btn-ignore" onclick="ignoreOpp(' + JSON.stringify(opp.notice_id || '') + ')">✕ Ignore</button>'
+    + '</div>'
+    + '</div>';
+}
+
+// ── Pagination / filter state ─────────────────────────────────────────────────
+let allOpps      = [];
+let snapAnalysis = null;
+let capgenUrl    = '/capability-generator.html';
+let currentPage  = 0;
+let currentFilter = 'best';
+const PAGE_SIZE  = 5;
+let ignoredIds   = new Set(JSON.parse(localStorage.getItem('ignored_opps_' + (token || '')) || '[]'));
+
+function saveIgnored() {
+  localStorage.setItem('ignored_opps_' + (token || ''), JSON.stringify([...ignoredIds]));
+}
+
+function ignoreOpp(noticeId) {
+  if (noticeId) ignoredIds.add(noticeId);
+  saveIgnored();
+  currentPage = 0;
+  renderPage();
+}
+
+function setFilter(f) {
+  currentFilter = f;
+  currentPage = 0;
+  document.querySelectorAll('.filter-btn').forEach(function(b) {
+    b.classList.toggle('active', b.dataset.filter === f);
+  });
+  renderPage();
+}
+
+function changePage(delta) {
+  currentPage += delta;
+  renderPage();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function getFiltered() {
+  var pool = allOpps.filter(function(o) { return !ignoredIds.has(o.notice_id); });
+  if (currentFilter === '60') pool = pool.filter(function(o) { return o.days_left !== null && o.days_left <= 60; });
+  else if (currentFilter === '30') pool = pool.filter(function(o) { return o.days_left !== null && o.days_left <= 30; });
+  else if (currentFilter === '7')  pool = pool.filter(function(o) { return o.days_left !== null && o.days_left <= 7; });
+  return pool.sort(function(a, b) { return (b.match_score || 0) - (a.match_score || 0); });
+}
+
+function renderPage() {
+  var filtered = getFiltered();
+  var total    = filtered.length;
+  var start    = currentPage * PAGE_SIZE;
+  var end      = Math.min(start + PAGE_SIZE, total);
+  var page     = filtered.slice(start, end);
+
+  document.getElementById('pageInfo').textContent =
+    total ? 'Showing ' + (start + 1) + '–' + end + ' of ' + total + ' matches' : 'No matches in this window';
+  document.getElementById('prevBtn').disabled = currentPage === 0;
+  document.getElementById('nextBtn').disabled = end >= total;
+
+  if (!page.length) {
+    document.getElementById('cardsEl').innerHTML =
+      '<div style="text-align:center;padding:40px;color:var(--soft)">No matches in this window — try a wider date range.</div>';
+    return;
+  }
+
+  document.getElementById('cardsEl').innerHTML = page.map(function(opp, i) {
+    return renderCard(opp, start + i, start + i === 0 ? snapAnalysis : null, capgenUrl);
+  }).join('');
+}
+
+function signOut() {
+  sessionStorage.clear();
+  window.location.href = '/';
+}
+
+async function load() {
+  if (!token) {
+    document.getElementById('loadingEl').innerHTML =
+      'No session. <a href="/demo" style="color:var(--cyan)">Start a new demo →</a> or <a href="/onboarding" style="color:var(--cyan)">Member Login →</a>';
+    return;
+  }
+  try {
+    var res  = await fetch('/.netlify/functions/demo-get?t=' + encodeURIComponent(token));
+    if (!res.ok) throw new Error('Snapshot not found');
+    var snap = await res.json();
+
+    var profile    = snap.profile || {};
+    var bizName    = profile.legal_name || snap.business_name || '';
+    var entityUei  = profile.uei || '';
+    capgenUrl      = '/capability-generator.html?uei=' + encodeURIComponent(entityUei);
+    snapAnalysis   = snap.analysis;
+    allOpps        = snap.opportunities || [];
+
+    // Ensure days_left is populated for filter logic
+    var now = new Date();
+    allOpps.forEach(function(o) {
+      if (o.days_left === undefined || o.days_left === null) {
+        o.days_left = o.response_deadline
+          ? Math.floor((new Date(o.response_deadline) - now) / 86400000) : null;
+      }
+    });
+
+    if (bizName) document.getElementById('bannerBiz').textContent = bizName + ' — Best Matches';
+
+    if (localStorage.getItem('is_subscriber')) {
+      var bar = document.querySelector('.sub-bar');
+      if (bar) bar.style.display = 'none';
+      var so = document.getElementById('signOutBtn');
+      if (so) so.style.display = 'inline-block';
+    }
+
+    document.getElementById('loadingEl').style.display = 'none';
+    document.getElementById('controlsEl').style.display = 'flex';
+
+    if (!allOpps.length) {
+      document.getElementById('cardsEl').innerHTML =
+        '<div style="text-align:center;padding:48px;color:var(--soft)">No matched opportunities found for your NAICS codes this week.</div>';
+      return;
+    }
+
+    renderPage();
+
+  } catch(e) {
+    document.getElementById('loadingEl').textContent = 'Error: ' + e.message;
+  }
+}
+
+load();
+</script>
+</body>
+</html>

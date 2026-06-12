@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Client Onboarding — CapGen Admin</title>
+<style>
+:root{--bg:#0A1A3A;--surface:#0f2244;--line:rgba(91,175,255,.18);--line2:rgba(91,175,255,.32);--text:#f0f6ff;--muted:#8facd0;--soft:#5a7899;--cyan:#5BD3FF;--green:#2ecc8a;--red:#e05555;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);min-height:100vh;font-family:Arial,Helvetica,sans-serif;display:flex;align-items:center;justify-content:center;padding:24px}
+.card{background:var(--surface);border:1px solid var(--line2);border-radius:20px;padding:40px;max-width:480px;width:100%;box-shadow:0 32px 80px rgba(0,0,0,.5)}
+.header{display:flex;align-items:center;gap:12px;margin-bottom:28px}
+.logo{background:var(--bg);border:1px solid var(--line2);border-radius:10px;padding:8px 12px;font-weight:900;color:var(--cyan);font-family:monospace;font-size:14px}
+h1{font-size:1.25rem;font-weight:700;color:var(--text)}
+.sub{font-size:.82rem;color:var(--muted);margin-top:4px}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+label{font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);font-weight:700}
+input{background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:10px;color:var(--text);padding:11px 14px;font-size:.92rem;outline:none;transition:.18s}
+input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(91,211,255,.1)}
+input::placeholder{color:var(--soft)}
+.optional{font-size:.68rem;color:var(--soft);margin-left:4px;font-weight:400;text-transform:none}
+.btn{width:100%;background:var(--cyan);color:#0A1A3A;border:none;border-radius:10px;padding:14px;font-weight:700;font-size:.95rem;cursor:pointer;margin-top:8px;transition:.18s}
+.btn:hover:not(:disabled){opacity:.88}
+.btn:disabled{opacity:.5;cursor:wait}
+.result{display:none;margin-top:18px;border-radius:10px;padding:14px 16px;font-size:.88rem;line-height:1.6}
+.result.success{background:rgba(46,204,138,.1);border:1px solid rgba(46,204,138,.3);color:#7eedc0}
+.result.error{background:rgba(224,85,85,.1);border:1px solid rgba(224,85,85,.3);color:#ffaaaa}
+.divider{border:none;border-top:1px solid var(--line);margin:22px 0}
+.sent-list{margin-top:20px}
+.sent-list h3{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);margin-bottom:10px}
+.sent-item{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin-bottom:8px;font-size:.82rem;color:var(--muted)}
+.sent-item strong{color:var(--text)}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="header">
+    <div class="logo">CG</div>
+    <div>
+      <h1>Client Onboarding</h1>
+      <div class="sub">CapGen by AI4 Businesses · Admin</div>
+    </div>
+  </div>
+
+  <form id="onboardForm">
+    <div class="field">
+      <label for="firstName">First Name</label>
+      <input id="firstName" type="text" placeholder="Lori" required/>
+    </div>
+    <div class="field">
+      <label for="bizName">Business Name</label>
+      <input id="bizName" type="text" placeholder="Custom IT Services LLC" required/>
+    </div>
+    <div class="field">
+      <label for="email">Email Address</label>
+      <input id="email" type="email" placeholder="lori@customitservices-llc.com" required/>
+    </div>
+    <div class="field">
+      <label for="uei">UEI <span class="optional">(optional — from SAM.gov)</span></label>
+      <input id="uei" type="text" placeholder="C13JZV6AY6L4"/>
+    </div>
+    <div class="field">
+      <label for="adminKey">Admin Key</label>
+      <input id="adminKey" type="password" placeholder="Your ONBOARD_ADMIN_KEY" required/>
+    </div>
+
+    <button class="btn" type="submit" id="submitBtn">Onboard Client & Send Welcome Email →</button>
+  </form>
+
+  <div class="result" id="result"></div>
+
+  <hr class="divider"/>
+
+  <div class="sent-list" id="sentList">
+    <h3>Sent this session</h3>
+    <div id="sentItems"><div style="font-size:.8rem;color:var(--soft)">None yet.</div></div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const form    = document.getElementById('onboardForm');
+const btn     = document.getElementById('submitBtn');
+const result  = document.getElementById('result');
+const sentItems = document.getElementById('sentItems');
+const log = [];
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const firstName    = document.getElementById('firstName').value.trim();
+  const businessName = document.getElementById('bizName').value.trim();
+  const email        = document.getElementById('email').value.trim();
+  const uei          = document.getElementById('uei').value.trim();
+  const adminKey     = document.getElementById('adminKey').value.trim();
+
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+  result.style.display = 'none';
+
+  try {
+    const res = await fetch('/.netlify/functions/onboard-client', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Admin-Key': adminKey },
+      body: JSON.stringify({ email, first_name: firstName, business_name: businessName, uei }),
+    });
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.error || 'Onboarding failed');
+
+    result.className = 'result success';
+    result.style.display = 'block';
+    result.innerHTML = `✓ <strong>${businessName}</strong> onboarded.<br/>Welcome email sent to <strong>${email}</strong>.`;
+
+    // Log to session list
+    log.unshift({ firstName, businessName, email, time: new Date().toLocaleTimeString() });
+    sentItems.innerHTML = log.map(l =>
+      `<div class="sent-item"><strong>${l.businessName}</strong> · ${l.email} · ${l.time}</div>`
+    ).join('');
+
+    // Reset form (keep admin key)
+    document.getElementById('firstName').value = '';
+    document.getElementById('bizName').value = '';
+    document.getElementById('email').value = '';
+    document.getElementById('uei').value = '';
+
+  } catch (err) {
+    result.className = 'result error';
+    result.style.display = 'block';
+    result.textContent = '✗ ' + (err.message || 'Something went wrong.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Onboard Client & Send Welcome Email →';
+  }
+});
+</script>
+</body>
+</html>

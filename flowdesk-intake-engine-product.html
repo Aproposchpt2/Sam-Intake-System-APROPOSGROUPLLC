@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FlowDesk Intake Engine - FlowDesk Pro</title>
+  <meta name="description" content="FlowDesk Intake Engine captures structured customer inquiries and prepares dashboard-ready lead records for FlowDesk Lead Manager." />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+    :root {
+      --bg: #030816;
+      --bg-2: #07162a;
+      --panel: rgba(8, 24, 47, 0.72);
+      --panel-2: rgba(12, 32, 56, 0.82);
+      --line: rgba(184, 196, 217, 0.14);
+      --line-strong: rgba(45, 184, 255, 0.36);
+      --blue: #1ea7ff;
+      --blue-2: #2db8ff;
+      --blue-3: #5bd3ff;
+      --silver: #d5deea;
+      --white: #f5f8ff;
+      --muted: #aebed3;
+      --muted-2: #7f93ad;
+      --green: #49d89c;
+      --amber: #f4c563;
+      --purple: #9c8cff;
+      --shadow: 0 28px 90px rgba(0, 0, 0, 0.42);
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Inter', sans-serif;
+      --display: 'Syne', sans-serif;
+      --r-sm: 10px;
+      --r-md: 16px;
+      --r-lg: 24px;
+      --r-xl: 34px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      min-height: 100vh;
+      color: var(--muted);
+      font-family: var(--sans);
+      background: linear-gradient(180deg, var(--bg) 0%, #02050e 48%, var(--bg-2) 100%);
+      overflow-x: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(45, 184, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(45, 184, 255, 0.035) 1px, transparent 1px);
+      background-size: 64px 64px;
+      mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.18) 70%, rgba(0, 0, 0, 0.04));
+    }
+    a { color: inherit; }
+    img { display: block; max-width: 100%; }
+
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      min-height: 68px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.75rem clamp(1rem, 4vw, 2.5rem);
+      background: rgba(3, 8, 22, 0.92);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(22px);
+    }
+    .nav-logo { display: flex; align-items: center; gap: 0.9rem; text-decoration: none; }
+    .nav-logo img { height: 36px; width: auto; filter: drop-shadow(0 0 10px rgba(30, 167, 255, 0.55)); }
+    .nav-logo span {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--blue-3);
+    }
+    .nav-links { display: flex; align-items: center; gap: 0.55rem; }
+    .nav-link {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 0.55rem 0.85rem;
+      border-radius: 999px;
+      transition: background 0.18s, color 0.18s;
+    }
+    .nav-link:hover,
+    .nav-link.active { color: var(--white); background: rgba(255, 255, 255, 0.06); }
+    .nav-cta,
+    .btn-primary {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      color: #03101f;
+      background: linear-gradient(135deg, var(--white), var(--blue-3) 44%, var(--blue));
+      border-radius: 999px;
+      padding: 0.82rem 1.35rem;
+      text-decoration: none;
+      box-shadow: 0 0 26px rgba(30, 167, 255, 0.34);
+      transition: transform 0.18s, box-shadow 0.18s;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+    }
+    .nav-cta:hover,
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 0 38px rgba(30, 167, 255, 0.52); }
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 0.82rem 1.25rem;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--white);
+      text-decoration: none;
+      font-weight: 800;
+      background: rgba(255, 255, 255, 0.055);
+      transition: transform 0.18s, border-color 0.18s, background 0.18s;
+    }
+    .btn-secondary:hover { transform: translateY(-1px); border-color: var(--line-strong); background: rgba(45, 184, 255, 0.1); }
+
+    main { position: relative; z-index: 1; }
+    .hero {
+      min-height: calc(100vh - 68px);
+      padding: clamp(3rem, 7vw, 6.5rem) clamp(1rem, 4vw, 2.5rem);
+      display: grid;
+      align-items: center;
+      border-bottom: 1px solid var(--line);
+    }
+    .hero-grid {
+      width: min(1180px, 100%);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: minmax(0, 1.02fr) minmax(360px, 0.78fr);
+      gap: clamp(1.25rem, 4vw, 3rem);
+      align-items: center;
+    }
+    .eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--blue-3);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin-bottom: 0.9rem;
+    }
+    .eyebrow::before {
+      content: '';
+      width: 26px;
+      height: 1px;
+      background: linear-gradient(90deg, var(--blue), transparent);
+      box-shadow: 0 0 8px rgba(30, 167, 255, 0.6);
+    }
+    h1,
+    .section-title {
+      color: var(--white);
+      font-family: var(--display);
+      letter-spacing: 0;
+      line-height: 0.98;
+    }
+    h1 {
+      font-size: clamp(3rem, 8vw, 6.6rem);
+      max-width: 820px;
+    }
+    .hero-sub {
+      color: var(--blue-3);
+      font-size: clamp(1.12rem, 2vw, 1.5rem);
+      font-weight: 800;
+      line-height: 1.35;
+      margin-top: 1.1rem;
+      max-width: 780px;
+    }
+    .hero-copy {
+      color: var(--silver);
+      font-size: 1.03rem;
+      line-height: 1.8;
+      max-width: 740px;
+      margin-top: 1rem;
+    }
+    .hero-actions,
+    .cta-row { display: flex; flex-wrap: wrap; gap: 0.85rem; align-items: center; margin-top: 1.65rem; }
+    .hero-badges { display: flex; flex-wrap: wrap; gap: 0.65rem; margin-top: 1.5rem; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      padding: 0.38rem 0.8rem;
+      border: 1px solid rgba(91, 211, 255, 0.22);
+      border-radius: 999px;
+      color: var(--blue-3);
+      background: rgba(45, 184, 255, 0.08);
+      font-family: var(--mono);
+      font-size: 0.66rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .hero-panel {
+      border: 1px solid var(--line);
+      border-radius: var(--r-xl);
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.018)), var(--panel);
+      box-shadow: var(--shadow);
+      padding: clamp(1rem, 2.5vw, 1.5rem);
+      overflow: hidden;
+    }
+    .mini-browser {
+      border: 1px solid rgba(184, 196, 217, 0.14);
+      border-radius: var(--r-lg);
+      background: rgba(2, 8, 18, 0.82);
+      overflow: hidden;
+    }
+    .browser-top {
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0 1rem;
+      border-bottom: 1px solid var(--line);
+      color: var(--muted-2);
+      font-family: var(--mono);
+      font-size: 0.68rem;
+    }
+    .dots { display: flex; gap: 0.38rem; }
+    .dots span { width: 8px; height: 8px; border-radius: 50%; background: var(--blue-3); opacity: 0.65; }
+    .form-preview { display: grid; gap: 0.8rem; padding: 1rem; }
+    .preview-field {
+      border: 1px solid rgba(184, 196, 217, 0.13);
+      border-radius: var(--r-sm);
+      padding: 0.75rem;
+      background: rgba(255, 255, 255, 0.035);
+    }
+    .preview-field span {
+      display: block;
+      color: var(--muted-2);
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      text-transform: uppercase;
+      letter-spacing: 0.11em;
+      margin-bottom: 0.35rem;
+    }
+    .preview-field strong { color: var(--white); font-size: 0.94rem; line-height: 1.35; }
+    .preview-submit {
+      min-height: 44px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #03101f;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      background: linear-gradient(135deg, var(--white), var(--blue-3), var(--green));
+    }
+
+    .section { padding: clamp(3rem, 7vw, 5.5rem) clamp(1rem, 4vw, 2.5rem); border-bottom: 1px solid var(--line); }
+    .section-inner { width: min(1180px, 100%); margin: 0 auto; }
+    .section-heading { max-width: 820px; margin-bottom: 1.5rem; }
+    .section-title { font-size: clamp(2rem, 4vw, 4rem); }
+    .section-copy { color: var(--silver); line-height: 1.75; font-size: 1rem; margin-top: 0.85rem; max-width: 760px; }
+
+    .workflow-grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+    }
+    .workflow-step,
+    .feature-card,
+    .value-card,
+    .connection-card,
+    .chain-card {
+      border: 1px solid var(--line);
+      border-radius: var(--r-lg);
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.065), rgba(255, 255, 255, 0.018)), var(--panel);
+      box-shadow: 0 18px 54px rgba(0, 0, 0, 0.24);
+    }
+    .workflow-step {
+      min-height: 180px;
+      padding: 1rem;
+      display: grid;
+      align-content: space-between;
+      gap: 1rem;
+    }
+    .step-num {
+      width: 38px;
+      height: 38px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      color: #03101f;
+      background: linear-gradient(135deg, var(--white), var(--blue-3));
+      font-family: var(--mono);
+      font-weight: 900;
+      font-size: 0.78rem;
+    }
+    .workflow-step h3,
+    .feature-card h3,
+    .value-card h3,
+    .connection-card h3,
+    .chain-card h3 {
+      color: var(--white);
+      font-size: 1rem;
+      line-height: 1.25;
+      margin-bottom: 0.5rem;
+    }
+    .workflow-step p,
+    .feature-card p,
+    .value-card p,
+    .connection-card p,
+    .chain-card p {
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.65;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .feature-card { padding: 1.1rem; min-height: 188px; display: grid; align-content: start; gap: 0.85rem; }
+    .feature-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(91, 211, 255, 0.24);
+      background: rgba(45, 184, 255, 0.1);
+      color: var(--blue-3);
+      font-family: var(--mono);
+      font-weight: 900;
+    }
+    .planned {
+      display: inline-flex;
+      width: fit-content;
+      color: #281900;
+      background: var(--amber);
+      border-radius: 999px;
+      padding: 0.25rem 0.55rem;
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .demo-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+      gap: 1rem;
+      margin-top: 1.6rem;
+      align-items: stretch;
+    }
+    .demo-pane {
+      border: 1px solid var(--line);
+      border-radius: var(--r-lg);
+      background: var(--panel);
+      overflow: hidden;
+      min-height: 100%;
+    }
+    .pane-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      min-height: 58px;
+      padding: 0.9rem 1rem;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.035);
+    }
+    .pane-head strong { color: var(--white); }
+    .pane-head span { color: var(--blue-3); font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.08em; text-transform: uppercase; }
+    .demo-form,
+    .demo-card-wrap { padding: 1rem; display: grid; gap: 0.8rem; }
+    .demo-input {
+      border: 1px solid rgba(184, 196, 217, 0.13);
+      border-radius: var(--r-sm);
+      min-height: 48px;
+      padding: 0.75rem 0.85rem;
+      color: var(--silver);
+      background: rgba(2, 8, 18, 0.65);
+    }
+    .demo-input.large { min-height: 104px; line-height: 1.55; }
+    .submitted {
+      border: 1px solid rgba(73, 216, 156, 0.28);
+      border-radius: var(--r-md);
+      padding: 1rem;
+      background: rgba(73, 216, 156, 0.08);
+    }
+    .submitted h4,
+    .lead-preview h4 { color: var(--white); margin-bottom: 0.45rem; }
+    .submitted p,
+    .lead-preview p { line-height: 1.65; }
+    .lead-preview {
+      border: 1px solid rgba(91, 211, 255, 0.28);
+      border-radius: var(--r-md);
+      padding: 1rem;
+      background: rgba(45, 184, 255, 0.08);
+    }
+    .lead-meta {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.6rem;
+      margin-top: 0.8rem;
+    }
+    .lead-meta div {
+      border: 1px solid rgba(184, 196, 217, 0.13);
+      border-radius: 12px;
+      padding: 0.7rem;
+      background: rgba(255, 255, 255, 0.035);
+    }
+    .lead-meta span {
+      display: block;
+      color: var(--muted-2);
+      font-family: var(--mono);
+      font-size: 0.58rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.32rem;
+    }
+    .lead-meta strong { color: var(--white); font-size: 0.82rem; line-height: 1.35; overflow-wrap: anywhere; }
+
+    .connection-grid,
+    .value-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .connection-card,
+    .value-card { padding: 1.15rem; }
+    .connection-card.highlight {
+      grid-column: span 2;
+      background: linear-gradient(145deg, rgba(45, 184, 255, 0.12), rgba(255, 255, 255, 0.02)), var(--panel);
+      border-color: var(--line-strong);
+    }
+    .notice {
+      margin-top: 1rem;
+      border: 1px solid rgba(244, 197, 99, 0.32);
+      border-radius: var(--r-md);
+      background: rgba(244, 197, 99, 0.08);
+      color: #ffe3a1;
+      padding: 1rem;
+      line-height: 1.6;
+    }
+    .value-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem;
+      margin-top: 1.4rem;
+      list-style: none;
+    }
+    .value-list li {
+      border: 1px solid var(--line);
+      border-radius: var(--r-md);
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.035);
+      color: var(--silver);
+      line-height: 1.55;
+    }
+    .value-list li::before {
+      content: '•';
+      color: var(--blue-3);
+      font-weight: 900;
+      margin-right: 0.5rem;
+    }
+
+    .chain {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 0.75rem;
+      margin-top: 1.4rem;
+    }
+    .chain-card { padding: 1rem; min-height: 150px; }
+    .chain-card.active { border-color: var(--line-strong); background: rgba(45, 184, 255, 0.08); }
+
+    .final-cta {
+      text-align: center;
+      padding: clamp(3.5rem, 8vw, 6.5rem) clamp(1rem, 4vw, 2.5rem);
+    }
+    .final-card {
+      width: min(980px, 100%);
+      margin: 0 auto;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--r-xl);
+      background: linear-gradient(145deg, rgba(45, 184, 255, 0.15), rgba(73, 216, 156, 0.06)), var(--panel);
+      box-shadow: var(--shadow);
+      padding: clamp(1.5rem, 5vw, 3rem);
+    }
+    .final-card h2 {
+      color: var(--white);
+      font-family: var(--display);
+      font-size: clamp(2rem, 5vw, 4.6rem);
+      line-height: 1;
+      letter-spacing: 0;
+    }
+    .final-card p {
+      margin: 1rem auto 0;
+      max-width: 680px;
+      color: var(--silver);
+      line-height: 1.75;
+    }
+    footer {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+      padding: 1.5rem;
+      border-top: 1px solid var(--line);
+      color: var(--muted-2);
+      font-size: 0.82rem;
+    }
+    footer img { height: 28px; width: auto; }
+
+    @media (max-width: 1100px) {
+      .hero-grid,
+      .demo-grid { grid-template-columns: 1fr; }
+      .workflow-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .feature-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .chain { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 820px) {
+      nav { align-items: stretch; flex-direction: column; }
+      .nav-links { flex-wrap: wrap; justify-content: center; }
+      .nav-cta { width: 100%; }
+      .hero { min-height: auto; }
+      .hero-grid { grid-template-columns: 1fr; }
+      .workflow-grid,
+      .feature-grid,
+      .connection-grid,
+      .value-grid,
+      .value-list,
+      .lead-meta,
+      .chain { grid-template-columns: 1fr; }
+      .connection-card.highlight { grid-column: auto; }
+      h1 { font-size: clamp(2.55rem, 18vw, 4.1rem); }
+      .cta-row,
+      .hero-actions { align-items: stretch; flex-direction: column; }
+      .btn-primary,
+      .btn-secondary { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a class="nav-logo" href="index.html">
+      <img src="AI4-FLOWDESK-PRO-LOGO.png" alt="FlowDesk Pro" />
+      <span>AI Business Automation</span>
+    </a>
+    <div class="nav-links">
+      <a class="nav-link" href="index.html#models">Models</a>
+      <a class="nav-link" href="index.html#workflow">Workflow</a>
+      <a class="nav-link active" href="flowdesk-intake-engine-product.html">Intake Engine</a>
+      <a class="nav-link" href="flowdesk-lead-manager-dashboard.html">Lead Manager</a>
+    </div>
+    <a class="nav-cta" href="flowdesk-intake-engine.html">View Intake Demo</a>
+  </nav>
+
+  <main>
+    <section class="hero">
+      <div class="hero-grid">
+        <div>
+          <div class="eyebrow">FlowDesk Pro / Product Line</div>
+          <h1>FlowDesk Intake Engine</h1>
+          <p class="hero-sub">Structured customer intake that turns inquiries into dashboard-ready lead records.</p>
+          <p class="hero-copy">
+            Capture the right customer details, organize incoming requests, and prepare every submission
+            for review, follow-up, and CRM-style tracking inside FlowDesk Pro.
+          </p>
+          <div class="hero-actions">
+            <a class="btn-primary" href="flowdesk-intake-engine.html">View Intake Demo</a>
+            <a class="btn-secondary" href="mailto:jmitchell@aiflowdeskpro.com?subject=FlowDesk%20Intake%20Engine%20Private%20Demo">Request a Private Demo</a>
+          </div>
+          <div class="hero-badges">
+            <span class="badge">Structured Intake</span>
+            <span class="badge">Lead Manager Ready</span>
+            <span class="badge">CRM-Style Tracking</span>
+          </div>
+        </div>
+
+        <aside class="hero-panel" aria-label="Intake Engine preview">
+          <div class="mini-browser">
+            <div class="browser-top">
+              <div class="dots"><span></span><span></span><span></span></div>
+              <span>flowdesk / intake</span>
+            </div>
+            <div class="form-preview">
+              <div class="preview-field"><span>Customer</span><strong>Maria Lopez, BrightSide Dental</strong></div>
+              <div class="preview-field"><span>Request Type</span><strong>New appointment inquiry</strong></div>
+              <div class="preview-field"><span>Urgency</span><strong>Time-sensitive</strong></div>
+              <div class="preview-field"><span>Next Action</span><strong>Review in Lead Manager and follow up</strong></div>
+              <div class="preview-submit">Prepare Dashboard Record</div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section" id="workflow">
+      <div class="section-inner">
+        <div class="section-heading">
+          <div class="eyebrow">Workflow</div>
+          <h2 class="section-title">From customer inquiry to organized follow-up.</h2>
+          <p class="section-copy">
+            Intake Engine gives every request a clean shape before it reaches the business owner or operator.
+          </p>
+        </div>
+        <div class="workflow-grid">
+          <article class="workflow-step">
+            <div class="step-num">01</div>
+            <div><h3>Customer submits inquiry</h3><p>A customer enters contact details, service needs, and preferred follow-up information.</p></div>
+          </article>
+          <article class="workflow-step">
+            <div class="step-num">02</div>
+            <div><h3>FlowDesk captures structured details</h3><p>The request is normalized into fields the business can scan quickly.</p></div>
+          </article>
+          <article class="workflow-step">
+            <div class="step-num">03</div>
+            <div><h3>Request is categorized for review</h3><p>Request type, urgency, source, and next action give the record operating context.</p></div>
+          </article>
+          <article class="workflow-step">
+            <div class="step-num">04</div>
+            <div><h3>Dashboard-ready lead record is prepared</h3><p>The submission becomes a cleaner record for Lead Manager review.</p></div>
+          </article>
+          <article class="workflow-step">
+            <div class="step-num">05</div>
+            <div><h3>Business reviews the request</h3><p>Owners and teams can see what came in, what matters, and what needs attention.</p></div>
+          </article>
+          <article class="workflow-step">
+            <div class="step-num">06</div>
+            <div><h3>Follow-up action is managed</h3><p>Email Lead and Callback Task help track managed follow-up from the dashboard.</p></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="features">
+      <div class="section-inner">
+        <div class="section-heading">
+          <div class="eyebrow">Product Capabilities</div>
+          <h2 class="section-title">Built for cleaner intake before the follow-up starts.</h2>
+        </div>
+        <div class="feature-grid">
+          <article class="feature-card"><div class="feature-icon">01</div><h3>Guided Customer Intake</h3><p>A focused public intake path helps customers submit the information a business needs to evaluate the request.</p></article>
+          <article class="feature-card"><div class="feature-icon">02</div><h3>Structured Lead Capture</h3><p>Contact details, business context, service needs, notes, and consent fields are organized into a repeatable record format.</p></article>
+          <article class="feature-card"><div class="feature-icon">03</div><h3>Request Type and Urgency Fields</h3><p>Requests can be sorted by category and urgency so teams can prioritize review without scanning scattered messages.</p></article>
+          <article class="feature-card"><div class="feature-icon">04</div><h3>Dashboard-Ready Records</h3><p>Each submission is prepared for FlowDesk Lead Manager, where the business can review and update the lead record.</p></article>
+          <article class="feature-card"><div class="feature-icon">05</div><h3>Follow-Up Visibility</h3><p>Lead status, next action, internal notes, and follow-up flags make it easier to see what needs action.</p></article>
+          <article class="feature-card"><div class="feature-icon">06</div><span class="planned">Future-ready</span><h3>Future AI Summary Support</h3><p>The page structure supports AI-assisted summaries when the workflow is promoted to a connected production path.</p></article>
+          <article class="feature-card"><div class="feature-icon">07</div><span class="planned">Planned</span><h3>Future SMS Follow-Up Support</h3><p>SMS follow-up can be added after approval and compliance requirements are verified.</p></article>
+          <article class="feature-card"><div class="feature-icon">08</div><span class="planned">Planned</span><h3>Future Appointment Request Workflow</h3><p>Appointment request handling can be layered into the intake path without claiming automatic booking today.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="demo-preview">
+      <div class="section-inner">
+        <div class="section-heading">
+          <div class="eyebrow">Demo Preview</div>
+          <h2 class="section-title">A static preview of the intake-to-dashboard path.</h2>
+          <p class="section-copy">
+            This preview is local and static. It does not write to Supabase, send email, trigger SMS, or place calls.
+          </p>
+        </div>
+        <div class="demo-grid">
+          <article class="demo-pane">
+            <div class="pane-head"><strong>Sample intake form</strong><span>Customer view</span></div>
+            <div class="demo-form">
+              <div class="demo-input">Full name: Maria Lopez</div>
+              <div class="demo-input">Business: BrightSide Dental</div>
+              <div class="demo-input">Request type: Appointment inquiry</div>
+              <div class="demo-input">Urgency: Time-sensitive</div>
+              <div class="demo-input large">Details: New patient needs a cleaning and wants a callback before Friday afternoon.</div>
+              <div class="preview-submit">Sample Submit</div>
+            </div>
+          </article>
+          <article class="demo-pane">
+            <div class="pane-head"><strong>Prepared record</strong><span>Lead Manager view</span></div>
+            <div class="demo-card-wrap">
+              <div class="submitted">
+                <h4>Sample submitted request</h4>
+                <p>BrightSide Dental received a time-sensitive appointment inquiry with phone, email, preferred callback time, and request details captured in one place.</p>
+              </div>
+              <div class="lead-preview">
+                <h4>Dashboard-ready lead card</h4>
+                <p>Lead Manager can review the customer, request category, urgency, next action, and follow-up state from a single record.</p>
+                <div class="lead-meta">
+                  <div><span>Status</span><strong>New / Priority Review</strong></div>
+                  <div><span>Next Action</span><strong>Callback task</strong></div>
+                  <div><span>Source</span><strong>Web Intake</strong></div>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+        <div class="cta-row">
+          <a class="btn-primary" href="flowdesk-intake-engine.html">Open Live Intake Demo</a>
+          <a class="btn-secondary" href="flowdesk-lead-manager-dashboard.html">View Lead Manager</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="lead-manager">
+      <div class="section-inner">
+        <div class="section-heading">
+          <div class="eyebrow">Lead Manager Connection</div>
+          <h2 class="section-title">Intake becomes action inside FlowDesk Lead Manager.</h2>
+          <p class="section-copy">
+            FlowDesk Intake Engine captures structured customer information. FlowDesk Lead Manager organizes
+            that information into records that can be reviewed, updated, and acted on from one dashboard.
+          </p>
+        </div>
+        <div class="connection-grid">
+          <article class="connection-card highlight">
+            <h3>Current managed actions</h3>
+            <p>Email Lead supports a managed follow-up email action. Callback Task creates a managed follow-up task, updates the lead status, and records the next action for the team.</p>
+            <div class="notice">Callback Task does not place an automatic outbound call. The manual Call link remains available for human follow-up.</div>
+          </article>
+          <article class="connection-card">
+            <h3>Review queue</h3>
+            <p>Lead Manager helps the business scan submitted requests by status, source, urgency, and follow-up needs.</p>
+          </article>
+          <article class="connection-card">
+            <h3>Record tracking</h3>
+            <p>Internal notes, next action, status, and follow-up state give each intake record a clearer operating history.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="business-value">
+      <div class="section-inner">
+        <div class="section-heading">
+          <div class="eyebrow">Business Value</div>
+          <h2 class="section-title">Less scattered intake. More visible follow-up.</h2>
+        </div>
+        <ul class="value-list">
+          <li>Reduces scattered customer requests</li>
+          <li>Helps capture more complete intake information</li>
+          <li>Improves follow-up visibility</li>
+          <li>Gives business owners a clearer review queue</li>
+          <li>Creates a foundation for CRM-style tracking</li>
+          <li>Supports future voice, SMS, and appointment workflows</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section" id="product-chain">
+      <div class="section-inner">
+        <div class="section-heading">
+          <div class="eyebrow">Product Chain</div>
+          <h2 class="section-title">The first piece of the FlowDesk Pro operating line.</h2>
+        </div>
+        <div class="chain">
+          <article class="chain-card active"><h3>FlowDesk Intake Engine</h3><p>Structured web intake for cleaner records.</p></article>
+          <article class="chain-card"><h3>FlowDesk Lead Manager</h3><p>Review, update, and manage follow-up visibility.</p></article>
+          <article class="chain-card"><h3>AI Voice Attendant</h3><p>Caller capture model for future voice workflows.</p></article>
+          <article class="chain-card"><h3>Future Missed Call Text-Back</h3><p>Planned SMS workflow after verification and approval.</p></article>
+          <article class="chain-card"><h3>Future Appointment Request Workflow</h3><p>Planned request workflow, not automatic booking today.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="final-cta">
+      <div class="final-card">
+        <h2>Turn customer inquiries into organized follow-up.</h2>
+        <p>Use FlowDesk Intake Engine to capture better customer details and prepare each request for Lead Manager review.</p>
+        <div class="cta-row" style="justify-content:center;">
+          <a class="btn-primary" href="mailto:jmitchell@aiflowdeskpro.com?subject=FlowDesk%20Intake%20Engine%20Private%20Demo">Request a Private Demo</a>
+          <a class="btn-secondary" href="flowdesk-lead-manager-dashboard.html">View Lead Manager</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <img src="AI4-FLOWDESK-PRO-LOGO.png" alt="FlowDesk Pro" />
+    <div>
+      FlowDesk Pro / Apropos Group LLC / Intake Engine Product Asset<br />
+      <a href="privacy.html">Privacy Policy</a> / <a href="terms.html">Terms &amp; Conditions</a> / <a href="sms-consent.html">SMS Consent</a>
+    </div>
+  </footer>
+</body>
+</html>

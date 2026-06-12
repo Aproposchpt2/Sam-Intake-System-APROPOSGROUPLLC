@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Welcome to CapGen Pro — You're In</title>
+<style>
+:root{--bg:#0A1A3A;--surface:#0f2244;--line:rgba(91,175,255,.15);--line2:rgba(91,175,255,.32);--text:#f0f6ff;--muted:#8facd0;--soft:#5a7899;--cyan:#5BD3FF;--green:#2ecc8a;font-family:Arial,Helvetica,sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 20px}
+.card{background:var(--surface);border:1px solid var(--line2);border-radius:24px;padding:52px 44px;max-width:560px;width:100%;text-align:center;box-shadow:0 40px 100px rgba(0,0,0,.5)}
+.icon{font-size:3.5rem;margin-bottom:24px;display:block}
+.eyebrow{font-size:.7rem;text-transform:uppercase;letter-spacing:.16em;color:var(--cyan);font-weight:700;margin-bottom:16px}
+h1{font-size:2rem;font-weight:900;line-height:1.1;letter-spacing:-.02em;margin-bottom:14px}
+.sub{font-size:1rem;color:var(--muted);line-height:1.75;margin-bottom:36px;max-width:420px;margin-left:auto;margin-right:auto}
+.steps{background:#132954;border:1px solid rgba(91,175,255,.15);border-radius:14px;padding:24px 28px;margin-bottom:32px;text-align:left}
+.steps-label{font-size:.68rem;text-transform:uppercase;letter-spacing:.12em;color:var(--soft);font-weight:700;margin-bottom:16px}
+.step{display:flex;align-items:flex-start;gap:14px;margin-bottom:14px}
+.step:last-child{margin-bottom:0}
+.step-num{width:26px;height:26px;border-radius:50%;background:rgba(91,211,255,.15);border:1px solid rgba(91,211,255,.3);color:var(--cyan);font-size:.75rem;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.step-text{font-size:.92rem;color:var(--muted);line-height:1.55}
+.step-text strong{color:var(--text)}
+.cta{display:block;background:var(--cyan);color:#0A1A3A;border:none;border-radius:12px;padding:16px;font-weight:900;font-size:1rem;text-decoration:none;margin-bottom:14px;transition:.18s}
+.cta:hover{opacity:.88}
+.note{font-size:.78rem;color:var(--soft);line-height:1.6}
+.note a{color:var(--cyan);text-decoration:none}
+footer{margin-top:36px;font-size:.75rem;color:var(--soft)}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <span class="icon">🎉</span>
+  <div class="eyebrow">Payment Confirmed</div>
+  <h1>Welcome to CapGen Pro.</h1>
+  <p class="sub">Your payment was received. Your federal contract pipeline is being configured — you'll have access within 24 hours.</p>
+
+  <div class="steps">
+    <div class="steps-label">What Happens Next</div>
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-text"><strong>Check your email</strong> — a welcome message with your access link is on its way to the email you used at checkout.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-text"><strong>Your pipeline goes live</strong> — we configure your NAICS codes and pull your SAM.gov data. Ready within 24 hours.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-text"><strong>Log in with your email</strong> — no password. Enter your email, get a code, access your live contract pipeline.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-text"><strong>Generate your first capability statement</strong> — click CapGen on any contract and your branded PDF arrives by email in seconds.</div>
+    </div>
+  </div>
+
+  <a href="/pipeline" class="cta">Go to My Pipeline →</a>
+  <div class="note">
+    Questions? Email us at <a href="mailto:jmitchell@aproposgroupllc.com">jmitchell@aproposgroupllc.com</a><br/>
+    We respond same business day.
+  </div>
+</div>
+
+<footer>CapGen Pro · AI4 Businesses · Apropos Group LLC</footer>
+
+</body>
+</html>

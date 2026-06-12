@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Experience the Live Demo — CapGen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,700;1,400&family=Cormorant+Garamond:ital@1&family=Jost:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--sap:#0F2A6A;--sap2:#163472;--white:#fff;--off:#e8edf8;
+  --green:#6EE7A8;--muted:rgba(255,255,255,.55);--err:#F87171;
+  font-family:'Jost',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--sap);color:var(--white);min-height:100vh;display:flex;flex-direction:column;align-items:center}
+.topbar{width:100%;background:rgba(0,0,0,.2);border-bottom:1px solid rgba(255,255,255,.08);
+  padding:14px 5vw;display:flex;align-items:center;justify-content:space-between}
+.brand{font-family:'Bodoni Moda',serif;font-size:1.25rem;color:var(--white);text-decoration:none}
+.nav-link{font-size:.82rem;color:var(--muted);text-decoration:none}
+.nav-link:hover{color:var(--white)}
+
+.hero{text-align:center;padding:48px 5vw 32px;max-width:720px}
+.hero h1{font-family:'Bodoni Moda',serif;font-size:2.5rem;line-height:1.15;margin-bottom:14px}
+.hero h1 span{font-family:'Cormorant Garamond',serif;font-style:italic}
+.hero-sub{font-size:1rem;color:var(--muted);line-height:1.65;margin-bottom:8px}
+.hero-rule{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.9rem;color:rgba(255,255,255,.38)}
+
+.step-wrap{max-width:680px;width:100%;padding:0 16px 60px}
+
+/* Form card */
+.form-card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:20px;padding:36px 40px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px}
+.form-full{margin-bottom:18px}
+label{display:block;font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.55);margin-bottom:7px}
+input[type=text],input[type=email]{width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);border-radius:12px;color:var(--white);padding:15px 18px;font-size:1rem;outline:none;font-family:'Jost',sans-serif;transition:.15s}
+input:focus{border-color:var(--green);background:rgba(255,255,255,.11)}
+input::placeholder{color:rgba(255,255,255,.3)}
+.hp{display:none}
+.form-btn{width:100%;background:var(--white);color:var(--sap);font-family:'Jost',sans-serif;font-weight:700;font-size:1.05rem;padding:16px;border:none;border-radius:12px;cursor:pointer;transition:.15s;margin-top:8px}
+.form-btn:hover{background:var(--off)}
+.form-btn:disabled{opacity:.55;cursor:wait}
+.form-rule{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.84rem;color:rgba(255,255,255,.33);text-align:center;margin-top:14px}
+.err-msg{color:var(--err);font-size:.86rem;margin-top:10px;text-align:center;min-height:22px}
+
+/* Disambiguation */
+#step2{display:none}
+.dis-head{font-family:'Bodoni Moda',serif;font-size:1.1rem;margin-bottom:6px;text-align:center}
+.dis-sub{font-size:.82rem;color:var(--muted);text-align:center;margin-bottom:20px}
+.candidate{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:16px 20px;cursor:pointer;margin-bottom:10px;transition:.15s;display:flex;align-items:center;justify-content:space-between}
+.candidate:hover{background:rgba(255,255,255,.12);border-color:var(--green)}
+.candidate.sel{border-color:var(--green);background:rgba(110,231,168,.08)}
+.cand-name{font-weight:700;font-size:.95rem;color:var(--white);margin-bottom:2px}
+.cand-meta{font-size:.74rem;color:var(--muted)}
+.cand-chk{font-size:1.1rem;color:var(--green);display:none}
+.candidate.sel .cand-chk{display:block}
+.not-listed{text-align:center;margin-top:14px;font-size:.8rem;color:var(--muted);cursor:pointer;text-decoration:underline}
+.not-listed:hover{color:var(--white)}
+
+/* Processing */
+#step3{display:none;text-align:center;padding:40px 0}
+.spinner{width:44px;height:44px;border:3px solid rgba(255,255,255,.12);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 20px}
+@keyframes spin{to{transform:rotate(360deg)}}
+#step3 p{color:var(--muted);font-size:.9rem;font-family:'Cormorant Garamond',serif;font-style:italic}
+
+@media(max-width:600px){
+  .form-row{grid-template-columns:1fr}
+  .form-card{padding:24px 20px}
+  .hero h1{font-size:1.9rem}
+  .step-wrap{padding:0 12px 60px}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="/" class="brand">CapGen</a>
+  <a href="/" class="nav-link">← Back</a>
+</div>
+
+<div class="hero">
+  <h1>Your business. Real opportunities.<br><span>Sourced from official public records.</span></h1>
+  <p class="hero-sub">We'll pull your federal registration profile, match active contract opportunities, and run a live fit analysis — personalized to your business in under 60 seconds.</p>
+  <p class="hero-rule">No login required.</p>
+</div>
+
+<div class="step-wrap">
+
+  <!-- Step 1: Intake form -->
+  <div id="step1">
+    <div class="form-card">
+      <div class="form-row">
+        <div>
+          <label>First Name *</label>
+          <input type="text" id="firstName" placeholder="Jane" autocomplete="given-name"/>
+        </div>
+        <div>
+          <label>Last Name</label>
+          <input type="text" id="lastName" placeholder="Smith" autocomplete="family-name"/>
+        </div>
+      </div>
+      <div class="form-full">
+        <label>Business Name *</label>
+        <input type="text" id="businessName" placeholder="Acme Federal Services LLC" autocomplete="organization"/>
+      </div>
+      <div class="form-full">
+        <label>Email Address *</label>
+        <input type="email" id="email" placeholder="jane@acmefederal.com" autocomplete="email"/>
+      </div>
+      <div class="hp"><input type="text" id="hp" name="website" tabindex="-1" autocomplete="off"/></div>
+      <button class="form-btn" id="lookupBtn" onclick="submitLookup()">See My Opportunities →</button>
+      <div class="err-msg" id="step1Err"></div>
+      <p class="form-rule">Your information is used only to generate your personal snapshot.</p>
+    </div>
+  </div>
+
+  <!-- Step 2: Entity disambiguation -->
+  <div id="step2">
+    <p class="dis-head">Select your business</p>
+    <p class="dis-sub">We found these active federal registrations. Select yours to continue.</p>
+    <div id="candidateList"></div>
+    <button class="form-btn" id="confirmBtn" disabled style="margin-top:4px" onclick="confirmEntity()">Generate My Snapshot →</button>
+    <p class="not-listed" onclick="notListed()">My business isn't listed — proceed anyway</p>
+    <div class="err-msg" id="step2Err"></div>
+  </div>
+
+  <!-- Step 3: Processing -->
+  <div id="step3">
+    <div class="spinner"></div>
+    <p id="procMsg">Pulling your registration profile…</p>
+  </div>
+
+</div>
+
+<script>
+let selectedCandidate = null;
+let formData = {};
+
+function v(id){ return (document.getElementById(id)||{value:''}).value.trim(); }
+function show(id){ document.getElementById(id).style.display='block'; }
+function hide(id){ document.getElementById(id).style.display='none'; }
+function setErr(id,msg){ document.getElementById(id).textContent=msg||''; }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+async function submitLookup(){
+  setErr('step1Err','');
+  const firstName=v('firstName'), lastName=v('lastName'), businessName=v('businessName'), email=v('email'), hp=v('hp');
+  if(!firstName) return setErr('step1Err','First name is required.');
+  if(!businessName) return setErr('step1Err','Business name is required.');
+  if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return setErr('step1Err','Please enter a valid email address.');
+  formData={firstName,lastName,businessName,email,hp};
+  const btn=document.getElementById('lookupBtn');
+  btn.disabled=true; btn.textContent='Searching…';
+  try{
+    const res=await fetch('/.netlify/functions/demo-lookup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({businessName,hp})});
+    const data=await res.json();
+    if(res.status===429){setErr('step1Err','Too many requests. Please try again in an hour.'); btn.disabled=false; btn.textContent='See My Opportunities →'; return;}
+    if(!res.ok) throw new Error(data.error||'Lookup failed');
+    if(data.total===0){await createSnapshot(null,businessName); return;}
+    if(data.total===1){selectedCandidate=data.candidates[0]; await createSnapshot(selectedCandidate.uei,selectedCandidate.legal_name); return;}
+    renderCandidates(data.candidates);
+    hide('step1'); show('step2');
+    btn.disabled=false; btn.textContent='See My Opportunities →';
+  }catch(e){
+    setErr('step1Err',e.message||'Something went wrong. Please try again.');
+    btn.disabled=false; btn.textContent='See My Opportunities →';
+  }
+}
+
+function renderCandidates(candidates){
+  window._cands=candidates;
+  document.getElementById('candidateList').innerHTML=candidates.map((c,i)=>
+    '<div class="candidate" id="cnd'+i+'" onclick="selectCand('+i+',this)">'
+    +'<div><div class="cand-name">'+esc(c.legal_name)+'</div>'
+    +'<div class="cand-meta">'+(c.city?esc(c.city)+(c.state?', '+esc(c.state):''):'')+(c.cage?' · CAGE '+esc(c.cage):'')
+    +' · <span style="color:#6EE7A8;font-weight:700">'+esc(c.registration_status)+'</span></div>'
+    +'</div><span class="cand-chk">✓</span></div>'
+  ).join('');
+}
+
+function selectCand(i,el){
+  document.querySelectorAll('.candidate').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+  selectedCandidate=window._cands[i];
+  document.getElementById('confirmBtn').disabled=false;
+}
+
+function confirmEntity(){ if(selectedCandidate) createSnapshot(selectedCandidate.uei,selectedCandidate.legal_name); }
+function notListed(){ createSnapshot(null,formData.businessName); }
+
+const procMsgs=['Pulling your registration profile…','Matching active contract opportunities…','Running capability fit analysis…','Finalizing your snapshot…'];
+let procTimer=null;
+
+async function createSnapshot(uei,businessName){
+  hide('step1'); hide('step2'); show('step3');
+  let mi=0;
+  const msgEl=document.getElementById('procMsg');
+  procTimer=setInterval(()=>{ mi=(mi+1)%procMsgs.length; msgEl.textContent=procMsgs[mi]; },4000);
+  try{
+    const res=await fetch('/.netlify/functions/demo-create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      uei:uei||'',businessName:businessName||formData.businessName,
+      firstName:formData.firstName,lastName:formData.lastName||'',
+      email:formData.email,hp:formData.hp||''
+    })});
+    const data=await res.json();
+    clearInterval(procTimer);
+    if(res.status===429){hide('step3');show('step1');setErr('step1Err',data.message||'Daily demo limit reached. Please try again tomorrow.');return;}
+    if(!res.ok) throw new Error(data.error||'Creation failed');
+    if(!data.view_token) throw new Error('No view_token returned');
+
+    // Cached path — surface it visibly, never silently redirect
+    if(data.cached){
+      hide('step3'); show('step1');
+      const dateStr = data.cached_date
+        ? new Date(data.cached_date).toLocaleDateString('en-US',{month:'long',day:'numeric'})
+        : 'a previous session';
+      setErr('step1Err',
+        'A snapshot for this email already exists (from ' + dateStr + '). '
+        + '<a href="/demo/snapshot?t=' + encodeURIComponent(data.view_token)
+        + '" style="color:#6EE7A8;font-weight:700">View your existing snapshot →</a> '
+        + 'or use a different email for a fresh one.'
+      );
+      const btn=document.getElementById('lookupBtn');
+      btn.disabled=false; btn.textContent='See My Opportunities →';
+      return;
+    }
+
+    localStorage.setItem('demo_view_token', data.view_token);
+    if(formData.businessName) localStorage.setItem('demo_biz_name', formData.businessName);
+    window.location.href='/demo/snapshot?t='+encodeURIComponent(data.view_token);
+  }catch(e){
+    clearInterval(procTimer);
+    hide('step3'); show('step1');
+    setErr('step1Err',e.message||'Something went wrong. Please try again.');
+    const btn=document.getElementById('lookupBtn');
+    btn.disabled=false; btn.textContent='See My Opportunities →';
+  }
+}
+
+document.addEventListener('keydown',e=>{if(e.key==='Enter'){const s1=document.getElementById('step1');if(s1.style.display!=='none')submitLookup();}});
+document.getElementById('firstName').focus();
+</script>
+</body>
+</html>

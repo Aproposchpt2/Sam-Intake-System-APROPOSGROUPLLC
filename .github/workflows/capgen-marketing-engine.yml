@@ -1,0 +1,24 @@
+# CapGen Marketing Engine — Change Order 1, Section 1 (effective 2026-06-10)
+#
+# RETIRED: scheduled trigger, Hunter.io enrichment step, and email sender step
+# removed permanently. Cold outreach to non-opted-in contacts is prohibited.
+#
+# STANDING RULE: No step in any workflow in this repository may invoke
+# enricher-hunter, sender, or any function that reads `contractors` or
+# `email_batch` as a recipient source without an explicit opted-in list.
+#
+# Importer (SAM.gov entity data) retained for pipeline data purposes only.
+# Manual dispatch available for controlled, supervised importer runs.
+
+name: CapGen Marketing Engine
+on:
+  workflow_dispatch:   # Manual trigger only — scheduled run permanently disabled
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Import SAM.gov contractors
+        run: |
+          curl -X POST https://capgen.aproposgroupllc.com/.netlify/functions/importer-sam \
+            -H "Content-Type: application/json" -s

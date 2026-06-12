@@ -1,0 +1,199 @@
+COMMAND BLOCK FOR CODEX
+
+TASK:
+Create the first FlowDesk Intake Engine MVP prototype.
+
+MODE:
+Prototype build mode. Do not modify live AI4 Website Design production files. Do not modify Stripe, Supabase, Resend, Twilio, or existing webhook logic unless explicitly instructed. Do not add payment logic.
+
+PROJECT:
+FlowDesk Pro / FlowDesk Intake Engine
+
+PRIMARY GOAL:
+Build a reusable business intake prototype that captures structured customer or lead information and prepares the data for dashboard-ready review, future CRM-style tracking, and future AI automation workflows.
+
+IMPORTANT CONTEXT:
+This is the first core prototype for the FlowDesk Pro product line.
+
+The Intake Engine will later support:
+- FlowDesk Lead Manager
+- AI Voice Attendant V2
+- Missed Call Text-Back
+- Appointment Request Workflow
+- Executive AI Readiness / ROI Calculator
+- Client onboarding templates
+- CRM-style lead tracking
+
+CURRENT BUILD SCOPE:
+Create an isolated prototype only.
+
+Do not connect to live payment systems.
+Do not send live SMS.
+Do not create external CRM integrations.
+Do not modify existing production purchase/subscription systems.
+Do not expose secrets.
+Do not hardcode API keys.
+
+BUILD REQUIREMENTS:
+
+1. Create a business intake form page.
+
+The form should collect:
+
+- Full name
+- Email
+- Phone
+- Business name
+- Industry
+- Request type
+- Service needed
+- Urgency level
+- Preferred contact method
+- Preferred callback time
+- Project or request details
+- Additional notes
+
+2. Include request type options:
+
+- New Lead
+- Service Request
+- Appointment Request
+- Website Inquiry
+- Automation Inquiry
+- Support Question
+- General Question
+
+3. Include urgency options:
+
+- Low
+- Normal
+- Time-sensitive
+- Urgent
+
+4. Create a local intake summary view.
+
+After form submission, show a structured summary that includes:
+
+- Contact information
+- Business information
+- Request type
+- Urgency
+- Customer details
+- Suggested category
+- Suggested next action
+- Dashboard-ready lead status
+
+5. Use a simple first-version summary logic.
+
+For this MVP, AI can be simulated/rule-based if no AI API is connected yet.
+
+Example output:
+
+Category:
+Automation Inquiry
+
+Suggested next action:
+Review request and follow up using the preferred contact method.
+
+Lead status:
+New / Needs Review
+
+6. Prepare dashboard-ready data structure.
+
+Create a JavaScript object or JSON-style structure that represents the intake record.
+
+Suggested fields:
+
+- intake_id
+- created_at
+- full_name
+- email
+- phone
+- business_name
+- industry
+- request_type
+- service_needed
+- urgency
+- preferred_contact_method
+- preferred_callback_time
+- details
+- notes
+- ai_summary
+- category
+- lead_status
+- follow_up_needed
+- next_action
+
+7. Add a simple dashboard preview section.
+
+The page should show how the intake record would appear in a future dashboard.
+
+Dashboard preview should include:
+
+- New Lead card
+- Business name
+- Contact name
+- Request type
+- Urgency
+- Summary
+- Status
+- Follow-up needed
+- Next action
+
+8. Keep design professional and portfolio-ready.
+
+Use a clean FlowDesk Pro / business automation style:
+- dark professional background
+- clear form fields
+- card-based dashboard preview
+- readable typography
+- professional SaaS-style layout
+
+9. Make it useful as an Upwork portfolio asset.
+
+The finished prototype should visually communicate:
+
+Customer submits request
+→ system captures structured information
+→ system prepares summary
+→ dashboard-ready lead record appears
+→ business can follow up
+
+10. Keep the prototype isolated.
+
+Recommended file name:
+flowdesk-intake-engine.html
+
+If a small supporting JS/CSS structure is preferred, keep it simple and explain file organization.
+
+DO NOT:
+- Do not add Stripe.
+- Do not add Supabase writes yet.
+- Do not add Resend emails yet.
+- Do not add Twilio SMS yet.
+- Do not add Netlify Functions yet.
+- Do not modify existing AI4 Website Design files.
+- Do not modify FlowDesk Pro production files unless specifically requested.
+- Do not use real customer data.
+- Do not expose private credentials.
+- Do not create a full CRM yet.
+
+EXPECTED OUTPUT:
+Return:
+1. Files created or modified
+2. Full code or reviewable diff
+3. Explanation of the prototype workflow
+4. Local testing checklist
+5. Recommended next step
+
+TESTING CHECKLIST:
+Verify:
+1. Form displays correctly on desktop and mobile.
+2. Required fields work.
+3. Submitting the form creates a structured summary.
+4. Dashboard preview displays the submitted intake record.
+5. Urgency and request type appear correctly.
+6. No payment logic exists.
+7. No external APIs are called.
+8. No secrets or credentials appear in the code.
+9. The prototype is isolated from live production systems.

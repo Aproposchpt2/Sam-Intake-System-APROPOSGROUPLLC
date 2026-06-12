@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Opportunity Pipeline — Apropos Group LLC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital@0;1&family=Cormorant+Garamond:ital@1&family=Jost:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0A1A3A;--surface:#0f2244;--panel:#132954;--line:rgba(91,175,255,.15);
+  --line2:rgba(91,175,255,.28);--text:#f0f6ff;--muted:#8facd0;--soft:#5a7899;
+  --gold:#d9a45b;--green:#2ecc8a;--amber:#f0a500;--red:#e05555;--cyan:#5BD3FF;
+  font-family:Arial,Helvetica,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.6}
+
+header{background:var(--surface);border-bottom:1px solid var(--line);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-mark{width:40px;height:40px;border-radius:10px;background:var(--bg);border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;color:var(--cyan)}
+.brand-name{font-size:1rem;font-weight:700;color:var(--text)}
+.brand-sub{font-size:.72rem;color:var(--muted);letter-spacing:.04em}
+.header-right{display:flex;align-items:center;gap:12px}
+.badge-wosb{background:rgba(91,211,255,.12);border:1px solid rgba(91,211,255,.3);color:var(--cyan);padding:4px 10px;border-radius:20px;font-size:.68rem;font-weight:700;letter-spacing:.04em}
+
+.page{max-width:1240px;margin:0 auto;padding:28px 20px}
+
+.entity-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin-bottom:22px;display:flex;flex-wrap:wrap;gap:20px;align-items:center}
+.entity-field{min-width:120px}
+.ef-label{font-size:.64rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);margin-bottom:3px}
+.ef-value{font-size:.92rem;font-weight:700;color:var(--text)}
+.ef-value.active{color:var(--green)}
+
+.controls{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px;align-items:center}
+.controls select,.controls input{background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:8px;color:var(--text);padding:8px 12px;font-size:.84rem;outline:none}
+.controls select:focus,.controls input:focus{border-color:var(--cyan)}
+.count-badge{font-size:.8rem;color:var(--muted);margin-left:auto}
+/* Window toggle buttons */
+.win-btns{display:flex;gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.win-btn{background:rgba(255,255,255,.04);border:none;border-right:1px solid var(--line);color:var(--muted);padding:8px 16px;font-size:.82rem;font-weight:700;cursor:pointer;transition:.18s;white-space:nowrap}
+.win-btn:last-child{border-right:none}
+.win-btn:hover{background:rgba(91,211,255,.08);color:var(--text)}
+.win-btn.active{background:rgba(91,211,255,.18);color:var(--cyan);border-color:var(--line)}
+
+/* NAICS ribbon */
+.naics-ribbon{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;align-items:center}
+.naics-ribbon-label{font-size:.66rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);margin-right:4px;white-space:nowrap}
+.naics-bubble{display:inline-flex;flex-direction:column;align-items:center;gap:2px;padding:7px 13px;border-radius:20px;cursor:pointer;border:1px solid var(--line);background:rgba(255,255,255,.04);transition:.18s;user-select:none}
+.naics-bubble:hover{border-color:var(--cyan);background:rgba(91,211,255,.08)}
+.naics-bubble.active{background:rgba(91,211,255,.15);border-color:var(--cyan);box-shadow:0 0 10px rgba(91,211,255,.2)}
+.naics-bubble.active .nb-code{color:var(--cyan)}
+.naics-bubble.inactive{opacity:.38;border-color:transparent}
+.nb-code{font-size:.75rem;font-weight:900;color:var(--muted);letter-spacing:.04em;line-height:1}
+.nb-label{font-size:.6rem;color:var(--soft);text-align:center;line-height:1.2;max-width:80px}
+/* NAICS quick-select controls */
+.naics-controls{display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap}
+.naics-ctrl-label{font-size:.62rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);margin-right:2px}
+.naics-ctrl-btn{background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--muted);
+  padding:4px 11px;border-radius:6px;font-size:.72rem;font-weight:700;cursor:pointer;
+  transition:.15s;font-family:Arial,sans-serif}
+.naics-ctrl-btn:hover{border-color:var(--cyan);color:var(--cyan);background:rgba(91,211,255,.08)}
+.naics-ctrl-btn.active-ctrl{background:rgba(91,211,255,.15);border-color:var(--cyan);color:var(--cyan)}
+
+.opp-table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.opp-table th{font-size:.64rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);padding:11px 14px;text-align:left;border-bottom:1px solid var(--line);background:rgba(255,255,255,.03)}
+.opp-table td{padding:13px 14px;border-bottom:1px solid rgba(91,175,255,.07);vertical-align:top}
+.opp-table tr:last-child td{border-bottom:none}
+.opp-table tr:hover td{background:rgba(91,175,255,.05)}
+
+.title-cell a{color:var(--text);text-decoration:none;font-weight:600;font-size:.88rem;line-height:1.35;display:block}
+.title-cell a:hover{color:var(--cyan)}
+.agency-cell{font-size:.76rem;color:var(--muted);line-height:1.5}
+.naics-chip{display:inline-block;background:rgba(91,211,255,.1);border:1px solid rgba(91,211,255,.22);color:var(--cyan);padding:2px 7px;border-radius:4px;font-size:.68rem;font-weight:700;margin-top:3px}
+.type-chip{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.66rem;font-weight:700}
+.type-rfp{background:rgba(91,175,255,.15);color:#82b8ff}
+.type-rfq{background:rgba(144,238,144,.12);color:#90ee90}
+.type-ss{background:rgba(240,165,0,.12);color:var(--amber)}
+.type-rfi{background:rgba(169,147,255,.14);color:#c0a8ff}
+.type-other{background:rgba(255,255,255,.07);color:var(--muted)}
+.setaside-cell{font-size:.75rem;color:var(--muted)}
+
+.deadline-cell{text-align:center;white-space:nowrap}
+.days-badge{display:inline-block;padding:4px 9px;border-radius:6px;font-size:.72rem;font-weight:700}
+.days-hot{background:rgba(224,85,85,.2);color:#ff9999;border:1px solid rgba(224,85,85,.35)}
+.days-warm{background:rgba(240,165,0,.15);color:#ffc96b;border:1px solid rgba(240,165,0,.3)}
+.days-ok{background:rgba(46,204,138,.12);color:#7eedc0;border:1px solid rgba(46,204,138,.28)}
+.days-none{background:rgba(255,255,255,.05);color:var(--soft);border:1px solid var(--line)}
+
+.capgen-btn{background:rgba(91,211,255,.12);border:1px solid rgba(91,211,255,.3);color:var(--cyan);padding:5px 11px;border-radius:7px;font-size:.72rem;font-weight:700;cursor:pointer;white-space:nowrap;text-decoration:none;display:inline-block;transition:.18s}
+.capgen-btn:hover{background:rgba(91,211,255,.22);border-color:var(--cyan)}
+
+.empty{text-align:center;padding:52px;color:var(--soft)}
+.loading{text-align:center;padding:52px;color:var(--muted)}
+.stat-bar{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:20px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 18px;min-width:110px}
+.stat-val{font-size:1.6rem;font-weight:900;line-height:1;color:var(--text)}
+.stat-val.red{color:var(--red)}.stat-val.amber{color:var(--amber)}.stat-val.green{color:var(--green)}
+.stat-label{font-size:.64rem;text-transform:uppercase;letter-spacing:.08em;color:var(--soft);margin-top:4px}
+
+/* ── Mobile card layout ── */
+.opp-cards{display:none;gap:12px;flex-direction:column}
+.opp-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.opp-card:hover{border-color:var(--line2)}
+.opp-card-title a{color:var(--text);text-decoration:none;font-weight:700;font-size:.92rem;line-height:1.35;display:block}
+.opp-card-title a:hover{color:var(--cyan)}
+.opp-card-agency{font-size:.76rem;color:var(--muted);margin-top:3px}
+.opp-card-row{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.opp-card-chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.opp-card-deadline{display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+.opp-card-date{font-size:.68rem;color:var(--soft)}
+
+@media(max-width:700px){
+  .opp-table-wrap table{display:none}
+  .opp-cards{display:flex}
+  header{flex-direction:column;align-items:flex-start;gap:10px;padding:12px 16px}
+  .header-right{flex-wrap:wrap;gap:8px}
+  .page{padding:16px 14px}
+  .stat-bar{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .stat{min-width:0;padding:10px 12px}
+  .stat-val{font-size:1.3rem}
+  .entity-card{gap:12px}
+  .entity-field{min-width:80px}
+  .controls{gap:8px}
+  .controls select,.controls input{font-size:.8rem;padding:7px 10px}
+  .naics-ribbon{gap:6px}
+  .naics-bubble{padding:5px 9px}
+  .nb-code{font-size:.68rem}
+  .nb-label{font-size:.54rem}
+}
+
+/* Auth gate */
+#auth-gate{display:none !important;}
+.auth-card{background:var(--surface);border:1px solid var(--line2);border-radius:20px;padding:40px;max-width:420px;width:100%;text-align:center}
+.auth-logo{width:52px;height:52px;border-radius:14px;background:var(--bg);border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;color:var(--cyan);margin:0 auto 20px}
+.auth-card h2{font-size:1.3rem;margin-bottom:6px}
+.auth-card p{color:var(--muted);font-size:.88rem;margin-bottom:24px}
+.auth-input{width:100%;background:rgba(255,255,255,.07);border:1px solid var(--line2);border-radius:10px;color:var(--text);padding:12px 14px;font-size:.95rem;outline:none;margin-bottom:12px}
+.auth-input:focus{border-color:var(--cyan)}
+.auth-btn{width:100%;background:var(--cyan);color:#0A1A3A;border:none;border-radius:10px;padding:13px;font-weight:700;font-size:.95rem;cursor:pointer}
+.auth-btn:disabled{opacity:.55;cursor:wait}
+.auth-notice{margin-top:14px;font-size:.82rem;color:var(--muted)}
+.auth-sent{display:none;text-align:center;padding:10px 0}
+.auth-sent-icon{font-size:2.5rem;margin-bottom:12px}
+#auth-app{display:block}
+#signout-btn{background:transparent;border:1px solid var(--line);border-radius:7px;color:var(--soft);padding:5px 12px;cursor:pointer;font-size:.74rem}
+#signout-btn:hover{border-color:var(--red);color:var(--red)}
+
+/* ── Analyze Fit — Gold Standard Drawer ── */
+#fit-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:900}
+#fit-overlay.open{display:block}
+#fit-drawer{position:fixed;top:0;right:0;width:min(520px,100vw);height:100vh;background:#0F2A6A;color:#fff;z-index:901;transform:translateX(110%);transition:transform .32s cubic-bezier(.4,0,.2,1);overflow-y:auto;box-shadow:-6px 0 40px rgba(0,0,0,.5)}
+#fit-drawer.open{transform:translateX(0)}
+.fit-drawer-inner{padding:22px 26px 56px}
+.fit-close{position:fixed;top:14px;right:14px;z-index:902;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.22);border-radius:8px;color:#fff;font-size:1.1rem;cursor:pointer;padding:5px 11px;font-family:'Jost',sans-serif;font-weight:700;transition:.15s}
+.fit-close:hover{background:rgba(255,255,255,.22)}
+.fit-opp-title{font-family:'Jost',sans-serif;font-weight:700;font-size:.96rem;color:#fff;margin-bottom:3px;padding-right:58px;line-height:1.35}
+.fit-opp-agency{font-family:'Jost',sans-serif;font-size:.76rem;color:rgba(255,255,255,.48);margin-bottom:20px}
+.fit-hero{display:flex;align-items:center;gap:16px;background:rgba(255,255,255,.08);border-radius:14px;padding:14px 18px;margin-bottom:20px}
+.fit-score-num{font-family:'Jost',sans-serif;font-size:2.8rem;font-weight:900;line-height:1;color:#6EE7A8}
+.fit-score-num.conditional{color:#F59E0B}.fit-score-num.no_bid{color:#F87171}
+.fit-rec-badge{font-family:'Jost',sans-serif;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;padding:3px 9px;border-radius:5px;display:inline-block;margin-top:5px}
+.fit-rec-badge.bid{background:#6EE7A8;color:#0F2A6A}
+.fit-rec-badge.conditional{background:#F59E0B;color:#0F2A6A}
+.fit-rec-badge.no_bid{background:rgba(248,113,113,.22);color:#F87171;border:1px solid rgba(248,113,113,.38)}
+.fit-naics-note{font-family:'Jost',sans-serif;font-size:.8rem;color:rgba(255,255,255,.68);line-height:1.45}
+.fit-match-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px}
+.fit-match-item{background:rgba(255,255,255,.07);border-radius:10px;padding:10px 8px;text-align:center}
+.fit-match-icon{font-size:1.1rem;margin-bottom:3px}
+.fit-match-label{font-family:'Jost',sans-serif;font-size:.58rem;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.4);margin-bottom:2px}
+.fit-match-val{font-family:'Jost',sans-serif;font-size:.76rem;font-weight:600;color:#fff}
+.fit-section{margin-bottom:20px}
+.fit-heading{font-family:'Bodoni Moda',serif;font-size:.98rem;font-weight:700;color:#fff;margin-bottom:2px;letter-spacing:.01em}
+.fit-heading-rule{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.76rem;color:rgba(255,255,255,.36);display:block;margin-bottom:9px}
+.fit-body-text{font-family:'Jost',sans-serif;font-size:.83rem;color:rgba(255,255,255,.8);line-height:1.6}
+.fit-list{list-style:none;display:flex;flex-direction:column;gap:5px}
+.fit-list li{font-family:'Jost',sans-serif;font-size:.82rem;color:rgba(255,255,255,.8);padding-left:15px;position:relative;line-height:1.45}
+.fit-list li::before{content:'›';position:absolute;left:0;color:#6EE7A8;font-weight:700}
+.fit-checklist{display:flex;flex-direction:column;gap:8px}
+.fit-check-item{display:flex;align-items:flex-start;gap:9px;cursor:pointer}
+.fit-check-item input[type=checkbox]{margin-top:3px;accent-color:#6EE7A8;flex-shrink:0}
+.fit-check-item .ci-text{font-family:'Jost',sans-serif;font-size:.82rem;color:rgba(255,255,255,.8);line-height:1.4}
+.fit-check-item .ci-hint{font-size:.7rem;color:rgba(255,255,255,.36);margin-top:2px}
+.fit-accordion{border:1px solid rgba(255,255,255,.1);border-radius:12px;overflow:hidden;margin-bottom:20px}
+.fit-acc-item{border-bottom:1px solid rgba(255,255,255,.07)}
+.fit-acc-item:last-child{border-bottom:none}
+.fit-acc-header{font-family:'Jost',sans-serif;font-size:.84rem;font-weight:600;color:rgba(255,255,255,.8);padding:11px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,.04);user-select:none}
+.fit-acc-header:hover{background:rgba(255,255,255,.08)}
+.fit-acc-header.is-open{color:#6EE7A8}
+.fit-acc-body{display:none;padding:10px 16px 14px;background:rgba(255,255,255,.025)}
+.fit-acc-body.is-open{display:block}
+.fit-loading{text-align:center;padding:60px 20px;font-family:'Jost',sans-serif;color:rgba(255,255,255,.45);font-size:.9rem}
+.fit-error{padding:18px;font-family:'Jost',sans-serif;color:#F87171;font-size:.84rem;background:rgba(248,113,113,.1);border-radius:10px;margin-top:12px}
+.fit-cached-bar{font-family:'Jost',sans-serif;font-size:.71rem;color:rgba(255,255,255,.38);margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.fit-reanalyze{color:#6EE7A8;background:none;border:none;font-size:.71rem;font-family:'Jost',sans-serif;cursor:pointer;padding:0;text-decoration:underline}
+.fit-analyze-anyway{background:none;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.58);font-family:'Jost',sans-serif;font-size:.78rem;padding:7px 14px;border-radius:8px;cursor:pointer;margin-top:14px;display:block}
+.fit-analyze-anyway:hover{border-color:rgba(255,255,255,.4);color:#fff}
+.fit-footer-btns{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap}
+.fit-btn-sam{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);font-family:'Jost',sans-serif;font-size:.78rem;font-weight:600;padding:8px 15px;border-radius:8px;text-decoration:none;display:inline-block;cursor:pointer;transition:.15s}
+.fit-btn-sam:hover{background:rgba(255,255,255,.18)}
+.fit-btn-capgen{background:#6EE7A8;color:#0F2A6A;border:none;font-family:'Jost',sans-serif;font-size:.78rem;font-weight:700;padding:8px 15px;border-radius:8px;text-decoration:none;display:inline-block;cursor:pointer;transition:.15s}
+.fit-btn-capgen:hover{background:#5dd49a}
+.fit-profile-prompt{text-align:center;padding:40px 20px}
+.fit-profile-prompt p{font-family:'Jost',sans-serif;color:rgba(255,255,255,.68);margin-bottom:16px;font-size:.88rem;line-height:1.6}
+.fit-limit-msg{font-family:'Jost',sans-serif;color:rgba(255,255,255,.7);font-size:.86rem;text-align:center;padding:30px 20px}
+.fit-stage2-loading{display:flex;align-items:center;gap:8px;font-family:'Jost',sans-serif;font-size:.82rem;color:rgba(255,255,255,.5);padding:10px 0}
+/* Analyze Fit button — Gold Standard: white bg, sapphire text */
+.analyze-btn{background:#fff;color:#0F2A6A;font-family:'Jost',sans-serif;border:none;padding:5px 11px;border-radius:7px;font-size:.7rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:.15s;margin-left:6px;display:inline-block;letter-spacing:.02em}
+.analyze-btn:hover{background:#e8f0ff;box-shadow:0 2px 8px rgba(15,42,106,.25)}
+/* Fit badges on opportunity list */
+.fit-list-badge{display:inline-block;font-family:'Jost',sans-serif;font-size:.6rem;font-weight:700;padding:2px 6px;border-radius:4px;margin-left:6px;vertical-align:middle;white-space:nowrap}
+.fit-list-badge.bid{background:#6EE7A8;color:#0F2A6A}
+.fit-list-badge.conditional{background:#F59E0B;color:#0F2A6A}
+.fit-list-badge.no_bid{background:rgba(248,113,113,.18);color:#F87171;border:1px solid rgba(248,113,113,.28)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.fit-spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.18);border-top-color:#6EE7A8;border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-right:6px}
+@media(max-width:700px){#fit-drawer{width:100vw}.fit-match-grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<!-- Auth gate — OTP flow -->
+<div id="auth-gate">
+  <div class="auth-card">
+    <div class="auth-logo">AG</div>
+    <h2>APROPOS GROUP LLC</h2>
+
+    <!-- Step 1: Email -->
+    <div id="auth-step1">
+      <p>Enter your email address to receive a 6-digit access code.</p>
+      <input class="auth-input" type="email" id="auth-email" placeholder="lori@customitservices-llc.com" autocomplete="email"/>
+      <button class="auth-btn" id="auth-send-btn">Send Access Code →</button>
+      <div class="auth-notice" id="auth-err"></div>
+    </div>
+
+    <!-- Step 2: Code entry -->
+    <div id="auth-step2" style="display:none">
+      <div class="auth-sent-icon">📬</div>
+      <strong style="color:var(--text);display:block;margin-bottom:8px">Check your email</strong>
+      <p style="margin-bottom:20px">Enter the 6-digit code we sent to <strong id="auth-email-display" style="color:var(--cyan)"></strong></p>
+      <input class="auth-input" type="text" id="auth-code" placeholder="000000" maxlength="6"
+             style="font-size:1.6rem;letter-spacing:.3em;text-align:center;font-weight:900" autocomplete="one-time-code"/>
+      <button class="auth-btn" id="auth-verify-btn">Access My Dashboard →</button>
+      <div class="auth-notice" id="auth-code-err"></div>
+      <div style="margin-top:14px">
+        <button onclick="resetOtp()" style="background:none;border:none;color:var(--soft);cursor:pointer;font-size:.8rem;text-decoration:underline">Use a different email</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Main app (shown when logged in) -->
+<div id="auth-app">
+
+<!-- Marketing Dashboard toggle -->
+<div style="background:rgba(91,211,255,.06);border-bottom:1px solid rgba(91,211,255,.15);padding:9px 28px;display:flex;align-items:center;gap:10px">
+  <span style="font-size:.76rem;color:var(--soft)">Contract Dashboard</span>
+  <span style="color:var(--soft)">·</span>
+  <a href="/marketing-dashboard" style="color:var(--cyan);font-size:.8rem;font-weight:700;text-decoration:none">View Marketing Dashboard →</a>
+</div>
+
+<header>
+  <div class="brand">
+    <div class="brand-mark">AG</div>
+    <div>
+      <div class="brand-name" id="brandName">APROPOS GROUP LLC</div>
+      <div class="brand-sub">Federal Contract Pipeline · CapGen by AI4 Businesses</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="badge-wosb">AI4 Businesses</span>
+    <span style="font-size:.72rem;color:var(--soft)" id="ueiCageEl">UEI: YVNXN3XBUSD5 · CAGE: 20UQ1</span>
+  </div>
+</header>
+
+<div class="page">
+
+  <!-- Entity summary -->
+  <div class="entity-card">
+    <div class="entity-field"><div class="ef-label">SAM Status</div><div class="ef-value active">● Active</div></div>
+    <div class="entity-field"><div class="ef-label">Business Type</div><div class="ef-value">Small Business</div></div>
+    <div class="entity-field"><div class="ef-label">Location</div><div class="ef-value" id="locationEl">North Las Vegas, NV</div></div>
+    <div class="entity-field"><div class="ef-label">Primary NAICS</div><div class="ef-value" id="primaryNaicsEl">—</div></div>
+    <div class="entity-field"><div class="ef-label">NAICS Monitored</div><div class="ef-value" id="naicsCount">—</div></div>
+    <div class="entity-field"><div class="ef-label">Last Refreshed</div><div class="ef-value" id="lastRefresh">—</div></div>
+    <div style="margin-left:auto"><button onclick="load()" style="background:var(--cyan);color:#0A1A3A;border:none;border-radius:8px;padding:9px 18px;font-weight:700;cursor:pointer;font-size:.82rem">Refresh Pipeline</button></div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stat-bar" id="statBar">
+    <div class="stat"><div class="stat-val" id="s-total">—</div><div class="stat-label">Total Opps</div></div>
+    <div class="stat"><div class="stat-val red" id="s-hot">—</div><div class="stat-label">Due &lt; 7 days</div></div>
+    <div class="stat"><div class="stat-val amber" id="s-warm">—</div><div class="stat-label">Due 7–30 days</div></div>
+    <div class="stat"><div class="stat-val green" id="s-ok">—</div><div class="stat-label">Due 30+ days</div></div>
+  </div>
+
+  <!-- Controls -->
+  <!-- Trust phrase caption -->
+  <p style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.82rem;color:rgba(255,255,255,.3);margin-bottom:14px">Opportunities sourced from official public records.</p>
+
+  <!-- NAICS ribbon -->
+  <!-- NAICS quick-select controls -->
+  <div class="naics-controls" id="naicsControls" style="display:none">
+    <span class="naics-ctrl-label">Filter</span>
+    <button class="naics-ctrl-btn active-ctrl" id="ctrlAll"    onclick="naicsSelectAll()">All Codes</button>
+    <button class="naics-ctrl-btn"              id="ctrlPrimary" onclick="naicsSelectPrimary()">Primary Only</button>
+    <button class="naics-ctrl-btn"              id="ctrlIT"    onclick="naicsSelectGroup('it')">IT Services</button>
+    <button class="naics-ctrl-btn"              id="ctrlConsult" onclick="naicsSelectGroup('consult')">Consulting</button>
+  </div>
+
+  <!-- NAICS ribbon — built dynamically from subscription profile on load -->
+  <div class="naics-ribbon" id="naicsRibbon">
+    <span class="naics-ribbon-label">NAICS</span>
+  </div>
+
+  <div class="controls">
+    <div class="win-btns" id="dayBtns">
+      <button class="win-btn active" data-days="60">60 Days</button>
+      <button class="win-btn" data-days="30">30 Days</button>
+      <button class="win-btn" data-days="7">7 Days</button>
+    </div>
+    <input type="search" id="searchInput" placeholder="Search title or agency…" style="min-width:220px"/>
+    <span class="count-badge" id="countBadge"></span>
+  </div>
+
+  <!-- Desktop table -->
+  <div class="opp-table-wrap">
+    <table class="opp-table">
+      <thead>
+        <tr>
+          <th>Opportunity</th>
+          <th>Agency</th>
+          <th>Type</th>
+          <th>Set-Aside</th>
+          <th>NAICS</th>
+          <th style="text-align:center">Deadline</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tbody"><tr><td colspan="7" class="loading">Loading pipeline…</td></tr></tbody>
+    </table>
+  </div>
+
+  <!-- Mobile cards -->
+  <div class="opp-cards" id="oppCards">
+    <div class="loading" style="text-align:center;padding:40px;color:var(--muted)">Loading pipeline…</div>
+  </div>
+
+</div><!-- end .page -->
+</div><!-- end #auth-app -->
+
+<script>
+// UEI priority: URL param → sessionStorage → default (Apropos Group)
+const _ueiParam = new URLSearchParams(location.search).get('uei');
+const UEI = _ueiParam || sessionStorage.getItem('capgen_uei') || 'YVNXN3XBUSD5';
+if (_ueiParam) sessionStorage.setItem('capgen_uei', _ueiParam); // persist for this session
+let allOpps = [];
+let naicsClient = [];
+let renderedOpps = [];
+
+function typeClass(t) {
+  const tl = (t||'').toLowerCase();
+  if (tl.includes('solicitation')) return 'type-rfp';
+  if (tl.includes('rfq'))          return 'type-rfq';
+  if (tl.includes('sources'))      return 'type-ss';
+  if (tl.includes('rfi'))          return 'type-rfi';
+  return 'type-other';
+}
+
+function fmtDeadline(d) {
+  if (!d) return '—';
+  const dt = new Date(d);
+  return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function render(opps) {
+  const tbody = document.getElementById('tbody');
+  const cards = document.getElementById('oppCards');
+  document.getElementById('countBadge').textContent = opps.length + ' opportunities';
+
+  if (!opps.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty">No opportunities match the current filters.</td></tr>';
+    cards.innerHTML = '<div class="empty">No opportunities match the current filters.</div>';
+    return;
+  }
+
+  const capgenUrl = `/capability-generator.html?uei=${UEI}`;
+  renderedOpps = opps;
+
+  // Desktop table rows
+  tbody.innerHTML = opps.map((o, idx) => {
+    const daysCls = o.urgency === 'hot' ? 'days-hot' : o.urgency === 'warm' ? 'days-warm' : o.urgency === 'ok' ? 'days-ok' : 'days-none';
+    const daysLabel = o.days_left !== null ? (o.days_left < 1 ? 'Closed' : o.days_left + 'd left') : 'No deadline';
+    return `<tr>
+      <td class="title-cell"><a href="${o.url}" target="_blank" rel="noopener">${o.title || 'Untitled'}</a>${(() => { const b = analysisCache[o.notice_id]; return b ? `<span class="fit-list-badge ${(b.recommendation||'').toLowerCase().replace(/ /g,'_')}">${b.recommendation} ${b.fit_score}</span>` : ''; })()}</td>
+      <td class="agency-cell">${o.agency || '—'}</td>
+      <td><span class="type-chip ${typeClass(o.type)}">${o.type || '—'}</span></td>
+      <td class="setaside-cell">${o.set_aside || 'Unrestricted'}</td>
+      <td><span class="naics-chip">${o.naics || '—'}</span></td>
+      <td class="deadline-cell">
+        <div><span class="days-badge ${daysCls}">${daysLabel}</span></div>
+        <div style="font-size:.68rem;color:var(--soft);margin-top:3px">${fmtDeadline(o.deadline)}</div>
+      </td>
+      <td style="white-space:nowrap"><a class="capgen-btn" href="${capgenUrl}">CapGen ↗</a><button class="analyze-btn" data-idx="${idx}">Analyze Fit</button></td>
+    </tr>`;
+  }).join('');
+
+  // Mobile cards
+  cards.innerHTML = opps.map((o, idx) => {
+    const daysCls = o.urgency === 'hot' ? 'days-hot' : o.urgency === 'warm' ? 'days-warm' : o.urgency === 'ok' ? 'days-ok' : 'days-none';
+    const daysLabel = o.days_left !== null ? (o.days_left < 1 ? 'Closed' : o.days_left + 'd left') : 'No deadline';
+    return `<div class="opp-card">
+      <div class="opp-card-title">
+        <a href="${o.url}" target="_blank" rel="noopener">${o.title || 'Untitled'}</a>
+        <div class="opp-card-agency">${o.agency || '—'}</div>
+      </div>
+      <div class="opp-card-row">
+        <div class="opp-card-chips">
+          <span class="type-chip ${typeClass(o.type)}">${o.type || '—'}</span>
+          <span class="naics-chip">${o.naics || '—'}</span>
+          ${o.set_aside && o.set_aside !== 'None' ? `<span class="setaside-cell">${o.set_aside}</span>` : ''}
+        </div>
+        <div class="opp-card-deadline">
+          <span class="days-badge ${daysCls}">${daysLabel}</span>
+          <span class="opp-card-date">${fmtDeadline(o.deadline)}</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <a class="capgen-btn" href="${capgenUrl}" style="flex:1;text-align:center;display:block;padding:8px">CapGen ↗</a>
+        <button class="analyze-btn" data-idx="${idx}" style="flex:1;padding:8px;margin-left:0">Analyze Fit</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function activeNaics() {
+  return [...document.querySelectorAll('.naics-bubble.active')].map(b => b.dataset.naics);
+}
+
+function applyFilters() {
+  const selectedNaics = activeNaics();
+  const search  = document.getElementById('searchInput').value.toLowerCase();
+
+  let filtered = allOpps;
+  if (selectedNaics.length < naicsClient.length) filtered = filtered.filter(o => selectedNaics.includes(o.naics));
+  if (search)  filtered = filtered.filter(o =>
+    (o.title||'').toLowerCase().includes(search) ||
+    (o.agency||'').toLowerCase().includes(search)
+  );
+  render(filtered);
+}
+
+async function load() {
+  document.getElementById('tbody').innerHTML = '<tr><td colspan="7" class="loading">Fetching live opportunities…</td></tr>';
+  try {
+    const activeDays = document.querySelector('.win-btn.active')?.dataset.days || '60';
+    const res  = await fetch(`/.netlify/functions/client-pipeline?uei=${UEI}&days=${activeDays}`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Load failed');
+
+    allOpps      = data.opportunities || [];
+    naicsClient  = data.client.naics  || [];
+
+    // Stats
+    document.getElementById('naicsCount').textContent = naicsClient.length;
+    document.getElementById('lastRefresh').textContent = new Date().toLocaleTimeString();
+    document.getElementById('s-total').textContent = allOpps.length;
+    document.getElementById('s-hot').textContent   = allOpps.filter(o => o.urgency === 'hot').length;
+    document.getElementById('s-warm').textContent  = allOpps.filter(o => o.urgency === 'warm').length;
+    document.getElementById('s-ok').textContent    = allOpps.filter(o => o.urgency === 'ok').length;
+
+    // Update header + entity card with subscriber's business data
+    const clientName = data.client.name || 'Apropos Group LLC';
+    const brandEl = document.getElementById('brandName');
+    const locEl   = document.getElementById('locationEl');
+    if (brandEl) brandEl.textContent = clientName.toUpperCase();
+    if (locEl && data.client.city) locEl.textContent = [data.client.city, data.client.state].filter(Boolean).join(', ');
+
+    // Build NAICS bubbles dynamically from subscription profile
+    buildNaicsRibbon(naicsClient);
+    // Update primary NAICS display dynamically
+    const primaryEl = document.getElementById('primaryNaicsEl');
+    if (primaryEl) primaryEl.textContent = '541512'; // SAM.gov registered primary (updated June 2026)
+    // Update UEI / CAGE from subscription data
+    const ueiCageEl = document.getElementById('ueiCageEl');
+    if (ueiCageEl && data.client.cage) {
+      ueiCageEl.textContent = 'UEI: ' + UEI + ' · CAGE: ' + data.client.cage;
+    }
+
+    // Load analysis badges in background (single query)
+    const noticeIds = allOpps.map(o => o.notice_id).filter(Boolean);
+    loadAnalysisBadges(noticeIds);
+
+    applyFilters();
+  } catch (e) {
+    document.getElementById('tbody').innerHTML = `<tr><td colspan="7" class="empty" style="color:var(--red)">${e.message}</td></tr>`;
+  }
+}
+
+// NAICS label map — extends as new codes are added to subscription
+const NAICS_LABELS = {
+  '541512':'Systems Design','541511':'Custom Programming','541519':'Other IT Services',
+  '541330':'Engineering Services','541370':'Scientific Consulting','541611':'Mgmt Consulting',
+  '541618':'Other Mgmt Consulting','561210':'Facilities Support','238210':'Cabling',
+  '518210':'Data Processing','541513':'IT Facilities Mgmt','541990':'Professional Svcs',
+  '517919':'Telecom Services','561499':'Business Support',
+};
+
+// NAICS groups for quick-select buttons
+const NAICS_GROUPS = {
+  it:      ['541511','541512','541519','541513'],
+  consult: ['541611','541618','541330','541370'],
+};
+const PRIMARY_NAICS = '541512'; // SAM.gov registered primary
+
+function buildNaicsRibbon(codes) {
+  const ribbon   = document.getElementById('naicsRibbon');
+  const controls = document.getElementById('naicsControls');
+  if (!codes || !codes.length) return;
+
+  // Primary first, then alphabetical
+  const sorted = [].concat(codes).sort(function(a,b){
+    if (a===PRIMARY_NAICS) return -1;
+    if (b===PRIMARY_NAICS) return 1;
+    return a.localeCompare(b);
+  });
+
+  ribbon.innerHTML = '<span class="naics-ribbon-label">NAICS</span>'
+    + sorted.map(function(code){
+      const label = NAICS_LABELS[code] || code;
+      return '<div class="naics-bubble active" data-naics="'+code+'" title="'+label+'">'
+        + '<span class="nb-code">'+code+(code===PRIMARY_NAICS?' ⭐':'')+'</span>'
+        + '<span class="nb-label">'+label+'</span>'
+        + '</div>';
+    }).join('');
+
+  // Click behaviour:
+  // • If ALL active → clicking one ISOLATES it (deactivates all others)
+  // • If some active → normal toggle
+  // • Cannot deactivate the last remaining bubble
+  ribbon.querySelectorAll('.naics-bubble').forEach(function(b) {
+    b.addEventListener('click', function() {
+      const bubbles   = ribbon.querySelectorAll('.naics-bubble');
+      const numActive = ribbon.querySelectorAll('.naics-bubble.active').length;
+      const allActive = numActive === bubbles.length;
+
+      if (allActive) {
+        // Isolate this one — deactivate all others
+        bubbles.forEach(function(x) {
+          x.classList.toggle('active',  x === b);
+          x.classList.toggle('inactive', x !== b);
+        });
+      } else if (b.classList.contains('active') && numActive === 1) {
+        // Last active — select all instead of leaving zero
+        naicsSelectAll();
+        return;
+      } else {
+        b.classList.toggle('active');
+        b.classList.toggle('inactive');
+      }
+      updateCtrlHighlight();
+      applyFilters();
+    });
+  });
+
+  if (controls) controls.style.display = 'flex';
+  updateCtrlHighlight();
+}
+
+function naicsSelectAll() {
+  document.querySelectorAll('#naicsRibbon .naics-bubble').forEach(function(b){
+    b.classList.add('active'); b.classList.remove('inactive');
+  });
+  updateCtrlHighlight(); applyFilters();
+}
+
+function naicsSelectPrimary() {
+  document.querySelectorAll('#naicsRibbon .naics-bubble').forEach(function(b){
+    const isPrimary = b.dataset.naics === PRIMARY_NAICS;
+    b.classList.toggle('active',   isPrimary);
+    b.classList.toggle('inactive', !isPrimary);
+  });
+  updateCtrlHighlight(); applyFilters();
+}
+
+function naicsSelectGroup(group) {
+  const groupCodes = NAICS_GROUPS[group] || [];
+  document.querySelectorAll('#naicsRibbon .naics-bubble').forEach(function(b){
+    const inGroup = groupCodes.includes(b.dataset.naics);
+    b.classList.toggle('active',   inGroup);
+    b.classList.toggle('inactive', !inGroup);
+  });
+  updateCtrlHighlight(); applyFilters();
+}
+
+function updateCtrlHighlight() {
+  const bubbles   = document.querySelectorAll('#naicsRibbon .naics-bubble');
+  const active    = [...document.querySelectorAll('#naicsRibbon .naics-bubble.active')].map(b=>b.dataset.naics);
+  const allActive = active.length === bubbles.length;
+  const onlyPrimary = active.length===1 && active[0]===PRIMARY_NAICS;
+
+  document.getElementById('ctrlAll')    ?.classList.toggle('active-ctrl', allActive);
+  document.getElementById('ctrlPrimary')?.classList.toggle('active-ctrl', onlyPrimary);
+  document.getElementById('ctrlIT')     ?.classList.toggle('active-ctrl',
+    !allActive && NAICS_GROUPS.it.every(c=>active.includes(c)) && active.every(c=>NAICS_GROUPS.it.includes(c)));
+  document.getElementById('ctrlConsult')?.classList.toggle('active-ctrl',
+    !allActive && NAICS_GROUPS.consult.every(c=>active.includes(c)) && active.every(c=>NAICS_GROUPS.consult.includes(c)));
+}
+
+// NAICS bubble toggle — legacy handler (bubbles now built dynamically by buildNaicsRibbon)
+document.querySelectorAll('.naics-bubble').forEach(b => {
+  b.addEventListener('click', () => {
+    const isActive = b.classList.contains('active');
+    const allActive = document.querySelectorAll('.naics-bubble.active').length;
+    // Don't let the last active bubble be deactivated
+    if (isActive && allActive === 1) return;
+    b.classList.toggle('active');
+    b.classList.toggle('inactive');
+    applyFilters();
+  });
+});
+document.querySelectorAll('.win-btn').forEach(btn => { btn.addEventListener('click', function() { document.querySelectorAll('.win-btn').forEach(b => b.classList.remove('active')); this.classList.add('active'); load(); }); });
+document.getElementById('searchInput').addEventListener('input', applyFilters);
+
+// ── Analyze Fit (Phase 2 — spec compliant) ───────────────────
+let currentFitOpp = null;
+let analysisCache = {}; // noticeId → row (pre-loaded badges)
+
+function getSessionToken() {
+  try {
+    const raw = sessionStorage.getItem('pipeline_session');
+    if (!raw) return null;
+    const s = JSON.parse(atob(raw));
+    if (!s.email || (Date.now() - s.ts) > 8 * 60 * 60 * 1000) return null;
+    return raw; // the base64 string itself is the bearer token
+  } catch { return null; }
+}
+
+// Load analysis badges for the current opportunity list (one query)
+async function loadAnalysisBadges(noticeIds) {
+  if (!noticeIds || !noticeIds.length) return;
+  const token = getSessionToken();
+  if (!token) return;
+  try {
+    const session = JSON.parse(atob(token));
+    const email   = encodeURIComponent(session.email);
+    const ids     = noticeIds.map(function(id){ return encodeURIComponent(id); }).join(',');
+    const SUPABASE_URL = 'https://judislfknmhofcgzyozc.supabase.co';
+    const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp1ZGlzbGZrbm1ob2ZjZ3p5b3pjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMDI3ODAsImV4cCI6MjA5Mjc3ODc4MH0.Kxpe0kJt0k7ZchYu70BOwm4KdT0C5aSsyeR1ov6NlQ0';
+    const res = await fetch(
+      SUPABASE_URL + '/rest/v1/opportunity_analyses?account_email=eq.' + email
+        + '&select=opportunity_id,recommendation,fit_score,profile_version,created_at'
+        + '&order=created_at.desc',
+      { headers: { apikey: ANON_KEY, Authorization: 'Bearer ' + ANON_KEY } }
+    );
+    if (!res.ok) return;
+    const rows = await res.json();
+    analysisCache = {};
+    rows.forEach(function(r) { analysisCache[r.opportunity_id] = r; });
+  } catch(e) { /* non-fatal */ }
+}
+
+document.addEventListener('click', function(e) {
+  var btn = e.target.closest('.analyze-btn');
+  if (!btn) return;
+  var idx = parseInt(btn.dataset.idx, 10);
+  if (!isNaN(idx) && renderedOpps[idx]) openFitDrawer(renderedOpps[idx]);
+});
+
+function openFitDrawer(opp) {
+  currentFitOpp = opp;
+  document.getElementById('fit-opp-title').textContent = opp.title || 'Opportunity';
+  document.getElementById('fit-opp-agency').textContent = opp.agency || '';
+  document.getElementById('fit-body').innerHTML = '<div class="fit-loading"><span class="fit-spinner"></span>Analyzing with Claude AI…</div>';
+  document.getElementById('fit-overlay').classList.add('open');
+  document.getElementById('fit-drawer').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  runAnalysis(opp, false, false);
+}
+
+let _pollTimer = null;
+
+async function runAnalysis(opp, force, deep) {
+  const token = getSessionToken();
+  if (!token) { document.getElementById('fit-body').innerHTML = '<div class="fit-error">Session expired. Please sign in again.</div>'; return; }
+
+  clearPollTimer();
+  document.getElementById('fit-body').innerHTML = '<div class="fit-loading"><span class="fit-spinner"></span>Contacting CapGen AI…</div>';
+
+  let res, data;
+  try {
+    res  = await fetch('/.netlify/functions/analyze-fit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({
+        opportunityId: opp.notice_id,
+        force,
+        deep,
+        opportunity: { title: opp.title, agency: opp.agency, naics: opp.naics, set_aside: opp.set_aside, deadline: opp.deadline }
+      })
+    });
+    data = await res.json();
+  } catch(e) {
+    document.getElementById('fit-body').innerHTML = '<div class="fit-error">Network error: ' + e.message + '</div>';
+    return;
+  }
+
+  if (res.status === 401) { document.getElementById('fit-body').innerHTML = '<div class="fit-error">Session expired — please sign in again.</div>'; return; }
+  if (res.status === 409) { renderProfileRequired(); return; }
+  if (res.status === 429) { renderDailyLimit(data.hoursLeft); return; }
+  if (!res.ok) { document.getElementById('fit-body').innerHTML = '<div class="fit-error">' + (data.error || 'Request failed') + '</div>'; return; }
+
+  // 200 = cache hit (any status) — render what we have
+  if (res.status === 200) {
+    handleAnalysisRow(data, opp);
+    return;
+  }
+
+  // 202 = background job started; poll until complete
+  if (res.status === 202) {
+    const rowId = data.id;
+    document.getElementById('fit-body').innerHTML = '<div class="fit-loading"><span class="fit-spinner"></span>Running Stage 1 analysis…</div>';
+    startPolling(rowId, opp, token);
+    return;
+  }
+}
+
+function startPolling(rowId, opp, token) {
+  clearPollTimer();
+  _pollTimer = setInterval(async function() {
+    try {
+      const res  = await fetch('/.netlify/functions/get-analysis?id=' + encodeURIComponent(rowId), {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      if (!res.ok) return; // keep polling
+      const data = await res.json();
+      handleAnalysisRow(data, opp);
+      if (data.status === 'complete' || data.status === 'failed') clearPollTimer();
+    } catch { /* keep polling */ }
+  }, 3000);
+}
+
+function clearPollTimer() {
+  if (_pollTimer) { clearInterval(_pollTimer); _pollTimer = null; }
+}
+
+function handleAnalysisRow(data, opp) {
+  if (data.status === 'pending') {
+    document.getElementById('fit-body').innerHTML = '<div class="fit-loading"><span class="fit-spinner"></span>Running Stage 1 analysis…</div>';
+    return;
+  }
+  if (data.status === 'failed') {
+    const errMsg = (data.stage1 && data.stage1.error) ? data.stage1.error : 'Analysis failed';
+    document.getElementById('fit-body').innerHTML = '<div class="fit-error">' + esc(errMsg) + '</div>';
+    return;
+  }
+  if (data.status === 'stage1_complete' || data.status === 'complete') {
+    renderStage1(data, opp);
+    if (data.opportunity_id) analysisCache[data.opportunity_id] = data;
+  }
+}
+
+function renderProfileRequired() {
+  document.getElementById('fit-body').innerHTML =
+    '<div class="fit-profile-prompt">'
+    + '<p>Complete your company profile to unlock Claude-powered fit analysis for every opportunity.</p>'
+    + '<a href="/onboarding.html" class="fit-btn-capgen" style="display:inline-block;padding:10px 22px">Complete Profile →</a>'
+    + '</div>';
+}
+
+function renderDailyLimit(hours) {
+  document.getElementById('fit-body').innerHTML =
+    '<div class="fit-limit-msg">Daily analysis limit reached — resets in ' + (hours || '?') + 'h.</div>';
+}
+
+function renderStage1(data, opp) {
+  const s1   = data.stage1 || {};
+  const rec  = (data.recommendation || 'NO_BID').toLowerCase().replace(/ /g,'_');
+  const score = data.fit_score != null ? data.fit_score : '—';
+  const m    = s1.match || {};
+  const naicsIcon   = m.naics_match      ? '✅' : '❌';
+  const setaside    = m.set_aside_eligible ? '✅' : '❌';
+  const capAlign    = (m.capability_alignment || 'LOW').toUpperCase();
+  const capIcon     = capAlign === 'HIGH' ? '✅' : capAlign === 'MEDIUM' ? '⚡' : '⚠️';
+  const cachedLine  = data.cached
+    ? '<div class="fit-cached-bar">Analyzed ' + fmtDeadline(data.created_at)
+      + ' <button class="fit-reanalyze" onclick="runAnalysis(currentFitOpp,true,false)">Re-analyze</button></div>'
+    : '';
+  const conditionsList = (s1.conditions && s1.conditions.length)
+    ? '<div class="fit-section"><div class="fit-heading">Conditions</div>'
+      + '<span class="fit-heading-rule">What must be true to bid</span>'
+      + '<ul class="fit-list">' + s1.conditions.map(function(c){ return '<li>' + esc(c) + '</li>'; }).join('') + '</ul></div>'
+    : '';
+  const noFidDeep = rec === 'no_bid'
+    ? '<button class="fit-analyze-anyway" onclick="runAnalysis(currentFitOpp,false,true)">Analyze anyway — build Stage 2 package</button>'
+    : '';
+
+  let stage2Html = '';
+  if (data.stage2) {
+    stage2Html = buildStage2Html(data.stage2);
+  } else if (data.status === 'stage1_complete' && (rec === 'bid' || rec === 'conditional')) {
+    stage2Html = '<div class="fit-stage2-loading"><span class="fit-spinner"></span>Building full proposal package…</div>';
+  }
+
+  document.getElementById('fit-body').innerHTML =
+    cachedLine
+    + '<div class="fit-hero">'
+    + '<div><div class="fit-score-num ' + rec + '">' + score + '</div>'
+    + '<div class="fit-rec-badge ' + rec + '">' + (data.recommendation || 'NO_BID') + '</div></div>'
+    + '<div style="flex:1"><div class="fit-naics-note">' + esc(s1.opportunity_summary || '') + '</div></div>'
+    + '</div>'
+
+    + '<div class="fit-match-grid">'
+    + '<div class="fit-match-item"><div class="fit-match-icon">' + naicsIcon + '</div><div class="fit-match-label">NAICS</div><div class="fit-match-val">' + esc(m.naics_detail || (m.naics_match ? 'Match' : 'No match')) + '</div></div>'
+    + '<div class="fit-match-item"><div class="fit-match-icon">' + setaside + '</div><div class="fit-match-label">Set-Aside</div><div class="fit-match-val">' + esc(m.set_aside_detail || (m.set_aside_eligible ? 'Eligible' : 'Not eligible')) + '</div></div>'
+    + '<div class="fit-match-item"><div class="fit-match-icon">' + capIcon + '</div><div class="fit-match-label">Capability</div><div class="fit-match-val">' + capAlign + '</div></div>'
+    + '</div>'
+
+    + '<div class="fit-section"><div class="fit-heading">Analyst Rationale</div><span class="fit-heading-rule">Bid / No-Bid reasoning</span>'
+    + '<p class="fit-body-text">' + esc(s1.rationale || '') + '</p></div>'
+
+    + conditionsList
+    + noFidDeep
+    + stage2Html
+
+    + '<p style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-size:.75rem;color:rgba(255,255,255,.28);margin-top:16px;margin-bottom:0">Analysis based on data sourced from official public records.</p>'
+    + '<div class="fit-footer-btns">'
+    + (opp.url ? '<a href="' + opp.url + '" target="_blank" rel="noopener" class="fit-btn-sam">View Opportunity ↗</a>' : '')
+    + '<a href="/capability-generator.html?uei=YVNXN3XBUSD5" class="fit-btn-capgen">Generate CapGen ↗</a>'
+    + '</div>';
+}
+
+function buildStage2Html(s2) {
+  function accSection(label, rule, content) {
+    return '<div class="fit-acc-item">'
+      + '<div class="fit-acc-header" onclick="toggleAcc(this)">' + label + '<span>›</span></div>'
+      + '<div class="fit-acc-body">'
+      + '<span class="fit-heading-rule">' + rule + '</span>'
+      + content
+      + '</div></div>';
+  }
+  function listHtml(arr) {
+    if (!arr || !arr.length) return '<p class="fit-body-text" style="color:rgba(255,255,255,.4)">Not specified.</p>';
+    return '<ul class="fit-list">' + arr.map(function(i){ return '<li>' + esc(String(i)); }).join('') + '</ul>';
+  }
+  function checklistHtml(items) {
+    if (!items || !items.length) return '';
+    return '<div class="fit-checklist">' + items.map(function(item, idx2){
+      var obj = (typeof item === 'object') ? item : { item: item };
+      return '<label class="fit-check-item"><input type="checkbox" id="chk' + idx2 + '"><div><div class="ci-text">' + esc(obj.item || '') + '</div>'
+        + (obj.owner_hint ? '<div class="ci-hint">Owner: ' + esc(obj.owner_hint) + '</div>' : '')
+        + (obj.deadline_hint ? '<div class="ci-hint">By: ' + esc(obj.deadline_hint) + '</div>' : '')
+        + '</div></label>';
+    }).join('') + '</div>';
+  }
+
+  return '<div class="fit-section"><div class="fit-heading">Full Pursuit Package</div><span class="fit-heading-rule">Stage 2 — generated because recommendation is BID or CONDITIONAL</span></div>'
+    + '<div class="fit-accordion">'
+    + accSection('Required Work Scope', 'What the government is actually buying',   listHtml(s2.required_work))
+    + accSection('Staffing & Delivery', 'Roles, certs, clearances, delivery mode',   listHtml(s2.staffing_delivery))
+    + accSection('Documents Needed',    'Everything required to respond',            listHtml(s2.documents_needed))
+    + accSection('Proposal Checklist',  'Actionable steps with owners and deadlines', checklistHtml(s2.proposal_checklist))
+    + accSection('Draft Technical Approach', 'Tailored to your capabilities',
+        '<p class="fit-body-text" style="white-space:pre-line">' + esc(s2.draft_technical_approach || '') + '</p>')
+    + accSection('Pricing Considerations', 'Contract type, cost drivers, competitive range', listHtml(s2.pricing_considerations))
+    + accSection('Questions for the CO',  'Specific, well-formed questions to submit', listHtml(s2.questions_for_co))
+    + '</div>';
+}
+
+function toggleAcc(header) {
+  header.classList.toggle('is-open');
+  const body = header.nextElementSibling;
+  if (body) body.classList.toggle('is-open');
+}
+
+function esc(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function closeFitDrawer() {
+  clearPollTimer();
+  document.getElementById('fit-overlay').classList.remove('open');
+  document.getElementById('fit-drawer').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeFitDrawer();
+});
+
+</script>
+
+<!-- OTP Auth -->
+<script>
+// Check existing session
+(function() {
+  const stored = sessionStorage.getItem('pipeline_session');
+  if (stored) {
+    try {
+      const s = JSON.parse(atob(stored));
+      if (s.email && (Date.now() - s.ts) < 8 * 60 * 60 * 1000) {
+        showApp(s.email);
+        load();
+        return;
+      }
+    } catch(_) {}
+  }
+  document.getElementById('auth-gate').style.display = 'flex';
+})();
+
+function showApp(email) {
+  document.getElementById('auth-gate').style.display = 'none';
+  document.getElementById('auth-app').style.display  = 'block';
+  const hdr = document.querySelector('.header-right');
+  if (hdr && !document.getElementById('signout-btn')) {
+    const btn = document.createElement('button');
+    btn.id = 'signout-btn';
+    btn.textContent = 'Sign out';
+    btn.addEventListener('click', () => { sessionStorage.removeItem('pipeline_session'); window.location.reload(); });
+    hdr.appendChild(btn);
+  }
+}
+
+function resetOtp() {
+  document.getElementById('auth-step2').style.display = 'none';
+  document.getElementById('auth-step1').style.display = 'block';
+  document.getElementById('auth-email').value = '';
+  document.getElementById('auth-err').textContent = '';
+}
+
+// Step 1 — send code
+document.getElementById('auth-send-btn').addEventListener('click', async function() {
+  const email = document.getElementById('auth-email').value.trim();
+  const err   = document.getElementById('auth-err');
+  if (!email) { err.textContent = 'Please enter your email address.'; return; }
+  this.disabled = true; this.textContent = 'Sending code…';
+  err.textContent = '';
+  try {
+    const res  = await fetch('/.netlify/functions/pipeline-otp-send', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to send code.');
+    document.getElementById('auth-email-display').textContent = email;
+    document.getElementById('auth-step1').style.display = 'none';
+    document.getElementById('auth-step2').style.display = 'block';
+    document.getElementById('auth-code').focus();
+  } catch(e) {
+    err.textContent = e.message;
+    this.disabled = false; this.textContent = 'Send Access Code →';
+  }
+});
+
+// Step 2 — verify code
+document.getElementById('auth-verify-btn').addEventListener('click', async function() {
+  const email = document.getElementById('auth-email').value.trim();
+  const code  = document.getElementById('auth-code').value.trim();
+  const err   = document.getElementById('auth-code-err');
+  if (code.length < 6) { err.textContent = 'Enter the 6-digit code from your email.'; return; }
+  this.disabled = true; this.textContent = 'Verifying…';
+  err.textContent = '';
+  try {
+    const res  = await fetch('/.netlify/functions/pipeline-otp-verify', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, code })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Invalid code.');
+    sessionStorage.setItem('pipeline_session', data.token);
+    showApp(data.email);
+    load();
+  } catch(e) {
+    err.textContent = e.message;
+    this.disabled = false; this.textContent = 'Access My Dashboard →';
+  }
+});
+
+// Allow Enter key on code input
+document.getElementById('auth-code').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') document.getElementById('auth-verify-btn').click();
+});
+</script>
+<!-- Analyze Fit — slide-in drawer -->
+<div id="fit-overlay" onclick="closeFitDrawer()"></div>
+<div id="fit-drawer">
+  <div class="fit-drawer-inner">
+    <button class="fit-close" onclick="closeFitDrawer()">&#xD7;</button>
+    <div id="fit-opp-title" class="fit-opp-title"></div>
+    <div id="fit-opp-agency" class="fit-opp-agency"></div>
+    <div id="fit-body"></div>
+  </div>
+</div>
+
+</body>
+</html>

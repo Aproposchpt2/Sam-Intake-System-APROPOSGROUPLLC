@@ -1,0 +1,126 @@
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
+  [build.environment]
+    NODE_VERSION = "18"
+    PDF_RENDERER = "adobe"
+    SECRETS_SCAN_OMIT_KEYS = "SUPABASE_URL"
+
+[functions]
+  node_bundler = "esbuild"
+
+[functions."generate-capability-background"]
+  external_node_modules = ["adm-zip"]
+
+[[redirects]]
+  from = "/privacy"
+  to = "/privacy.html"
+  status = 200
+
+[[redirects]]
+  from = "/terms"
+  to = "/terms.html"
+  status = 200
+
+[[redirects]]
+  from = "/sms-consent"
+  to = "/sms-consent.html"
+  status = 200
+
+[[redirects]]
+  from = "/pipeline"
+  to = "/pipeline-dashboard.html"
+  status = 200
+
+[[redirects]]
+  from = "/capgen"
+  to = "/capability-generator.html"
+  status = 200
+
+[[redirects]]
+  from = "/apropos"
+  to = "/ag-dashboard.html"
+  status = 200
+
+[[redirects]]
+  from = "/pro"
+  to = "/capgen-pro.html"
+  status = 200
+
+[[redirects]]
+  from = "/pro/thankyou"
+  to = "/capgen-pro-thankyou.html"
+  status = 200
+
+[[redirects]]
+  from = "/offer"
+  to = "/offer.html"
+  status = 200
+
+[[redirects]]
+  from = "/welcome"
+  to = "/welcome.html"
+  status = 200
+
+[[redirects]]
+  from = "/onboarding"
+  to = "/onboarding.html"
+  status = 200
+
+[[redirects]]
+  from = "/signin"
+  to = "/onboarding.html"
+  status = 200
+
+[[redirects]]
+  from = "/signup"
+  to = "/offer.html"
+  status = 200
+
+[[redirects]]
+  from = "/demo"
+  to = "/demo.html"
+  status = 200
+
+[[redirects]]
+  from = "/demo/snapshot"
+  to = "/demo-snapshot.html"
+  status = 200
+
+[[redirects]]
+  from = "/capgen-onboarding"
+  to = "/capgen-onboarding.html"
+  status = 200
+
+[[redirects]]
+  from = "/profile"
+  to = "/capgen-profile.html"
+  status = 200
+
+[[redirects]]
+  from = "/opportunity"
+  to = "/opportunity.html"
+  status = 200
+
+[[redirects]]
+  from = "/marketing-dashboard"
+  to = "/marketing-dashboard.html"
+  status = 200
+
+[[redirects]]
+  from = "/demo/report"
+  to = "/demo-report.html"
+  status = 200
+
+[[redirects]]
+  from = "/member-home"
+  to = "/member-home.html"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"

@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Opportunity Pipeline — Custom IT Services LLC</title>
+<style>
+:root{
+  --bg:#0A1A3A;--surface:#0f2244;--panel:#132954;--line:rgba(91,175,255,.15);
+  --line2:rgba(91,175,255,.28);--text:#f0f6ff;--muted:#8facd0;--soft:#5a7899;
+  --gold:#d9a45b;--green:#2ecc8a;--amber:#f0a500;--red:#e05555;--cyan:#5BD3FF;
+  font-family:Arial,Helvetica,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.6}
+
+header{background:var(--surface);border-bottom:1px solid var(--line);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-mark{width:40px;height:40px;border-radius:10px;background:var(--bg);border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;color:var(--cyan)}
+.brand-name{font-size:1rem;font-weight:700;color:var(--text)}
+.brand-sub{font-size:.72rem;color:var(--muted);letter-spacing:.04em}
+.header-right{display:flex;align-items:center;gap:12px}
+.badge-wosb{background:rgba(91,211,255,.12);border:1px solid rgba(91,211,255,.3);color:var(--cyan);padding:4px 10px;border-radius:20px;font-size:.68rem;font-weight:700;letter-spacing:.04em}
+
+.page{max-width:1240px;margin:0 auto;padding:28px 20px}
+
+.entity-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin-bottom:22px;display:flex;flex-wrap:wrap;gap:20px;align-items:center}
+.entity-field{min-width:120px}
+.ef-label{font-size:.64rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);margin-bottom:3px}
+.ef-value{font-size:.92rem;font-weight:700;color:var(--text)}
+.ef-value.active{color:var(--green)}
+
+.controls{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px;align-items:center}
+.controls select,.controls input{background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:8px;color:var(--text);padding:8px 12px;font-size:.84rem;outline:none}
+.controls select:focus,.controls input:focus{border-color:var(--cyan)}
+.count-badge{font-size:.8rem;color:var(--muted);margin-left:auto}
+/* Window toggle buttons */
+.win-btns{display:flex;gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.win-btn{background:rgba(255,255,255,.04);border:none;border-right:1px solid var(--line);color:var(--muted);padding:8px 16px;font-size:.82rem;font-weight:700;cursor:pointer;transition:.18s;white-space:nowrap}
+.win-btn:last-child{border-right:none}
+.win-btn:hover{background:rgba(91,211,255,.08);color:var(--text)}
+.win-btn.active{background:rgba(91,211,255,.18);color:var(--cyan);border-color:var(--line)}
+
+/* NAICS ribbon */
+.naics-ribbon{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;align-items:center}
+.naics-ribbon-label{font-size:.66rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);margin-right:4px;white-space:nowrap}
+.naics-bubble{display:inline-flex;flex-direction:column;align-items:center;gap:2px;padding:7px 13px;border-radius:20px;cursor:pointer;border:1px solid var(--line);background:rgba(255,255,255,.04);transition:.18s;user-select:none}
+.naics-bubble:hover{border-color:var(--cyan);background:rgba(91,211,255,.08)}
+.naics-bubble.active{background:rgba(91,211,255,.15);border-color:var(--cyan);box-shadow:0 0 10px rgba(91,211,255,.2)}
+.naics-bubble.active .nb-code{color:var(--cyan)}
+.naics-bubble.inactive{opacity:.38;border-color:transparent}
+.nb-code{font-size:.75rem;font-weight:900;color:var(--muted);letter-spacing:.04em;line-height:1}
+.nb-label{font-size:.6rem;color:var(--soft);text-align:center;line-height:1.2;max-width:80px}
+
+.opp-table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.opp-table th{font-size:.64rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);padding:11px 14px;text-align:left;border-bottom:1px solid var(--line);background:rgba(255,255,255,.03)}
+.opp-table td{padding:13px 14px;border-bottom:1px solid rgba(91,175,255,.07);vertical-align:top}
+.opp-table tr:last-child td{border-bottom:none}
+.opp-table tr:hover td{background:rgba(91,175,255,.05)}
+
+.title-cell a{color:var(--text);text-decoration:none;font-weight:600;font-size:.88rem;line-height:1.35;display:block}
+.title-cell a:hover{color:var(--cyan)}
+.agency-cell{font-size:.76rem;color:var(--muted);line-height:1.5}
+.naics-chip{display:inline-block;background:rgba(91,211,255,.1);border:1px solid rgba(91,211,255,.22);color:var(--cyan);padding:2px 7px;border-radius:4px;font-size:.68rem;font-weight:700;margin-top:3px}
+.type-chip{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.66rem;font-weight:700}
+.type-rfp{background:rgba(91,175,255,.15);color:#82b8ff}
+.type-rfq{background:rgba(144,238,144,.12);color:#90ee90}
+.type-ss{background:rgba(240,165,0,.12);color:var(--amber)}
+.type-rfi{background:rgba(169,147,255,.14);color:#c0a8ff}
+.type-other{background:rgba(255,255,255,.07);color:var(--muted)}
+.setaside-cell{font-size:.75rem;color:var(--muted)}
+
+.deadline-cell{text-align:center;white-space:nowrap}
+.days-badge{display:inline-block;padding:4px 9px;border-radius:6px;font-size:.72rem;font-weight:700}
+.days-hot{background:rgba(224,85,85,.2);color:#ff9999;border:1px solid rgba(224,85,85,.35)}
+.days-warm{background:rgba(240,165,0,.15);color:#ffc96b;border:1px solid rgba(240,165,0,.3)}
+.days-ok{background:rgba(46,204,138,.12);color:#7eedc0;border:1px solid rgba(46,204,138,.28)}
+.days-none{background:rgba(255,255,255,.05);color:var(--soft);border:1px solid var(--line)}
+
+.capgen-btn{background:rgba(91,211,255,.12);border:1px solid rgba(91,211,255,.3);color:var(--cyan);padding:5px 11px;border-radius:7px;font-size:.72rem;font-weight:700;cursor:pointer;white-space:nowrap;text-decoration:none;display:inline-block;transition:.18s}
+.capgen-btn:hover{background:rgba(91,211,255,.22);border-color:var(--cyan)}
+
+.empty{text-align:center;padding:52px;color:var(--soft)}
+.loading{text-align:center;padding:52px;color:var(--muted)}
+.stat-bar{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:20px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 18px;min-width:110px}
+.stat-val{font-size:1.6rem;font-weight:900;line-height:1;color:var(--text)}
+.stat-val.red{color:var(--red)}.stat-val.amber{color:var(--amber)}.stat-val.green{color:var(--green)}
+.stat-label{font-size:.64rem;text-transform:uppercase;letter-spacing:.08em;color:var(--soft);margin-top:4px}
+
+/* ── Mobile card layout ── */
+.opp-cards{display:none;gap:12px;flex-direction:column}
+.opp-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.opp-card:hover{border-color:var(--line2)}
+.opp-card-title a{color:var(--text);text-decoration:none;font-weight:700;font-size:.92rem;line-height:1.35;display:block}
+.opp-card-title a:hover{color:var(--cyan)}
+.opp-card-agency{font-size:.76rem;color:var(--muted);margin-top:3px}
+.opp-card-row{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.opp-card-chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.opp-card-deadline{display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+.opp-card-date{font-size:.68rem;color:var(--soft)}
+
+@media(max-width:700px){
+  .opp-table-wrap table{display:none}
+  .opp-cards{display:flex}
+  header{flex-direction:column;align-items:flex-start;gap:10px;padding:12px 16px}
+  .header-right{flex-wrap:wrap;gap:8px}
+  .page{padding:16px 14px}
+  .stat-bar{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .stat{min-width:0;padding:10px 12px}
+  .stat-val{font-size:1.3rem}
+  .entity-card{gap:12px}
+  .entity-field{min-width:80px}
+  .controls{gap:8px}
+  .controls select,.controls input{font-size:.8rem;padding:7px 10px}
+  .naics-ribbon{gap:6px}
+  .naics-bubble{padding:5px 9px}
+  .nb-code{font-size:.68rem}
+  .nb-label{font-size:.54rem}
+}
+
+/* Auth gate */
+#auth-gate{display:none;min-height:100vh;align-items:center;justify-content:center;background:var(--bg)}
+.auth-card{background:var(--surface);border:1px solid var(--line2);border-radius:20px;padding:40px;max-width:420px;width:100%;text-align:center}
+.auth-logo{width:52px;height:52px;border-radius:14px;background:var(--bg);border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;color:var(--cyan);margin:0 auto 20px}
+.auth-card h2{font-size:1.3rem;margin-bottom:6px}
+.auth-card p{color:var(--muted);font-size:.88rem;margin-bottom:24px}
+.auth-input{width:100%;background:rgba(255,255,255,.07);border:1px solid var(--line2);border-radius:10px;color:var(--text);padding:12px 14px;font-size:.95rem;outline:none;margin-bottom:12px}
+.auth-input:focus{border-color:var(--cyan)}
+.auth-btn{width:100%;background:var(--cyan);color:#0A1A3A;border:none;border-radius:10px;padding:13px;font-weight:700;font-size:.95rem;cursor:pointer}
+.auth-btn:disabled{opacity:.55;cursor:wait}
+.auth-notice{margin-top:14px;font-size:.82rem;color:var(--muted)}
+.auth-sent{display:none;text-align:center;padding:10px 0}
+.auth-sent-icon{font-size:2.5rem;margin-bottom:12px}
+#auth-app{display:none}
+#signout-btn{background:transparent;border:1px solid var(--line);border-radius:7px;color:var(--soft);padding:5px 12px;cursor:pointer;font-size:.74rem}
+#signout-btn:hover{border-color:var(--red);color:var(--red)}
+</style>
+</head>
+<body>
+
+<!-- Auth gate — OTP flow -->
+<div id="auth-gate">
+  <div class="auth-card">
+    <div class="auth-logo">CI</div>
+    <h2>Custom IT Services LLC</h2>
+
+    <!-- Step 1: Email -->
+    <div id="auth-step1">
+      <p>Enter your email address to receive a 6-digit access code.</p>
+      <input class="auth-input" type="email" id="auth-email" placeholder="lori@customitservices-llc.com" autocomplete="email"/>
+      <button class="auth-btn" id="auth-send-btn">Send Access Code →</button>
+      <div class="auth-notice" id="auth-err"></div>
+    </div>
+
+    <!-- Step 2: Code entry -->
+    <div id="auth-step2" style="display:none">
+      <div class="auth-sent-icon">📬</div>
+      <strong style="color:var(--text);display:block;margin-bottom:8px">Check your email</strong>
+      <p style="margin-bottom:20px">Enter the 6-digit code we sent to <strong id="auth-email-display" style="color:var(--cyan)"></strong></p>
+      <input class="auth-input" type="text" id="auth-code" placeholder="000000" maxlength="6"
+             style="font-size:1.6rem;letter-spacing:.3em;text-align:center;font-weight:900" autocomplete="one-time-code"/>
+      <button class="auth-btn" id="auth-verify-btn">Access My Dashboard →</button>
+      <div class="auth-notice" id="auth-code-err"></div>
+      <div style="margin-top:14px">
+        <button onclick="resetOtp()" style="background:none;border:none;color:var(--soft);cursor:pointer;font-size:.8rem;text-decoration:underline">Use a different email</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Main app (shown when logged in) -->
+<div id="auth-app">
+
+<header>
+  <div class="brand">
+    <div class="brand-mark">CI</div>
+    <div>
+      <div class="brand-name">CUSTOM IT SERVICES LLC</div>
+      <div class="brand-sub">Federal Contract Pipeline · CapGen by AI4 Businesses</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="badge-wosb">WOSB Certified</span>
+    <span style="font-size:.72rem;color:var(--soft)">UEI: C13JZV6AY6L4 · CAGE: 79M55</span>
+  </div>
+</header>
+
+<div class="page">
+
+  <!-- Entity summary -->
+  <div class="entity-card">
+    <div class="entity-field"><div class="ef-label">Federal Status</div><div class="ef-value active">● Active</div></div>
+    <div class="entity-field"><div class="ef-label">Business Type</div><div class="ef-value">Small Business</div></div>
+    <div class="entity-field"><div class="ef-label">Location</div><div class="ef-value">Henderson, NV</div></div>
+    <div class="entity-field"><div class="ef-label">Primary NAICS</div><div class="ef-value">541519</div></div>
+    <div class="entity-field"><div class="ef-label">NAICS Monitored</div><div class="ef-value" id="naicsCount">—</div></div>
+    <div class="entity-field"><div class="ef-label">Last Refreshed</div><div class="ef-value" id="lastRefresh">—</div></div>
+    <div style="margin-left:auto"><button onclick="load()" style="background:var(--cyan);color:#0A1A3A;border:none;border-radius:8px;padding:9px 18px;font-weight:700;cursor:pointer;font-size:.82rem">Refresh Pipeline</button></div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stat-bar" id="statBar">
+    <div class="stat"><div class="stat-val" id="s-total">—</div><div class="stat-label">Total Opps</div></div>
+    <div class="stat"><div class="stat-val red" id="s-hot">—</div><div class="stat-label">Due &lt; 7 days</div></div>
+    <div class="stat"><div class="stat-val amber" id="s-warm">—</div><div class="stat-label">Due 7–30 days</div></div>
+    <div class="stat"><div class="stat-val green" id="s-ok">—</div><div class="stat-label">Due 30+ days</div></div>
+  </div>
+
+  <!-- Controls -->
+  <!-- NAICS ribbon -->
+  <div class="naics-ribbon" id="naicsRibbon">
+    <span class="naics-ribbon-label">NAICS</span>
+    <div class="naics-bubble active" data-naics="541519">
+      <span class="nb-code">541519 ⭐</span><span class="nb-label">Other IT Services</span>
+    </div>
+    <div class="naics-bubble active" data-naics="541511">
+      <span class="nb-code">541511</span><span class="nb-label">Custom Programming</span>
+    </div>
+    <div class="naics-bubble active" data-naics="541512">
+      <span class="nb-code">541512</span><span class="nb-label">Systems Design</span>
+    </div>
+    <div class="naics-bubble active" data-naics="541513">
+      <span class="nb-code">541513</span><span class="nb-label">IT Facilities Mgmt</span>
+    </div>
+    <div class="naics-bubble active" data-naics="541990">
+      <span class="nb-code">541990</span><span class="nb-label">Professional Svcs</span>
+    </div>
+    <div class="naics-bubble active" data-naics="541690">
+      <span class="nb-code">541690</span><span class="nb-label">Scientific Consulting</span>
+    </div>
+    <div class="naics-bubble active" data-naics="541370">
+      <span class="nb-code">541370</span><span class="nb-label">Surveying & Mapping</span>
+    </div>
+    <div class="naics-bubble active" data-naics="541330">
+      <span class="nb-code">541330</span><span class="nb-label">Engineering Svcs</span>
+    </div>
+    <div class="naics-bubble active" data-naics="517919">
+      <span class="nb-code">517919</span><span class="nb-label">Telecommunications</span>
+    </div>
+  </div>
+
+  <div class="controls">
+    <!-- Window toggle buttons -->
+    <div class="win-btns">
+      <button class="win-btn active" data-days="60">60 Days</button>
+      <button class="win-btn" data-days="30">30 Days</button>
+      <button class="win-btn" data-days="7">7 Days</button>
+    </div>
+    <input type="search" id="searchInput" placeholder="Search title or agency…" style="min-width:200px"/>
+    <span class="count-badge" id="countBadge"></span>
+  </div>
+
+  <!-- Desktop table -->
+  <div class="opp-table-wrap">
+    <table class="opp-table">
+      <thead>
+        <tr>
+          <th>Opportunity</th>
+          <th>Agency</th>
+          <th>Type</th>
+          <th>Set-Aside</th>
+          <th>NAICS</th>
+          <th style="text-align:center">Deadline</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tbody"><tr><td colspan="7" class="loading">Loading pipeline…</td></tr></tbody>
+    </table>
+  </div>
+
+  <!-- Mobile cards -->
+  <div class="opp-cards" id="oppCards">
+    <div class="loading" style="text-align:center;padding:40px;color:var(--muted)">Loading pipeline…</div>
+  </div>
+
+</div><!-- end .page -->
+</div><!-- end #auth-app -->
+
+<script>
+// UEI resolved after auth — see resolveUEI()
+let UEI = null;
+// Update header with client's business name if available
+(function(){const biz=sessionStorage.getItem('capgen_biz');if(biz){const t=document.querySelector('.dash-mock-title em');if(t)t.textContent=biz;}})();
+let allOpps = [];
+let naicsClient = [];
+
+function typeClass(t) {
+  const tl = (t||'').toLowerCase();
+  if (tl.includes('solicitation')) return 'type-rfp';
+  if (tl.includes('rfq'))          return 'type-rfq';
+  if (tl.includes('sources'))      return 'type-ss';
+  if (tl.includes('rfi'))          return 'type-rfi';
+  return 'type-other';
+}
+
+function fmtDeadline(d) {
+  if (!d) return '—';
+  const dt = new Date(d);
+  return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function render(opps) {
+  const tbody = document.getElementById('tbody');
+  const cards = document.getElementById('oppCards');
+  document.getElementById('countBadge').textContent = opps.length + ' opportunities';
+
+  if (!opps.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty">No opportunities match the current filters.</td></tr>';
+    cards.innerHTML = '<div class="empty">No opportunities match the current filters.</div>';
+    return;
+  }
+
+  const capgenUrl = `/capability-generator.html?uei=${UEI}`;
+
+  // Desktop table rows
+  tbody.innerHTML = opps.map(o => {
+    const daysCls = o.urgency === 'hot' ? 'days-hot' : o.urgency === 'warm' ? 'days-warm' : o.urgency === 'ok' ? 'days-ok' : 'days-none';
+    const daysLabel = o.days_left !== null ? (o.days_left < 1 ? 'Closed' : o.days_left + 'd left') : 'No deadline';
+    return `<tr>
+      <td class="title-cell"><a href="${o.url}" target="_blank" rel="noopener">${o.title || 'Untitled'}</a></td>
+      <td class="agency-cell">${o.agency || '—'}</td>
+      <td><span class="type-chip ${typeClass(o.type)}">${o.type || '—'}</span></td>
+      <td class="setaside-cell">${o.set_aside || 'Unrestricted'}</td>
+      <td><span class="naics-chip">${o.naics || '—'}</span></td>
+      <td class="deadline-cell">
+        <div><span class="days-badge ${daysCls}">${daysLabel}</span></div>
+        <div style="font-size:.68rem;color:var(--soft);margin-top:3px">${fmtDeadline(o.deadline)}</div>
+      </td>
+      <td><a class="capgen-btn" href="${capgenUrl}">CapGen ↗</a></td>
+    </tr>`;
+  }).join('');
+
+  // Mobile cards
+  cards.innerHTML = opps.map(o => {
+    const daysCls = o.urgency === 'hot' ? 'days-hot' : o.urgency === 'warm' ? 'days-warm' : o.urgency === 'ok' ? 'days-ok' : 'days-none';
+    const daysLabel = o.days_left !== null ? (o.days_left < 1 ? 'Closed' : o.days_left + 'd left') : 'No deadline';
+    return `<div class="opp-card">
+      <div class="opp-card-title">
+        <a href="${o.url}" target="_blank" rel="noopener">${o.title || 'Untitled'}</a>
+        <div class="opp-card-agency">${o.agency || '—'}</div>
+      </div>
+      <div class="opp-card-row">
+        <div class="opp-card-chips">
+          <span class="type-chip ${typeClass(o.type)}">${o.type || '—'}</span>
+          <span class="naics-chip">${o.naics || '—'}</span>
+          ${o.set_aside && o.set_aside !== 'None' ? `<span class="setaside-cell">${o.set_aside}</span>` : ''}
+        </div>
+        <div class="opp-card-deadline">
+          <span class="days-badge ${daysCls}">${daysLabel}</span>
+          <span class="opp-card-date">${fmtDeadline(o.deadline)}</span>
+        </div>
+      </div>
+      <div>
+        <a class="capgen-btn" href="${capgenUrl}" style="width:100%;text-align:center;display:block;padding:8px">Generate CapGen Statement ↗</a>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function activeNaics() {
+  return [...document.querySelectorAll('.naics-bubble.active')].map(b => b.dataset.naics);
+}
+
+function applyFilters() {
+  const selectedNaics = activeNaics();
+  const search  = document.getElementById('searchInput').value.toLowerCase();
+
+  let filtered = allOpps;
+  if (selectedNaics.length < 9) filtered = filtered.filter(o => selectedNaics.includes(o.naics));
+  if (search)  filtered = filtered.filter(o =>
+    (o.title||'').toLowerCase().includes(search) ||
+    (o.agency||'').toLowerCase().includes(search)
+  );
+  render(filtered);
+}
+
+async function load() {
+  document.getElementById('tbody').innerHTML = '<tr><td colspan="7" class="loading">Fetching live opportunities from SAM.gov…</td></tr>';
+  try {
+    const activeDays = document.querySelector('.win-btn.active')?.dataset.days || '60';
+    const res  = await fetch(`/.netlify/functions/client-pipeline?uei=${UEI}&days=${activeDays}`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Load failed');
+
+    allOpps      = data.opportunities || [];
+    naicsClient  = data.client.naics  || [];
+
+    // Stats
+    document.getElementById('naicsCount').textContent = naicsClient.length;
+    document.getElementById('lastRefresh').textContent = new Date().toLocaleTimeString();
+    document.getElementById('s-total').textContent = allOpps.length;
+    document.getElementById('s-hot').textContent   = allOpps.filter(o => o.urgency === 'hot').length;
+    document.getElementById('s-warm').textContent  = allOpps.filter(o => o.urgency === 'warm').length;
+    document.getElementById('s-ok').textContent    = allOpps.filter(o => o.urgency === 'ok').length;
+
+    applyFilters();
+  } catch (e) {
+    document.getElementById('tbody').innerHTML = `<tr><td colspan="7" class="empty" style="color:var(--red)">${e.message}</td></tr>`;
+  }
+}
+
+// NAICS bubble toggle
+document.querySelectorAll('.naics-bubble').forEach(b => {
+  b.addEventListener('click', () => {
+    const isActive = b.classList.contains('active');
+    const allActive = document.querySelectorAll('.naics-bubble.active').length;
+    // Don't let the last active bubble be deactivated
+    if (isActive && allActive === 1) return;
+    b.classList.toggle('active');
+    b.classList.toggle('inactive');
+    applyFilters();
+  });
+});
+
+// Window toggle buttons
+document.querySelectorAll('.win-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.win-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    currentPage = 0;
+    load();
+  });
+});
+document.getElementById('searchInput').addEventListener('input', applyFilters);
+
+</script>
+
+<!-- OTP Auth -->
+<script>
+async function resolveUEI(email) {
+  // Check sessionStorage first
+  const cached = sessionStorage.getItem('capgen_uei');
+  if (cached) { UEI = cached; return; }
+  // Fetch from capgen_subscriptions by email
+  try {
+    const res = await fetch(
+      'https://judislfknmhofcgzyozc.supabase.co/rest/v1/capgen_subscriptions?email=eq.' + encodeURIComponent(email) + '&select=uei&limit=1',
+      { headers: { apikey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp1ZGlzbGZrbm1ob2ZjZ3p5b3pjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMDI3ODAsImV4cCI6MjA5Mjc3ODc4MH0.Kxpe0kJt0k7ZchYu70BOwm4KdT0C5aSsyeR1ov6NlQ0', Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp1ZGlzbGZrbm1ob2ZjZ3p5b3pjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMDI3ODAsImV4cCI6MjA5Mjc3ODc4MH0.Kxpe0kJt0k7ZchYu70BOwm4KdT0C5aSsyeR1ov6NlQ0' } }
+    );
+    const rows = await res.json();
+    if (Array.isArray(rows) && rows[0] && rows[0].uei) {
+      UEI = rows[0].uei;
+      sessionStorage.setItem('capgen_uei', UEI);
+    }
+  } catch(e) { console.warn('UEI lookup error:', e.message); }
+  // Fallback — show generic demo pipeline
+  if (!UEI) UEI = 'C13JZV6AY6L4';
+}
+
+</script>
+<script>
+// Check existing session
+(function() {
+  const stored = sessionStorage.getItem('pipeline_session');
+  if (stored) {
+    try {
+      const s = JSON.parse(atob(stored));
+      if (s.email && (Date.now() - s.ts) < 8 * 60 * 60 * 1000) {
+        resolveUEI(s.email).then(() => { showApp(s.email); load(); });
+        return;
+      }
+    } catch(_) {}
+  }
+  document.getElementById('auth-gate').style.display = 'flex';
+})();
+
+function showApp(email) {
+  document.getElementById('auth-gate').style.display = 'none';
+  document.getElementById('auth-app').style.display  = 'block';
+  const hdr = document.querySelector('.header-right');
+  if (hdr && !document.getElementById('signout-btn')) {
+    const btn = document.createElement('button');
+    btn.id = 'signout-btn';
+    btn.textContent = 'Sign out';
+    btn.addEventListener('click', () => { sessionStorage.removeItem('pipeline_session'); window.location.reload(); });
+    hdr.appendChild(btn);
+  }
+}
+
+function resetOtp() {
+  document.getElementById('auth-step2').style.display = 'none';
+  document.getElementById('auth-step1').style.display = 'block';
+  document.getElementById('auth-email').value = '';
+  document.getElementById('auth-err').textContent = '';
+}
+
+// Step 1 — send code
+document.getElementById('auth-send-btn').addEventListener('click', async function() {
+  const email = document.getElementById('auth-email').value.trim();
+  const err   = document.getElementById('auth-err');
+  if (!email) { err.textContent = 'Please enter your email address.'; return; }
+  this.disabled = true; this.textContent = 'Sending code…';
+  err.textContent = '';
+  try {
+    const res  = await fetch('/.netlify/functions/pipeline-otp-send', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to send code.');
+    document.getElementById('auth-email-display').textContent = email;
+    document.getElementById('auth-step1').style.display = 'none';
+    document.getElementById('auth-step2').style.display = 'block';
+    document.getElementById('auth-code').focus();
+  } catch(e) {
+    err.textContent = e.message;
+    this.disabled = false; this.textContent = 'Send Access Code →';
+  }
+});
+
+// Step 2 — verify code
+document.getElementById('auth-verify-btn').addEventListener('click', async function() {
+  const email = document.getElementById('auth-email').value.trim();
+  const code  = document.getElementById('auth-code').value.trim();
+  const err   = document.getElementById('auth-code-err');
+  if (code.length < 6) { err.textContent = 'Enter the 6-digit code from your email.'; return; }
+  this.disabled = true; this.textContent = 'Verifying…';
+  err.textContent = '';
+  try {
+    const res  = await fetch('/.netlify/functions/pipeline-otp-verify', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, code })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Invalid code.');
+    sessionStorage.setItem('pipeline_session', data.token);
+    await resolveUEI(data.email);
+    showApp(data.email);
+    load();
+  } catch(e) {
+    err.textContent = e.message;
+    this.disabled = false; this.textContent = 'Access My Dashboard →';
+  }
+});
+
+// Allow Enter key on code input
+document.getElementById('auth-code').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') document.getElementById('auth-verify-btn').click();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Complete Your CapGen Setup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,700;1,400&family=Cormorant+Garamond:ital@1&family=Jost:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--sap:#0F2A6A;--sap2:#163472;--white:#fff;--off:#e8edf8;--green:#6EE7A8;--muted:rgba(255,255,255,.55);--err:#F87171;font-family:'Jost',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--sap);color:var(--white);min-height:100vh;display:flex;flex-direction:column;align-items:center}
+.topbar{width:100%;background:rgba(0,0,0,.2);border-bottom:1px solid rgba(255,255,255,.08);padding:14px 5vw;display:flex;align-items:center;gap:12px}
+.brand{font-family:'Bodoni Moda',serif;font-size:1.1rem;color:var(--white)}
+.step-indicator{display:flex;gap:6px;margin-left:auto}
+.step-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.2);transition:.25s}
+.step-dot.active{background:var(--green)}
+.step-dot.done{background:rgba(110,231,168,.5)}
+
+.content{max-width:560px;width:100%;padding:40px 5vw 80px}
+.step-eyebrow{font-size:.68rem;text-transform:uppercase;letter-spacing:.12em;color:var(--green);font-weight:700;margin-bottom:10px}
+.step-heading{font-family:'Bodoni Moda',serif;font-size:1.9rem;line-height:1.15;margin-bottom:8px}
+.step-sub{font-size:.9rem;color:var(--muted);line-height:1.65;margin-bottom:28px}
+.step-rule{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.82rem;color:rgba(255,255,255,.32);margin-bottom:24px;display:block}
+
+/* Form */
+.form-card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:28px 30px}
+.field{margin-bottom:16px}
+label{display:block;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.5);margin-bottom:5px}
+input[type=text],input[type=number],textarea,select{width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:10px;color:var(--white);padding:11px 14px;font-size:.9rem;outline:none;font-family:'Jost',sans-serif;transition:.15s;resize:vertical}
+input:focus,textarea:focus,select:focus{border-color:var(--green)}
+input::placeholder,textarea::placeholder{color:rgba(255,255,255,.28)}
+select option{background:#163472;color:var(--white)}
+textarea{min-height:90px}
+.helper{font-size:.72rem;color:rgba(255,255,255,.35);margin-top:4px;line-height:1.4}
+
+/* Set-aside checkboxes */
+.check-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
+.check-item{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:8px 12px;cursor:pointer;transition:.15s}
+.check-item:hover{background:rgba(255,255,255,.09)}
+.check-item input[type=checkbox]{accent-color:var(--green);width:15px;height:15px;flex-shrink:0;cursor:pointer}
+.check-item span{font-size:.8rem;color:var(--white)}
+
+/* Disambiguation cards */
+.candidate{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:14px 18px;cursor:pointer;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;transition:.15s}
+.candidate:hover{background:rgba(255,255,255,.12);border-color:var(--green)}
+.candidate.sel{border-color:var(--green);background:rgba(110,231,168,.07)}
+.cand-name{font-weight:700;font-size:.92rem;margin-bottom:2px}
+.cand-meta{font-size:.73rem;color:var(--muted)}
+.cand-chk{color:var(--green);display:none;font-size:1.1rem}
+.candidate.sel .cand-chk{display:block}
+.not-listed{text-align:center;font-size:.78rem;color:var(--muted);cursor:pointer;text-decoration:underline;margin-top:10px}
+.not-listed:hover{color:var(--white)}
+
+/* Submit */
+.submit-btn{width:100%;background:var(--white);color:var(--sap);font-family:'Jost',sans-serif;font-weight:700;font-size:1rem;padding:13px;border:none;border-radius:10px;cursor:pointer;transition:.15s;margin-top:6px}
+.submit-btn:hover{background:var(--off)}
+.submit-btn:disabled{opacity:.55;cursor:wait}
+.err-msg{color:var(--err);font-size:.82rem;margin-top:8px}
+.skip-link{text-align:center;margin-top:14px;font-size:.78rem;color:rgba(255,255,255,.35);cursor:pointer;text-decoration:underline}
+.skip-link:hover{color:var(--white)}
+
+/* Spinner */
+.spinner{width:32px;height:32px;border:3px solid rgba(255,255,255,.1);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;margin:30px auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:480px){.check-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">CapGen Pro</div>
+  <div class="step-indicator">
+    <div class="step-dot" id="dot1"></div>
+    <div class="step-dot" id="dot2"></div>
+    <div class="step-dot active" id="dot3"></div>
+  </div>
+</div>
+
+<div class="content" id="mainContent">
+  <div id="loadingView"><div class="spinner"></div></div>
+</div>
+
+<script>
+'use strict';
+const SUPABASE = 'https://judislfknmhofcgzyozc.supabase.co';
+const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp1ZGlzbGZrbm1ob2ZjZ3p5b3pjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMDI3ODAsImV4cCI6MjA5Mjc3ODc4MH0.Kxpe0kJt0k7ZchYu70BOwm4KdT0C5aSsyeR1ov6NlQ0';
+const BASE = '/.netlify/functions';
+
+let sessionToken = null;
+let currentEmail = null;
+let selectedCandidate = null;
+
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function show(id){ document.getElementById(id).style.display='block'; }
+function hide(id){ document.getElementById(id).style.display='none'; }
+function q(id){ return document.getElementById(id); }
+function err(id,msg){ const el=q(id); if(el){el.textContent=msg||''; el.style.display=msg?'block':'none';} }
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+
+(async function init() {
+  // Read session
+  const stored = sessionStorage.getItem('pipeline_session');
+  const email  = sessionStorage.getItem('capgen_email') || '';
+  if (!stored || !email) { window.location.href = '/onboarding'; return; }
+  sessionToken = stored;
+  currentEmail = email;
+
+  // Determine state from URL param or re-fetch from DB
+  const urlState = new URLSearchParams(location.search).get('s') || '';
+  let state = urlState;
+
+  if (!state || !['entity_pending','enrichment_pending'].includes(state)) {
+    // Re-check DB
+    try {
+      const res  = await fetch(`${SUPABASE}/rest/v1/capgen_subscriptions?email=eq.${encodeURIComponent(email)}&select=onboarding_state,business_name&limit=1`,
+        { headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` } });
+      const rows = await res.json();
+      state = (rows[0] && rows[0].onboarding_state) || 'complete';
+    } catch(e) { state = 'complete'; }
+  }
+
+  if (state === 'complete') { window.location.href = '/pipeline'; return; }
+  if (state === 'entity_pending')    renderEntityStep();
+  else if (state === 'enrichment_pending') renderEnrichmentStep();
+})();
+
+// ── Step 1: Entity claim (entity_pending) ────────────────────────────────────
+
+function renderEntityStep() {
+  q('dot1').classList.add('active'); q('dot2').classList.remove('active');
+  q('mainContent').innerHTML = `
+    <p class="step-eyebrow">Step 1 of 2 — Find Your Business</p>
+    <h1 class="step-heading">Let's find your business.</h1>
+    <p class="step-sub">Enter your company name and we'll pull your profile from official public records — registration status, NAICS codes, and certifications.</p>
+    <span class="step-rule">Sourced from official public records.</span>
+    <div class="form-card">
+      <div class="field">
+        <label>Business Name *</label>
+        <input type="text" id="bizName" placeholder="Acme Federal Services LLC" autocomplete="organization"/>
+      </div>
+      <div id="candidateArea"></div>
+      <button class="submit-btn" id="searchBtn" onclick="searchEntity()">Find My Business →</button>
+      <p class="err-msg" id="searchErr" style="display:none"></p>
+      <p class="not-listed" onclick="proceedWithoutEntity()">My business isn't registered yet — enter NAICS codes manually</p>
+    </div>`;
+  q('bizName').focus();
+  q('bizName').addEventListener('keydown', e => { if (e.key === 'Enter') searchEntity(); });
+}
+
+async function searchEntity() {
+  const name = (q('bizName').value || '').trim();
+  if (!name) { err('searchErr','Business name required'); return; }
+  err('searchErr','');
+  const btn = q('searchBtn'); btn.disabled = true; btn.textContent = 'Searching…';
+  try {
+    const res  = await fetch(`${BASE}/demo-lookup`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ businessName: name })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Search failed');
+
+    if (data.total === 0) { proceedWithoutEntity(); return; }
+    if (data.total === 1) { await claimEntity(data.candidates[0].uei, data.candidates[0].legal_name); return; }
+    renderCandidates(data.candidates);
+    btn.textContent = 'Confirm Selection →';
+    btn.onclick = confirmCandidate;
+  } catch(e) {
+    err('searchErr', e.message || 'Search failed');
+    btn.disabled = false; btn.textContent = 'Find My Business →';
+  }
+  btn.disabled = false;
+}
+
+function renderCandidates(candidates) {
+  window._cands = candidates;
+  q('candidateArea').innerHTML = '<p style="font-size:.78rem;color:var(--muted);margin-bottom:10px">Select your business:</p>'
+    + candidates.map((c,i) =>
+        `<div class="candidate" id="cnd${i}" onclick="selectCand(${i},this)">
+          <div><div class="cand-name">${esc(c.legal_name)}</div>
+          <div class="cand-meta">${c.city?esc(c.city)+', ':''} ${esc(c.state||'')} · <span style="color:var(--green)">${esc(c.registration_status)}</span></div></div>
+          <span class="cand-chk">✓</span></div>`
+      ).join('');
+}
+
+function selectCand(i, el) {
+  document.querySelectorAll('.candidate').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel');
+  selectedCandidate = window._cands[i];
+  q('searchBtn').disabled = false;
+}
+
+async function confirmCandidate() {
+  if (!selectedCandidate) return;
+  await claimEntity(selectedCandidate.uei, selectedCandidate.legal_name);
+}
+
+async function claimEntity(uei, businessName) {
+  const btn = q('searchBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+  try {
+    const res = await fetch(`${BASE}/capgen-claim-entity`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + sessionToken },
+      body: JSON.stringify({ uei, businessName })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed');
+    sessionStorage.setItem('capgen_uei', data.uei || uei || '');
+    sessionStorage.setItem('capgen_biz', businessName || '');
+    renderEnrichmentStep();
+  } catch(e) {
+    err('searchErr', e.message);
+    if (btn) { btn.disabled = false; btn.textContent = 'Confirm Selection →'; }
+  }
+}
+
+async function proceedWithoutEntity() {
+  // Enter NAICS manually — advance to enrichment with entity_pending converted
+  await fetch(`${BASE}/capgen-claim-entity`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + sessionToken },
+    body: JSON.stringify({ businessName: (q('bizName') && q('bizName').value) || '' })
+  });
+  renderEnrichmentStep(true);
+}
+
+// ── Step 2: Enrichment form (enrichment_pending) ──────────────────────────────
+
+function renderEnrichmentStep(showNaicsManual) {
+  q('dot1').classList.remove('active'); q('dot1').classList.add('done');
+  q('dot2').classList.add('active'); q('dot3').classList.remove('active');
+
+  const naicsBlock = showNaicsManual ? `
+    <div class="field">
+      <label>NAICS Codes (comma-separated)</label>
+      <input type="text" id="manualNaics" placeholder="541511, 541512, 541519"/>
+      <p class="helper">Enter the 6-digit NAICS codes that describe your work.</p>
+    </div>` : '';
+
+  q('mainContent').innerHTML = `
+    <p class="step-eyebrow">Step 2 of 2 — Your Profile</p>
+    <h1 class="step-heading">Tell us about your work.</h1>
+    <p class="step-sub">These details power your Analyze Fit scores and opportunity matching. You can always update them later.</p>
+    <span class="step-rule">Sourced from official public records — plus the details only you know.</span>
+    <div class="form-card">
+      ${naicsBlock}
+      <div class="field">
+        <label>Core Capabilities</label>
+        <textarea id="capabilities" placeholder="Describe your core services, technical expertise, and what makes your team effective for federal work…"></textarea>
+        <p class="helper">2–4 sentences. This appears in your Analyze Fit analysis.</p>
+      </div>
+      <div class="field">
+        <label>Past Performance</label>
+        <textarea id="pastPerf" placeholder="Summarize relevant past contracts, key deliveries, or notable client results…"></textarea>
+        <p class="helper">Optional but improves fit analysis accuracy.</p>
+      </div>
+      <div class="field">
+        <label>Team Size</label>
+        <select id="teamSize">
+          <option value="">— Select —</option>
+          <option value="1">Solo / 1 person</option>
+          <option value="2">2–5</option>
+          <option value="10">6–15</option>
+          <option value="25">16–50</option>
+          <option value="75">51–100</option>
+          <option value="150">100+</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Set-Aside Certifications</label>
+        <div class="check-grid">
+          <label class="check-item"><input type="checkbox" value="WOSB"><span>WOSB</span></label>
+          <label class="check-item"><input type="checkbox" value="EDWOSB"><span>EDWOSB</span></label>
+          <label class="check-item"><input type="checkbox" value="SDVOSB"><span>SDVOSB</span></label>
+          <label class="check-item"><input type="checkbox" value="8(a)"><span>8(a)</span></label>
+          <label class="check-item"><input type="checkbox" value="HUBZone"><span>HUBZone</span></label>
+          <label class="check-item"><input type="checkbox" value="Small Business"><span>Small Business</span></label>
+        </div>
+      </div>
+      <button class="submit-btn" id="enrichBtn" onclick="submitEnrichment()">Complete My Setup →</button>
+      <p class="err-msg" id="enrichErr" style="display:none"></p>
+      <p class="skip-link" onclick="skipEnrichment()">Skip for now — I'll complete this later</p>
+    </div>`;
+}
+
+async function submitEnrichment() {
+  const btn  = q('enrichBtn'); btn.disabled = true; btn.textContent = 'Saving…';
+  const caps = (q('capabilities') && q('capabilities').value || '').trim();
+  const past = (q('pastPerf') && q('pastPerf').value || '').trim();
+  const size = q('teamSize') ? q('teamSize').value : '';
+  const setAsides = Array.from(document.querySelectorAll('.check-grid input[type=checkbox]:checked')).map(c => c.value);
+  const naicsRaw  = q('manualNaics') ? (q('manualNaics').value || '') : '';
+  const keywords  = naicsRaw ? naicsRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+  err('enrichErr','');
+  try {
+    const res = await fetch(`${BASE}/capgen-enrich-profile`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + sessionToken },
+      body: JSON.stringify({
+        capabilities: caps, past_performance: past,
+        team_size: size ? parseInt(size,10) : null,
+        set_asides: setAsides, keywords: keywords,
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to save');
+    renderComplete();
+  } catch(e) {
+    err('enrichErr', e.message);
+    btn.disabled = false; btn.textContent = 'Complete My Setup →';
+  }
+}
+
+async function skipEnrichment() {
+  // Mark complete with empty profile — user can fill in from dashboard settings later
+  try {
+    await fetch(`${BASE}/capgen-enrich-profile`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + sessionToken },
+      body: JSON.stringify({ capabilities: null, past_performance: null, team_size: null, set_asides: [], keywords: [] })
+    });
+  } catch(e) { /* ignore */ }
+  window.location.href = '/pipeline';
+}
+
+// ── Complete ──────────────────────────────────────────────────────────────────
+
+function renderComplete() {
+  q('dot1').classList.add('done'); q('dot2').classList.add('done'); q('dot3').classList.add('active');
+  q('mainContent').innerHTML = `
+    <div style="text-align:center;padding:40px 0">
+      <div style="font-size:3rem;margin-bottom:16px">✓</div>
+      <h1 class="step-heading" style="text-align:center;margin-bottom:12px">You're all set.</h1>
+      <p class="step-sub" style="text-align:center;margin-bottom:6px">Your pipeline is ready — opportunities matched to your profile, updated daily.</p>
+      <span class="step-rule" style="text-align:center;display:block">Sourced from official public records.</span>
+      <button class="submit-btn" style="max-width:260px;margin:0 auto" onclick="window.location.href='/pipeline'">Open My Pipeline →</button>
+    </div>`;
+  setTimeout(() => window.location.href = '/pipeline', 2500);
+}
+</script>
+</body>
+</html>

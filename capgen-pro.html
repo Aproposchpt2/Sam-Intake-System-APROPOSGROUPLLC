@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CapGen Pro — Federal Contract Pipeline for Small Businesses</title>
+<meta name="description" content="Live federal contract opportunity monitoring matched to your NAICS codes. Generate capability statements in 30 seconds. Built for small businesses pursuing federal contracts."/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital@1&display=swap" rel="stylesheet">
+<style>.cormorant{font-family:'Cormorant Garamond',serif;font-style:italic}</style>
+<style>
+:root{
+  --bg:#0A1A3A;--surface:#0f2244;--line:rgba(91,175,255,.15);--line2:rgba(91,175,255,.32);
+  --text:#f0f6ff;--muted:#8facd0;--soft:#5a7899;--cyan:#5BD3FF;
+  --gold:#d9a45b;--green:#2ecc8a;--red:#e05555;
+  font-family:Arial,Helvetica,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+
+/* Nav */
+nav{display:flex;align-items:center;justify-content:space-between;padding:18px 5vw;border-bottom:1px solid var(--line);background:rgba(10,26,58,.9);backdrop-filter:blur(16px);position:sticky;top:0;z-index:50}
+.nav-brand{display:flex;align-items:center;gap:10px}
+.nav-mark{background:var(--surface);border:1px solid var(--line2);border-radius:8px;padding:6px 10px;font-weight:900;color:var(--cyan);font-family:monospace;font-size:13px}
+.nav-name{font-weight:700;font-size:1rem;color:var(--text)}
+.nav-sub{font-size:.72rem;color:var(--muted)}
+.nav-cta{background:var(--cyan);color:#0A1A3A;border:none;border-radius:8px;padding:10px 22px;font-weight:700;font-size:.9rem;cursor:pointer;text-decoration:none;white-space:nowrap;transition:.18s}
+.nav-cta:hover{opacity:.88}
+
+/* Hero */
+.hero{text-align:center;padding:90px 5vw 70px;max-width:960px;margin:0 auto}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(91,211,255,.1);border:1px solid rgba(91,211,255,.25);border-radius:20px;padding:5px 16px;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--cyan);margin-bottom:28px}
+.hero-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(46,204,138,.4)}50%{opacity:.8;box-shadow:0 0 0 6px rgba(46,204,138,0)}}
+.hero h1{font-size:clamp(2.2rem,5vw,4rem);font-weight:900;line-height:1.08;letter-spacing:-.03em;margin-bottom:22px}
+.hero h1 span{color:var(--cyan)}
+.hero p{font-size:1.1rem;color:var(--muted);max-width:620px;margin:0 auto 36px;line-height:1.75}
+.hero-actions{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-bottom:48px}
+.btn-primary{background:var(--cyan);color:#0A1A3A;border:none;border-radius:12px;padding:16px 36px;font-weight:900;font-size:1rem;cursor:pointer;text-decoration:none;transition:.18s;display:inline-flex;align-items:center;gap:8px}
+.btn-primary:hover{opacity:.88;transform:translateY(-2px)}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--line2);border-radius:12px;padding:16px 28px;font-weight:600;font-size:.9rem;cursor:pointer;text-decoration:none;transition:.18s}
+.btn-ghost:hover{border-color:var(--cyan);color:var(--text)}
+.price-note{font-size:.82rem;color:var(--soft)}
+.price-note strong{color:var(--text)}
+
+/* Dashboard preview */
+.preview-wrap{max-width:900px;margin:0 auto 80px;border:1px solid var(--line2);border-radius:16px;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,.5)}
+.preview-bar{background:rgba(2,4,7,.95);padding:11px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--line)}
+.pbar-dot{width:11px;height:11px;border-radius:50%}
+.pbar-url{flex:1;background:rgba(255,255,255,.06);border-radius:5px;padding:4px 12px;font-family:monospace;font-size:.72rem;color:var(--soft);text-align:center}
+.preview-body{background:var(--surface);padding:20px}
+.preview-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.pm{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:10px;padding:12px;text-align:center}
+.pm-val{font-size:1.6rem;font-weight:900;color:var(--text);line-height:1}
+.pm-val.c{color:var(--cyan)}.pm-val.g{color:var(--green)}.pm-val.a{color:var(--gold)}
+.pm-lbl{font-size:.6rem;color:var(--soft);text-transform:uppercase;letter-spacing:.08em;margin-top:5px}
+.preview-row{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.pr-title{font-size:.86rem;font-weight:700;color:var(--text)}
+.pr-agency{font-size:.72rem;color:var(--muted);margin-top:2px}
+.pr-badge{padding:4px 10px;border-radius:6px;font-size:.68rem;font-weight:700;white-space:nowrap}
+.hot{background:rgba(224,85,85,.2);color:#ff9999;border:1px solid rgba(224,85,85,.35)}
+.warm{background:rgba(217,164,91,.15);color:#ffc96b;border:1px solid rgba(217,164,91,.3)}
+.ok{background:rgba(46,204,138,.12);color:#7eedc0;border:1px solid rgba(46,204,138,.28)}
+
+/* Value props */
+.section{padding:70px 5vw;max-width:1100px;margin:0 auto}
+.section-label{font-size:.7rem;text-transform:uppercase;letter-spacing:.14em;color:var(--cyan);font-weight:700;margin-bottom:12px}
+.section h2{font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:900;line-height:1.1;letter-spacing:-.02em;margin-bottom:16px}
+.section-sub{font-size:1rem;color:var(--muted);max-width:580px;line-height:1.75;margin-bottom:48px}
+.props{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.prop{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:28px}
+.prop-icon{font-size:1.8rem;margin-bottom:16px;display:block}
+.prop h3{font-size:1.05rem;font-weight:700;margin-bottom:8px;color:var(--text)}
+.prop p{font-size:.88rem;color:var(--muted);line-height:1.65}
+
+/* Who it's for */
+.who{background:var(--surface);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:70px 5vw}
+.who-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+.tags{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
+.tag{background:rgba(91,211,255,.1);border:1px solid rgba(91,211,255,.22);color:var(--cyan);border-radius:20px;padding:6px 16px;font-size:.82rem;font-weight:700}
+.checklist{display:flex;flex-direction:column;gap:14px}
+.check{display:flex;align-items:flex-start;gap:12px;font-size:.95rem;color:var(--muted)}
+.check-icon{color:var(--green);font-size:1.1rem;flex-shrink:0;margin-top:2px}
+
+/* Pricing */
+.pricing{padding:80px 5vw;text-align:center}
+.pricing-inner{max-width:480px;margin:0 auto}
+.price-card{background:var(--surface);border:2px solid var(--cyan);border-radius:24px;padding:48px 40px;box-shadow:0 0 60px rgba(91,211,255,.1)}
+.price-label{font-size:.7rem;text-transform:uppercase;letter-spacing:.14em;color:var(--cyan);font-weight:700;margin-bottom:16px}
+.price-amount{font-size:3.8rem;font-weight:900;line-height:1;letter-spacing:-.04em;color:var(--text);margin-bottom:6px}
+.price-amount span{font-size:1.4rem;color:var(--muted);font-weight:400}
+.price-period{font-size:.88rem;color:var(--muted);margin-bottom:32px}
+.price-features{text-align:left;margin-bottom:36px;display:flex;flex-direction:column;gap:12px}
+.pf{display:flex;align-items:center;gap:10px;font-size:.92rem;color:var(--muted)}
+.pf-check{color:var(--green);font-weight:900;flex-shrink:0}
+.price-cta{width:100%;background:var(--cyan);color:#0A1A3A;border:none;border-radius:12px;padding:17px;font-weight:900;font-size:1.05rem;cursor:pointer;text-decoration:none;display:block;text-align:center;transition:.18s}
+.price-cta:hover{opacity:.88}
+.price-guarantee{margin-top:16px;font-size:.78rem;color:var(--soft)}
+
+/* Footer */
+footer{border-top:1px solid var(--line);padding:28px 5vw;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.footer-txt{font-size:.78rem;color:var(--soft)}
+.footer-links{display:flex;gap:20px}
+.footer-links a{font-size:.78rem;color:var(--soft);text-decoration:none}
+.footer-links a:hover{color:var(--cyan)}
+
+@media(max-width:800px){
+  .props{grid-template-columns:1fr}
+  .who-inner{grid-template-columns:1fr}
+  .preview-metrics{grid-template-columns:repeat(2,1fr)}
+  footer{flex-direction:column;text-align:center}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">
+    <div class="nav-mark">CG</div>
+    <div>
+      <div class="nav-name">CapGen Pro</div>
+      <div class="nav-sub">by AI4 Businesses</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:10px;align-items:center"><a href="/onboarding" class="nav-cta" style="background:#fff;color:#0A1A3A;border:none">Member Login →</a><a href="/offer" class="nav-cta">Subscribe Today →</a></div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-eyebrow"><span class="hero-dot"></span>Live Federal Contract Monitoring</div>
+  <h1>Your federal contract pipeline.<br/><span>Live. Automated. Ready.</span></h1>
+  <p>CapGen Pro monitors active federal contracts matched to your NAICS codes — and generates your branded capability statement in 30 seconds. Built for small businesses pursuing federal work.</p>
+  <div class="hero-actions">
+    <a href="/demo" class="btn-primary">Experience the Live Demo →</a>
+    <a href="#pricing" class="btn-ghost">See Pricing →</a>
+  </div>
+  <p class="cormorant" style="font-size:1.05rem;color:rgba(255,255,255,.55);margin-top:10px;margin-bottom:4px">Your business. Real opportunities. <em>Sourced from official public records.</em></p>
+  <div class="price-note">No setup fee · Cancel anytime</div>
+</section>
+
+<!-- Dashboard preview -->
+<div style="padding:0 5vw">
+<div class="preview-wrap">
+  <div class="preview-bar">
+    <div class="pbar-dot" style="background:#ff5f57"></div>
+    <div class="pbar-dot" style="background:#febc2e"></div>
+    <div class="pbar-dot" style="background:#28c840"></div>
+    <div class="pbar-url">sam-gov-search-engine.netlify.app/pipeline</div>
+  </div>
+  <div class="preview-body">
+    <div class="preview-metrics">
+      <div class="pm"><div class="pm-val c">47</div><div class="pm-lbl">Open Contracts</div></div>
+      <div class="pm"><div class="pm-val" style="color:var(--red)">6</div><div class="pm-lbl">Due &lt; 7 Days</div></div>
+      <div class="pm"><div class="pm-val a">18</div><div class="pm-lbl">Due 7–30 Days</div></div>
+      <div class="pm"><div class="pm-val g">23</div><div class="pm-lbl">Due 30+ Days</div></div>
+    </div>
+    <div class="preview-row">
+      <div><div class="pr-title">Cybersecurity Support Services Bridge Contract</div><div class="pr-agency">Dept of Defense · NAICS 541519</div></div>
+      <span class="pr-badge hot">3d left</span>
+    </div>
+    <div class="preview-row">
+      <div><div class="pr-title">Enterprise IT Systems Design & Integration</div><div class="pr-agency">Dept of Veterans Affairs · NAICS 541512</div></div>
+      <span class="pr-badge warm">14d left</span>
+    </div>
+    <div class="preview-row">
+      <div><div class="pr-title">Custom Software Development — Workflow Automation</div><div class="pr-agency">NSHE / University of Nevada · NAICS 541511</div></div>
+      <span class="pr-badge ok">31d left</span>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- Value props -->
+<section class="section">
+  <div class="section-label">What You Get</div>
+  <h2>Everything a federal contractor needs.<br/>Nothing they don't.</h2>
+  <p class="section-sub">CapGen Pro replaces hours of manual searching with a live, filtered federal contract pipeline — and turns your registration data into a ready-to-send capability statement.</p>
+  <div class="props">
+    <div class="prop">
+      <span class="prop-icon">📡</span>
+      <h3>Live Contract Pipeline</h3>
+      <p>Active contracts matched to your NAICS codes updated daily. Filter by deadline urgency, contract type, or specific code. Only open contracts — nothing expired.</p>
+    </div>
+    <div class="prop">
+      <span class="prop-icon">📄</span>
+      <h3>Capability Statements in 30 Seconds</h3>
+      <p>Pull your verified federal registration data — UEI, CAGE, NAICS, certifications — and generate a branded PDF capability statement. Email it directly from the platform.</p>
+    </div>
+    <div class="prop">
+      <span class="prop-icon">📱</span>
+      <h3>Desktop + Mobile</h3>
+      <p>Check your pipeline from anywhere. Full desktop table view and a clean mobile card layout. Your contracts wherever you are.</p>
+    </div>
+    <div class="prop">
+      <span class="prop-icon">🎯</span>
+      <h3>NAICS Bubble Filter</h3>
+      <p>Toggle individual NAICS codes on and off with one click. Focus on your strongest codes or see everything you're registered for.</p>
+    </div>
+    <div class="prop">
+      <span class="prop-icon">🔒</span>
+      <h3>Private & Secure</h3>
+      <p>Your pipeline is private to you. Secure OTP access — no passwords, no shared dashboards. Only you see your contracts.</p>
+    </div>
+    <div class="prop">
+      <span class="prop-icon">⚡</span>
+      <h3>Up in 24 Hours</h3>
+      <p>Active federal registration required. We pull your data, configure your pipeline, and send your access link within one business day.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Who it's for -->
+<div class="who">
+  <div class="who-inner">
+    <div>
+      <div class="section-label">Who It's For</div>
+      <h2 style="font-size:clamp(1.6rem,3vw,2.4rem);font-weight:900;line-height:1.1;letter-spacing:-.02em;margin-bottom:14px">Built for small businesses in the federal market</h2>
+      <p style="color:var(--muted);line-height:1.75;margin-bottom:20px">If you have an active federal registration and NAICS codes in IT, professional services, or business support — this is your pipeline.</p>
+      <div class="tags">
+        <span class="tag">WOSB</span>
+        <span class="tag">SDVOSB</span>
+        <span class="tag">8(a)</span>
+        <span class="tag">HUBZone</span>
+        <span class="tag">Small Business</span>
+        <span class="tag">IT Services</span>
+        <span class="tag">Professional Services</span>
+      </div>
+    </div>
+    <div class="checklist">
+      <div class="check"><span class="check-icon">✓</span>Active federal registration with verified NAICS codes</div>
+      <div class="check"><span class="check-icon">✓</span>Pursuing federal contracts but spending too much time searching federal contract databases</div>
+      <div class="check"><span class="check-icon">✓</span>Need a capability statement but don't have one ready</div>
+      <div class="check"><span class="check-icon">✓</span>Want to know what's open right now — not tomorrow, not next week</div>
+      <div class="check"><span class="check-icon">✓</span>Building a federal pipeline for the first time or scaling an existing one</div>
+    </div>
+  </div>
+</div>
+
+<!-- Pricing -->
+<section class="pricing" id="pricing">
+  <div style="margin-bottom:48px">
+    <div class="section-label" style="text-align:center">Simple Pricing</div>
+    <h2 style="font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:900;text-align:center;letter-spacing:-.02em">One plan. Everything included.</h2>
+  </div>
+  <div class="pricing-inner">
+    <div class="price-card">
+      <div class="price-label">CapGen Pro</div>
+      <div class="price-amount">$97<span>/mo</span></div>
+      <div class="price-period">Billed monthly · Cancel anytime</div>
+      <div class="price-features">
+        <div class="pf"><span class="pf-check">✓</span>Live federal contract opportunity pipeline</div>
+        <div class="pf"><span class="pf-check">✓</span>All NAICS codes from your registration</div>
+        <div class="pf"><span class="pf-check">✓</span>Unlimited capability statement generation</div>
+        <div class="pf"><span class="pf-check">✓</span>PDF delivery by email</div>
+        <div class="pf"><span class="pf-check">✓</span>Desktop + mobile access</div>
+        <div class="pf"><span class="pf-check">✓</span>Secure private dashboard</div>
+        <div class="pf"><span class="pf-check">✓</span>Setup within 24 hours</div>
+      </div>
+      <a href="https://buy.stripe.com/test_7sY6oGdqG7H2f9iePigEg0g" class="price-cta" id="checkoutBtn">Subscribe Now →</a>
+      <div class="price-guarantee">Requires active federal registration</div>
+      <p class="cormorant" style="font-size:.88rem;color:rgba(255,255,255,.38);margin-top:10px">CapGen intelligence is sourced from official public records.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-txt">CapGen Pro · AI4 Businesses · Apropos Group LLC · © 2026</div>
+  <div style="font-size:.75rem;color:rgba(255,255,255,.28);margin-bottom:10px;font-style:italic;font-family:'Cormorant Garamond',serif">CapGen intelligence is sourced from official public records.</div>
+  <div class="footer-links">
+    <a href="/privacy.html">Privacy</a>
+    <a href="/terms.html">Terms</a>
+    <a href="mailto:jmitchell@aproposgroupllc.com">Contact</a>
+  </div>
+</footer>
+
+</body>
+</html>
