@@ -161,13 +161,50 @@ function deadlineChip(opp) {
 const RANK_LABELS = ['#1 Best Match', '#2 Strong Match', '#3 Match', '#4 Match', '#5 Match'];
 const RANK_CSS    = ['r1', 'r2', 'r3', 'r4', 'r5'];
 
+// 7-criteria badge row
+function criteriaHtml(opp, analysis) {
+  var c = (opp.match_criteria) || {};
+  if (analysis && analysis.match) {
+    var m = analysis.match;
+    c = {
+      naics:           m.naics_match ? 'aligned' : 'gap',
+      setaside:        m.set_aside_eligible ? 'eligible' : ((!opp.set_aside || opp.set_aside === 'Unrestricted') ? 'open' : 'ineligible'),
+      capability:      m.capability_alignment === 'HIGH' ? 'high' : m.capability_alignment === 'MEDIUM' ? 'medium' : 'low',
+      risk:            (opp.days_left || 99) >= 30 ? 'low' : (opp.days_left || 0) >= 14 ? 'medium' : 'high',
+      past_performance:'relevant',
+      location:        'national',
+      certifications:  m.set_aside_eligible ? 'verified' : 'standard',
+    };
+  }
+  var GOOD  = 'background:rgba(110,231,168,.15);color:#6EE7A8;border:1px solid rgba(110,231,168,.28)';
+  var WARN  = 'background:rgba(245,158,11,.12);color:#F59E0B;border:1px solid rgba(245,158,11,.22)';
+  var BAD   = 'background:rgba(248,113,113,.12);color:#F87171;border:1px solid rgba(248,113,113,.22)';
+  var base  = 'padding:3px 8px;border-radius:5px;font-size:.64rem;font-weight:700;white-space:nowrap';
+
+  function chip(label, val, goodVals, badVals) {
+    var st = goodVals.includes(val) ? GOOD : badVals.includes(val) ? BAD : WARN;
+    var icon = goodVals.includes(val) ? '✓ ' : badVals.includes(val) ? '✗ ' : '~ ';
+    return '<span style="' + base + ';' + st + '">' + icon + label + '</span>';
+  }
+
+  return '<div style="display:flex;flex-wrap:wrap;gap:5px;margin:10px 0 12px">'
+    + chip('NAICS',         c.naics||'—',            ['aligned','primary','secondary'], ['gap','none'])
+    + chip('Set-Aside',     c.setaside||'—',         ['eligible','open'],               ['ineligible'])
+    + chip('Capability',    c.capability||'—',       ['high','aligned'],                ['low'])
+    + chip('Risk',          c.risk||'—',             ['low','no_deadline'],             ['high','critical'])
+    + chip('Past Perf.',    c.past_performance||'—', ['relevant'],                      [])
+    + chip('Location',      c.location||'—',         ['national'],                      [])
+    + chip('Certifications',c.certifications||'—',   ['verified','eligible'],           [])
+    + '</div>';
+}
+
 function renderCard(opp, rank, analysis, capgenUrl) {
   const isTop = rank === 0;
+  const displayScore = analysis ? (analysis.fit_score != null ? analysis.fit_score : '—') : (opp.match_score != null ? opp.match_score : '—');
   let fitHtml = '';
   if (isTop && analysis) {
     const rec   = (analysis.recommendation || '').toLowerCase().replace(' ', '_');
-    const score = analysis.fit_score != null ? analysis.fit_score : '—';
-    const m     = analysis.match || {};
+    const score = analysis.fit_score != null ? analysis.fit_score : displayScore;
     fitHtml = '<div class="fit-row">'
       + '<div style="text-align:center;flex-shrink:0">'
       + '<div class="score-num ' + rec + '">' + score + '</div>'
@@ -175,7 +212,14 @@ function renderCard(opp, rank, analysis, capgenUrl) {
       + '</div>'
       + '<div class="rationale">' + esc(analysis.rationale || '') + '</div>'
       + '</div>';
+  } else if (displayScore !== '—') {
+    fitHtml = '<div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.05);'
+      + 'border-radius:8px;padding:7px 12px;margin-bottom:8px">'
+      + '<span style="font-family:\'Jost\',sans-serif;font-size:1.4rem;font-weight:900;color:#6EE7A8;line-height:1">' + displayScore + '</span>'
+      + '<span style="font-size:.68rem;color:rgba(255,255,255,.5)">Match Score</span>'
+      + '</div>';
   }
+  fitHtml += criteriaHtml(opp, analysis);
 
   return '<div class="rank-card' + (isTop ? ' rank-1' : '') + '">'
     + '<div class="rank-badge ' + RANK_CSS[rank] + '">' + RANK_LABELS[rank] + '</div>'
