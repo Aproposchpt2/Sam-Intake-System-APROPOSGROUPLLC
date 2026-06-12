@@ -86,29 +86,89 @@ async function fetchEntity(uei) {
 
 // ── Opportunity matching from sam_opportunities ───────────────────────────────
 
-async function matchOpportunities(naicsCodes, primaryNaics) {
+// ── 7-criteria scoring ───────────────────────────────────────────────────────
+// Criteria: NAICS alignment, past performance, capability, location,
+//           set-aside, certifications, risk factors
+
+function scoreOpportunity(row, naicsCodes, primaryNaics, setAsides) {
+  var score = 0;
+  var criteria = {};
+  var today = new Date();
+
+  // 1. NAICS alignment (30 pts)
+  if (row.naics_code === primaryNaics) {
+    score += 30; criteria.naics = 'primary';
+  } else if (naicsCodes.includes(row.naics_code)) {
+    score += 20; criteria.naics = 'secondary';
+  } else {
+    score += 0; criteria.naics = 'none';
+  }
+
+  // 2. Set-aside / certifications (25 pts)
+  var sa = (row.set_aside || '').toLowerCase();
+  if (!sa || sa === 'none' || sa === 'unrestricted') {
+    score += 15; criteria.setaside = 'open';
+  } else {
+    var eligible = (setAsides || []).some(function(cert) {
+      return sa.includes(cert.toLowerCase().split(' ')[0].toLowerCase());
+    });
+    if (eligible) { score += 25; criteria.setaside = 'eligible'; }
+    else           { score += 0;  criteria.setaside = 'ineligible'; }
+  }
+
+  // 3. Risk factors / timeline (20 pts)
+  var days = row.response_deadline
+    ? Math.ceil((new Date(row.response_deadline) - today) / 86400000)
+    : null;
+  if (days === null)   { score += 12; criteria.risk = 'no_deadline'; }
+  else if (days >= 30) { score += 20; criteria.risk = 'low'; }
+  else if (days >= 14) { score += 13; criteria.risk = 'medium'; }
+  else if (days >= 7)  { score += 6;  criteria.risk = 'high'; }
+  else                 { score += 2;  criteria.risk = 'critical'; }
+
+  // 4. Capability alignment (15 pts) — NAICS match implies capability
+  if (naicsCodes.includes(row.naics_code)) {
+    score += 15; criteria.capability = 'aligned';
+  } else {
+    score += 5; criteria.capability = 'partial';
+  }
+
+  // 5. Past performance alignment (5 pts) — estimated from NAICS history
+  criteria.past_performance = naicsCodes.includes(row.naics_code) ? 'relevant' : 'adjacent';
+  score += naicsCodes.includes(row.naics_code) ? 5 : 2;
+
+  // 6. Location requirements (3 pts) — SAM.gov opps are typically national
+  criteria.location = 'national';
+  score += 3;
+
+  // 7. Certifications required (2 pts)
+  criteria.certifications = (setAsides || []).length > 0 ? 'verified' : 'basic';
+  score += (setAsides || []).length > 0 ? 2 : 1;
+
+  return {
+    score: Math.min(score, 100),
+    criteria: criteria,
+    days_left: days,
+    urgency: days === null ? 'none' : days <= 7 ? 'hot' : days <= 30 ? 'warm' : 'ok',
+  };
+}
+
+async function matchOpportunities(naicsCodes, primaryNaics, setAsides) {
   if (!naicsCodes.length) return { top5: [], remaining: 0 };
   var today = new Date();
   var minDeadline = new Date(today.getTime() + 7 * 24 * 3600000).toISOString();
 
-  // Fetch all opp rows for any matching NAICS
   var inClause = naicsCodes.slice(0, 10).map(function(c) { return encodeURIComponent(c); }).join(',');
   var rows = await sbGet(
     'sam_opportunities?naics_code=in.(' + inClause + ')'
     + '&response_deadline=gte.' + encodeURIComponent(minDeadline)
     + '&select=notice_id,title,agency,naics_code,set_aside,response_deadline,ui_link'
-    + '&order=response_deadline.asc&limit=50'
+    + '&order=response_deadline.asc&limit=100'
   );
 
-  // Sort: primary NAICS first, then by deadline
-  rows.sort(function(a, b) {
-    var aPrimary = a.naics_code === primaryNaics ? 0 : 1;
-    var bPrimary = b.naics_code === primaryNaics ? 0 : 1;
-    if (aPrimary !== bPrimary) return aPrimary - bPrimary;
-    return new Date(a.response_deadline) - new Date(b.response_deadline);
-  });
-
-  var top5 = rows.slice(0, 5).map(function(r) {
+  // Score every opportunity against all 7 criteria
+  var scored = rows.map(function(r) {
+    var s = scoreOpportunity(r, naicsCodes, primaryNaics, setAsides);
     return {
       notice_id:         r.notice_id,
       title:             r.title,
@@ -117,10 +177,18 @@ async function matchOpportunities(naicsCodes, primaryNaics) {
       set_aside:         r.set_aside || 'Unrestricted',
       response_deadline: r.response_deadline,
       url:               r.ui_link || '',
+      match_score:       s.score,
+      match_criteria:    s.criteria,
+      days_left:         s.days_left,
+      urgency:           s.urgency,
     };
   });
 
-  return { top5: top5, remaining: Math.max(0, rows.length - 5) };
+  // Sort by match score descending
+  scored.sort(function(a, b) { return b.match_score - a.match_score; });
+
+  var top5 = scored.slice(0, 5);
+  return { top5: top5, remaining: Math.max(0, scored.length - 5) };
 }
 
 // ── Claude Stage 1 (verbatim prompts from Phase II spec) ─────────────────────
@@ -331,7 +399,7 @@ exports.handler = async function(event) {
 
     // 2. Match opportunities
     var naicsCodes = profile.naics.map(function(n) { return n.code; });
-    var matchResult = await matchOpportunities(naicsCodes, profile.primary_naics);
+    var matchResult = await matchOpportunities(naicsCodes, profile.primary_naics, profile.set_asides || []);
     var top5       = matchResult.top5;
     var remaining  = matchResult.remaining;
     console.log('[demo-bg] Opportunities: top5=' + top5.length + ' remaining=' + remaining);
