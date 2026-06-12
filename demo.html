@@ -223,6 +223,8 @@ async function createSnapshot(uei,businessName){
       return;
     }
 
+    localStorage.setItem('demo_view_token', data.view_token);
+    if(formData.businessName) localStorage.setItem('demo_biz_name', formData.businessName);
     window.location.href='/demo/snapshot?t='+encodeURIComponent(data.view_token);
   }catch(e){
     clearInterval(procTimer);
