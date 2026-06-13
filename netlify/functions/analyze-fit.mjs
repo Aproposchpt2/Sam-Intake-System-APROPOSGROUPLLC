@@ -2,11 +2,10 @@
 // POST { opportunityId, force?, deep?, opportunity? }
 // Auth + cache check + pending-row insert + fire background → 200 (hit) or 202 (miss)
 
-import { createHmac, timingSafeEqual } from 'crypto';
+// Session validation uses client_sessions table — no HMAC needed
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const AUTH_SECRET  = process.env.AUTH_TOKEN_SECRET;
 const SITE_URL     = process.env.DEPLOY_URL || process.env.URL || '';
 const MODEL        = process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-6';
 
@@ -58,22 +57,21 @@ async function sbDelete(table, filter) {
   if (!res.ok) throw new Error(`Supabase DELETE ${table}: ${(await res.text()).slice(0,200)}`);
 }
 
-// ── Auth ─────────────────────────────────────────────────────────────────────
+// ── Auth — validates session_token against client_sessions table ──────────────
 
-function verifyToken(authHeader) {
+async function verifySession(authHeader) {
   if (!authHeader?.startsWith('Bearer ')) return null;
-  if (!AUTH_SECRET) return null;
+  const token = authHeader.slice(7).trim();
+  if (!token) return null;
   try {
-    const raw  = authHeader.slice(7);
-    const data = JSON.parse(Buffer.from(raw, 'base64').toString('utf8'));
-    if (!data.email || !data.ts || !data.sig) return null;
-    if (Date.now() - data.ts > 7 * 24 * 60 * 60 * 1000) return null;
-    const toSign   = JSON.stringify({ email: data.email, ts: data.ts });
-    const expected = createHmac('sha256', AUTH_SECRET).update(toSign).digest('hex');
-    const expBuf   = Buffer.from(expected, 'hex');
-    const sigBuf   = Buffer.from(data.sig,  'hex');
-    if (expBuf.length !== sigBuf.length || !timingSafeEqual(expBuf, sigBuf)) return null;
-    return data.email.toLowerCase().trim();
+    const res  = await fetch(
+      `${SUPABASE_URL}/rest/v1/client_sessions?session_token=eq.${encodeURIComponent(token)}&revoked=eq.false&limit=1`,
+      { headers: sbH() }
+    );
+    const rows = await res.json();
+    if (!Array.isArray(rows) || !rows[0]) return null;
+    if (new Date(rows[0].expires_at) < new Date()) return null;
+    return rows[0].email.toLowerCase().trim();
   } catch { return null; }
 }
 
@@ -83,7 +81,7 @@ export const handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: CORS, body: '' };
   if (event.httpMethod !== 'POST')    return { statusCode: 405, headers: CORS, body: JSON.stringify({ error: 'POST only' }) };
 
-  const accountEmail = verifyToken(event.headers?.authorization || event.headers?.Authorization || '');
+  const accountEmail = await verifySession(event.headers?.authorization || event.headers?.Authorization || '');
   if (!accountEmail) return { statusCode: 401, headers: CORS, body: JSON.stringify({ error: 'UNAUTHORIZED' }) };
 
   let body;

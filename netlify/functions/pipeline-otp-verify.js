@@ -1,5 +1,5 @@
 'use strict';
-// POST { email, code } → verifies OTP, returns signed session token + dashboard redirect data.
+// POST { email, code } → verifies OTP, creates server-side session, returns session data.
 
 const crypto = require('crypto');
 
@@ -38,7 +38,6 @@ exports.handler = async (event) => {
   }
 
   const row = rows[0];
-
   if (new Date(row.expires_at) < new Date()) {
     return { statusCode: 401, headers, body: JSON.stringify({ error: 'Code expired. Request a new one.' }) };
   }
@@ -50,16 +49,12 @@ exports.handler = async (event) => {
     body: JSON.stringify({ used: true }),
   });
 
-  // HMAC-SHA256 signed session token
-  const ts     = Date.now();
-  const toSign = JSON.stringify({ email, ts });
-  const sig    = crypto.createHmac('sha256', process.env.AUTH_TOKEN_SECRET || '').update(toSign).digest('hex');
-  const token  = Buffer.from(JSON.stringify({ email, ts, sig })).toString('base64');
+  const lookupKey = SERVICE_KEY || ANON_KEY;
 
-  // Look up subscriber record (service key bypasses RLS)
+  // Look up subscription
   let isSubscriber = false;
   let viewToken    = null;
-  const lookupKey  = SERVICE_KEY || ANON_KEY;
+  let accountType  = 'subscriber';
 
   try {
     const subRes = await fetch(
@@ -73,23 +68,55 @@ exports.handler = async (event) => {
     }
   } catch(e) { /* non-fatal */ }
 
-  // If no token from subscription, check demo_snapshots (any status — pending snapshots still have a valid token)
-  if (!viewToken) {
-    try {
-      const snapRes = await fetch(
-        `${SUPABASE_URL}/rest/v1/demo_snapshots?requester_email=eq.${encodeURIComponent(email)}&order=created_at.desc&limit=1&select=view_token`,
-        { headers: { apikey: lookupKey, Authorization: `Bearer ${lookupKey}` } }
-      );
-      const snaps = await snapRes.json();
-      if (Array.isArray(snaps) && snaps[0] && snaps[0].view_token) {
-        viewToken = snaps[0].view_token;
-      }
-    } catch(e) { /* non-fatal */ }
-  }
+  // Look up snapshot for view_token + business identity
+  let uei = '', bizName = '';
+  try {
+    const snapRes = await fetch(
+      `${SUPABASE_URL}/rest/v1/demo_snapshots?requester_email=eq.${encodeURIComponent(email)}&order=created_at.desc&limit=1&select=view_token,business_name,entity_uei,profile`,
+      { headers: { apikey: lookupKey, Authorization: `Bearer ${lookupKey}` } }
+    );
+    const snaps = await snapRes.json();
+    if (Array.isArray(snaps) && snaps[0]) {
+      const snap = snaps[0];
+      if (!viewToken && snap.view_token) viewToken = snap.view_token;
+      bizName = snap.business_name || (snap.profile && snap.profile.legal_name) || '';
+      uei     = snap.entity_uei   || (snap.profile && snap.profile.uei)        || '';
+    }
+  } catch(e) { /* non-fatal */ }
+
+  // Create server-side session in client_sessions (7-day expiry)
+  const sessionToken = crypto.randomUUID();
+  const expiresAt    = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/client_sessions`, {
+      method: 'POST',
+      headers: { apikey: lookupKey, Authorization: `Bearer ${lookupKey}`, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+      body: JSON.stringify({
+        session_token:    sessionToken,
+        email,
+        uei,
+        business_name:    bizName,
+        onboarding_state: 'complete',
+        account_type:     accountType,
+        expires_at:       expiresAt,
+      }),
+    });
+  } catch(e) { console.error('[verify] session insert failed:', e.message); }
 
   return {
     statusCode: 200,
     headers,
-    body: JSON.stringify({ ok: true, token, email, view_token: viewToken, is_subscriber: isSubscriber, clear_stale: true }),
+    body: JSON.stringify({
+      ok:               true,
+      session_token:    sessionToken,
+      email,
+      uei,
+      business_name:    bizName,
+      onboarding_state: 'complete',
+      account_type:     accountType,
+      view_token:       viewToken,
+      is_subscriber:    isSubscriber,
+    }),
   };
 };

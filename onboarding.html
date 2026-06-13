@@ -114,16 +114,23 @@ document.getElementById('verifyBtn').addEventListener('click', async function() 
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Invalid code.');
 
-    // Clear any stale token from a previous session under a different email
+    // Clear any stale localStorage from a previous session under a different email
     localStorage.removeItem('demo_view_token');
     localStorage.removeItem('demo_biz_name');
     localStorage.removeItem('is_subscriber');
 
-    // Persist session
-    sessionStorage.setItem('pipeline_session', data.token);
-    sessionStorage.setItem('capgen_email', currentEmail);
-    if (data.is_subscriber) localStorage.setItem('is_subscriber', '1');
-    if (data.view_token)    localStorage.setItem('demo_view_token', data.view_token);
+    // Store server-side session in sessionStorage (clears on tab close — by design)
+    sessionStorage.setItem('capgen_session', JSON.stringify({
+      session_token:    data.session_token,
+      email:            data.email,
+      uei:              data.uei,
+      business_name:    data.business_name,
+      onboarding_state: data.onboarding_state,
+      account_type:     data.account_type,
+    }));
+
+    // Keep view_token in localStorage — it's a data key, not auth
+    if (data.view_token) localStorage.setItem('demo_view_token', data.view_token);
 
     // Redirect to dashboard
     if (data.is_subscriber) {

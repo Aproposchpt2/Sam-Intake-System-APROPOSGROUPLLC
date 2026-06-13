@@ -6,7 +6,7 @@
 <title>Capability Report — CapGen</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital@1&family=Jost:wght@400;600;700&display=swap" rel="stylesheet">
-<script>if(localStorage.getItem('is_subscriber')||sessionStorage.getItem('pipeline_session')){document.documentElement.style.setProperty('--sub-bar','none');}</script>
+<script>if(sessionStorage.getItem('capgen_session')){document.documentElement.style.setProperty('--sub-bar','none');}</script>
 <style>
 .sub-bar{display:var(--sub-bar,flex)!important}
 :root{--sap:#0F2A6A;--sap2:#163472;--white:#fff;--green:#6EE7A8;--muted:rgba(255,255,255,.55);font-family:'Jost',sans-serif}
@@ -117,7 +117,7 @@ const token = q.get('t') || localStorage.getItem('demo_view_token') || '';
 document.getElementById('backBtn').href = token ? '/demo/snapshot?t=' + encodeURIComponent(token) : '/demo';
 document.getElementById('subCta').href  = STRIPE_OFFER;
 if (token) localStorage.setItem('demo_view_token', token);
-if (localStorage.getItem('is_subscriber') || sessionStorage.getItem('pipeline_session')) {
+if (sessionStorage.getItem('capgen_session')) {
   const bar = document.querySelector('.sub-bar');
   if (bar) bar.style.display = 'none';
   const so = document.getElementById('signOutBtn');

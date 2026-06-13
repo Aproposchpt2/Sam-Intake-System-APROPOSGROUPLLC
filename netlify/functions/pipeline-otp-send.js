@@ -17,17 +17,23 @@ const RESEND_KEY   = process.env.RESEND_API_KEY;
 const FROM_EMAIL   = process.env.RESEND_FROM_EMAIL || 'alerts@aproposgroupllc.com';
 const OTP_MINUTES  = 15;
 
-// Gate: only emails with an active capgen_subscriptions row get a code
-async function isAllowed(email) {
+// Gate: check each allowed table in order. Extensible — add beta_testers when /beta ships.
+async function checkTable(table, email) {
   try {
     const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/capgen_subscriptions?email=eq.${encodeURIComponent(email)}&select=email&limit=1`,
+      `${SUPABASE_URL}/rest/v1/${table}?email=eq.${encodeURIComponent(email)}&select=email&limit=1`,
       { headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` } }
     );
     if (!res.ok) return false;
     const rows = await res.json();
     return Array.isArray(rows) && rows.length > 0;
   } catch { return false; }
+}
+
+async function isAllowed(email) {
+  if (await checkTable('capgen_subscriptions', email)) return true;
+  // Future: if (await checkTable('beta_testers', email)) return true;
+  return false;
 }
 
 function generateOTP() {

@@ -65,13 +65,13 @@ body{background:var(--sap);color:var(--white);min-height:100vh;display:flex;flex
 
 <script>
 'use strict';
-// ONE TOKEN — read from localStorage (set at demo intake, persists forever)
-const stored    = sessionStorage.getItem('pipeline_session');
+const sessionRaw = sessionStorage.getItem('capgen_session');
+if (!sessionRaw) { window.location.href = '/onboarding'; }
+
+const session   = JSON.parse(sessionRaw || '{}');
 const demoToken = localStorage.getItem('demo_view_token') || '';
 
-if (!stored) { window.location.href = '/onboarding'; }
-
-// Wire all nav buttons to token-based URLs — no UEI juggling
+// Wire nav buttons to token-based URLs
 if (demoToken) {
   const contractsLink = document.querySelector('a[href="/apropos"]');
   const bestMatchBtn  = document.getElementById('bestMatchBtn');
@@ -79,13 +79,12 @@ if (demoToken) {
   if (bestMatchBtn)  bestMatchBtn.href  = '/opportunity?t='   + encodeURIComponent(demoToken);
 }
 
-// Show business name from localStorage if stored alongside token
-const bizName = localStorage.getItem('demo_biz_name') || '';
+// Show business name from session (server-sourced) or localStorage fallback
+const bizName = session.business_name || localStorage.getItem('demo_biz_name') || '';
 if (bizName) document.getElementById('bizName').textContent = bizName;
 
 function signOut() {
   sessionStorage.clear();
-  // Keep demo_view_token in localStorage — it's their persistent identity
   window.location.href = '/';
 }
 </script>
