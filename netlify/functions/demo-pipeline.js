@@ -108,6 +108,8 @@ exports.handler = async function(event) {
           days_left:   dl,
           urgency:     urgencyClass(dl),
           url:         o.uiLink || ('https://sam.gov/opp/' + o.noticeId + '/view'),
+          state:       (o.placeOfPerformance && o.placeOfPerformance.state && o.placeOfPerformance.state.code) || null,
+          city:        (o.placeOfPerformance && o.placeOfPerformance.city && o.placeOfPerformance.city.name) || null,
         });
       }
     } catch(e) { console.error('[demo-pipeline] NAICS', naics, ':', e.message); }

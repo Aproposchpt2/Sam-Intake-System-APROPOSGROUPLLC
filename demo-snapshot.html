@@ -180,6 +180,9 @@ header{background:var(--surface);border-bottom:1px solid var(--line);padding:14p
       <button class="win-btn" data-days="7">7 Days</button>
     </div>
     <input type="search" class="search-input" id="searchInput" placeholder="Search title or agency…"/>
+    <select id="stateFilter" class="search-input" style="min-width:0;width:auto;padding:8px 12px;cursor:pointer">
+      <option value="">All States</option>
+    </select>
     <span class="count-badge" id="countBadge"></span>
   </div>
 
@@ -298,9 +301,24 @@ function activeNaics() {
   return [...document.querySelectorAll('.naics-bubble.active')].map(b => b.dataset.naics);
 }
 
+function populateStateDropdown() {
+  var states = {}, hasNational = false;
+  allOpps.forEach(function(o) {
+    if (o.state) states[o.state] = true; else hasNational = true;
+  });
+  var sorted = Object.keys(states).sort();
+  var sel = document.getElementById('stateFilter');
+  var cur = sel.value;
+  sel.innerHTML = '<option value="">All States</option>'
+    + (hasNational ? '<option value="national">National / Not Specified</option>' : '')
+    + sorted.map(function(s) { return '<option value="' + s + '">' + s + '</option>'; }).join('');
+  sel.value = cur;
+}
+
 function applyFilters() {
   const selNaics = activeNaics();
-  const q = document.getElementById('searchInput').value.toLowerCase();
+  const q     = document.getElementById('searchInput').value.toLowerCase();
+  const state = document.getElementById('stateFilter').value;
   let filtered = allOpps;
   if (selNaics.length && selNaics.length < allOpps.length) {
     filtered = filtered.filter(o => selNaics.includes(o.naics));
@@ -308,6 +326,8 @@ function applyFilters() {
   if (q) filtered = filtered.filter(o =>
     (o.title||'').toLowerCase().includes(q) || (o.agency||'').toLowerCase().includes(q)
   );
+  if (state === 'national') filtered = filtered.filter(o => !o.state);
+  else if (state)           filtered = filtered.filter(o => o.state === state);
   render(filtered);
 }
 
@@ -387,6 +407,7 @@ async function load() {
       });
     }
 
+    populateStateDropdown();
     applyFilters();
   } catch(e) {
     document.getElementById('oppBody').innerHTML = '<tr><td colspan="5" class="empty" style="color:var(--red)">' + esc(e.message) + '</td></tr>';
@@ -402,6 +423,7 @@ document.querySelectorAll('.win-btn').forEach(function(btn) {
   });
 });
 document.getElementById('searchInput').addEventListener('input', applyFilters);
+document.getElementById('stateFilter').addEventListener('change', applyFilters);
 
 load();
 </script>

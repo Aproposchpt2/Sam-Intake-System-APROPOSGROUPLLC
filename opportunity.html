@@ -156,6 +156,9 @@ header{background:var(--surface);border-bottom:1px solid var(--line);padding:14p
       <button class="filter-btn" data-filter="30" onclick="setFilter('30')">30 Days</button>
       <button class="filter-btn" data-filter="7" onclick="setFilter('7')">7 Days</button>
     </div>
+    <select id="stateFilter" onchange="setStateFilter(this.value)" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:var(--text);padding:7px 12px;font-size:.76rem;font-family:'Jost',sans-serif;outline:none;cursor:pointer">
+      <option value="">All States</option>
+    </select>
     <span class="page-info" id="pageInfo"></span>
     <div class="page-btns">
       <button class="page-btn" id="prevBtn" onclick="changePage(-1)" disabled>← Prev</button>
@@ -348,6 +351,7 @@ let profileSetAsides = null;
 let currentPage      = 0;
 const snapAnalysis   = null; // live pipeline — no pre-computed analysis
 let currentFilter    = 'best';
+let currentState     = '';
 const PAGE_SIZE      = 5;
 let ignoredIds   = new Set(JSON.parse(localStorage.getItem('ignored_opps_' + (token || '')) || '[]'));
 
@@ -369,6 +373,26 @@ function setFilter(f) {
     b.classList.toggle('active', b.dataset.filter === f);
   });
   renderPage();
+}
+
+function setStateFilter(s) {
+  currentState = s;
+  currentPage  = 0;
+  renderPage();
+}
+
+function populateStateDropdown() {
+  var states = {};
+  var hasNational = false;
+  allOpps.forEach(function(o) {
+    if (o.state) states[o.state] = true;
+    else hasNational = true;
+  });
+  var sorted = Object.keys(states).sort();
+  var sel = document.getElementById('stateFilter');
+  sel.innerHTML = '<option value="">All States</option>'
+    + (hasNational ? '<option value="national">National / Not Specified</option>' : '')
+    + sorted.map(function(s) { return '<option value="' + s + '">' + s + '</option>'; }).join('');
 }
 
 function changePage(delta) {
@@ -409,6 +433,8 @@ function getFiltered() {
   if (currentFilter === '60') pool = pool.filter(function(o) { return o.days_left !== null && o.days_left <= 60; });
   else if (currentFilter === '30') pool = pool.filter(function(o) { return o.days_left !== null && o.days_left <= 30; });
   else if (currentFilter === '7')  pool = pool.filter(function(o) { return o.days_left !== null && o.days_left <= 7; });
+  if (currentState === 'national') pool = pool.filter(function(o) { return !o.state; });
+  else if (currentState)           pool = pool.filter(function(o) { return o.state === currentState; });
   return pool.sort(function(a, b) { return (b.match_score || 0) - (a.match_score || 0); });
 }
 
@@ -485,6 +511,8 @@ async function load() {
         days_left:         opp.days_left,
         urgency:           opp.urgency,
         url:               opp.url,
+        state:             opp.state || null,
+        city:              opp.city  || null,
         match_score:       s.score,
         match_criteria:    s.criteria,
       };
@@ -501,6 +529,7 @@ async function load() {
       return;
     }
 
+    populateStateDropdown();
     renderPage();
 
   } catch(e) {
