@@ -90,7 +90,7 @@ async function fetchEntity(uei) {
 // Criteria: NAICS alignment, past performance, capability, location,
 //           set-aside, certifications, risk factors
 
-function scoreOpportunity(row, naicsCodes, primaryNaics, setAsides) {
+function scoreOpportunity(row, naicsCodes, primaryNaics, setAsides, companyState) {
   var score = 0;
   var criteria = {};
   var today = new Date();
@@ -154,9 +154,15 @@ function scoreOpportunity(row, naicsCodes, primaryNaics, setAsides) {
   criteria.past_performance = naicsCodes.includes(row.naics_code) ? 'relevant' : 'adjacent';
   score += naicsCodes.includes(row.naics_code) ? 5 : 2;
 
-  // 6. Location requirements (3 pts) — SAM.gov opps are typically national
-  criteria.location = 'national';
-  score += 3;
+  // 6. Location (5 pts) — national scope / home state / out of state
+  var oppState = (row.place_of_performance_state || row.pop_state || '').toUpperCase().trim();
+  if (!oppState) {
+    score += 3; criteria.location = 'national';
+  } else if (companyState && oppState === companyState.toUpperCase()) {
+    score += 5; criteria.location = 'home_state';
+  } else {
+    score += 1; criteria.location = 'out_of_state';
+  }
 
   // 7. Certifications required (2 pts)
   criteria.certifications = (setAsides || []).length > 0 ? 'verified' : 'basic';
@@ -170,7 +176,7 @@ function scoreOpportunity(row, naicsCodes, primaryNaics, setAsides) {
   };
 }
 
-async function matchOpportunities(naicsCodes, primaryNaics, setAsides) {
+async function matchOpportunities(naicsCodes, primaryNaics, setAsides, companyState) {
   if (!naicsCodes.length) return { top5: [], remaining: 0 };
   var today = new Date();
   var minDeadline = new Date(today.getTime() + 7 * 24 * 3600000).toISOString();
@@ -191,7 +197,7 @@ async function matchOpportunities(naicsCodes, primaryNaics, setAsides) {
 
   // Score every opportunity against all 7 criteria
   var scored = rows.map(function(r) {
-    var s = scoreOpportunity(r, naicsCodes, primaryNaics, setAsides);
+    var s = scoreOpportunity(r, naicsCodes, primaryNaics, setAsides, companyState);
     return {
       notice_id:         r.notice_id,
       title:             r.title,
@@ -422,7 +428,7 @@ exports.handler = async function(event) {
 
     // 2. Match opportunities
     var naicsCodes = profile.naics.map(function(n) { return n.code; });
-    var matchResult = await matchOpportunities(naicsCodes, profile.primary_naics, profile.set_asides || []);
+    var matchResult = await matchOpportunities(naicsCodes, profile.primary_naics, profile.set_asides || [], profile.state || null);
     var top5       = matchResult.top5;
     var remaining  = matchResult.remaining;
     console.log('[demo-bg] Opportunities: top5=' + top5.length + ' remaining=' + remaining);

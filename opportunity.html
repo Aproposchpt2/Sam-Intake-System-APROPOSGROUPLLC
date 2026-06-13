@@ -253,7 +253,7 @@ function criteriaHtml(opp, analysis) {
     + chip('Capability',    c.capability||'—',       ['high','aligned'],                ['low'])
     + chip('Risk',          c.risk||'—',             ['low','no_deadline'],             ['high','critical'])
     + chip('Past Perf.',    c.past_performance||'—', ['relevant'],                      [])
-    + chip('Location',      c.location||'—',         ['national'],                      [])
+    + chip('Location',      c.location||'—',         ['national','home_state'],         ['out_of_state'])
     + chip('Certifications',c.certifications||'—',   ['verified','eligible'],           [])
     + '</div>';
 }
@@ -301,7 +301,7 @@ function renderCard(opp, rank, analysis) {
 }
 
 // ── Live client-side scoring (mirrors demo-create-background.js) ──────────────
-function scoreOpp(opp, naicsCodes, primaryNaics, setAsides) {
+function scoreOpp(opp, naicsCodes, primaryNaics, setAsides, companyState) {
   var score = 0, criteria = {};
   // 1. NAICS (30 pts)
   if (opp.naics === primaryNaics)            { score += 30; criteria.naics = 'primary'; }
@@ -337,8 +337,14 @@ function scoreOpp(opp, naicsCodes, primaryNaics, setAsides) {
   // 5. Past performance (5 pts)
   criteria.past_performance = naicsCodes.includes(opp.naics) ? 'relevant' : 'adjacent';
   score += naicsCodes.includes(opp.naics) ? 5 : 2;
-  // 6. Location (3 pts)
-  criteria.location = 'national'; score += 3;
+  // 6. Location (5 pts) — national scope / home state / out of state
+  if (!opp.state) {
+    score += 3; criteria.location = 'national';          // open to all
+  } else if (companyState && opp.state === companyState) {
+    score += 5; criteria.location = 'home_state';        // home field advantage
+  } else {
+    score += 1; criteria.location = 'out_of_state';      // possible but requires travel
+  }
   // 7. Certifications (2 pts)
   criteria.certifications = setAsides.length > 0 ? 'verified' : 'basic';
   score += setAsides.length > 0 ? 2 : 1;
@@ -493,15 +499,16 @@ async function load() {
     if (!res.ok) throw new Error('Could not load live opportunities');
     var data = await res.json();
 
-    var client       = data.client || {};
-    var bizName      = client.name || '';
-    var naicsCodes   = client.naics || [];
-    var primaryNaics = client.primary_naics || '';
-    profileSetAsides = client.certifications || [];
+    var client        = data.client || {};
+    var bizName       = client.name || '';
+    var naicsCodes    = client.naics || [];
+    var primaryNaics  = client.primary_naics || '';
+    var companyState  = client.state || null;
+    profileSetAsides  = client.certifications || [];
 
     // Score every live opportunity client-side using the 7-criteria algorithm
     allOpps = (data.opportunities || []).map(function(opp) {
-      var s = scoreOpp(opp, naicsCodes, primaryNaics, profileSetAsides);
+      var s = scoreOpp(opp, naicsCodes, primaryNaics, profileSetAsides, companyState);
       return {
         notice_id:         opp.notice_id,
         title:             opp.title,
