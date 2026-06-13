@@ -19,11 +19,10 @@ function sbH(extra = {}) {
   return { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}`, 'Content-Type': 'application/json', ...extra };
 }
 
-async function getAwardTotals(uei, legalName) {
-  // Try by UEI first, fall back to name search
-  const filters = uei
-    ? { recipient_search_text: [uei], award_type_codes: ['A','B','C','D'] }
-    : { recipient_search_text: [legalName], award_type_codes: ['A','B','C','D'] };
+async function getAwardTotals(cage, legalName) {
+  // Search by company name — most reliable cross-reference for this dataset
+  const searchTerm = legalName;
+  const filters = { recipient_search_text: [searchTerm], award_type_codes: ['A','B','C','D'] };
 
   try {
     const res = await fetch(USA_SPENDING, {
@@ -67,7 +66,7 @@ async function getAwardTotals(uei, legalName) {
       top_agency:        topAgency ? topAgency.slice(0, 120) : null,
     };
   } catch(e) {
-    console.error('[usaspending] error for', uei || legalName, ':', e.message);
+    console.error('[usaspending] error for', legalName, ':', e.message);
     return null;
   }
 }
@@ -91,24 +90,24 @@ exports.handler = async (event) => {
 
   // Load batch of contractors not yet enriched (or force re-enrich if force=true)
   const filter = body.force
-    ? `sam_status=eq.Active&uei=not.is.null&order=legal_name.asc&limit=${batchSize}&offset=${offset}`
-    : `sam_status=eq.Active&uei=not.is.null&enriched_at=is.null&order=legal_name.asc&limit=${batchSize}&offset=${offset}`;
+    ? `sam_status=eq.Active&order=legal_name.asc&limit=${batchSize}&offset=${offset}`
+    : `sam_status=eq.Active&enriched_at=is.null&order=legal_name.asc&limit=${batchSize}&offset=${offset}`;
 
   const res = await fetch(
-    `${SUPABASE_URL}/rest/v1/contractors?${filter}&select=id,legal_name,uei`,
+    `${SUPABASE_URL}/rest/v1/contractors?${filter}&select=id,legal_name,cage`,
     { headers: sbH() }
   );
   const contractors = await res.json();
 
   if (!Array.isArray(contractors) || !contractors.length) {
-    return { statusCode: 200, headers: CORS, body: JSON.stringify({ ok: true, processed: 0, message: 'All contractors enriched.' }) };
+    return { statusCode: 200, headers: CORS, body: JSON.stringify({ ok: true, processed: 0, enriched: 0, message: 'All contractors enriched.' }) };
   }
 
   let enriched = 0, notFound = 0;
 
   for (const c of contractors) {
     await new Promise(r => setTimeout(r, 200)); // rate limit: 5 req/sec
-    const awards = await getAwardTotals(c.uei, c.legal_name);
+    const awards = await getAwardTotals(c.cage, c.legal_name);
 
     const patch = awards
       ? { ...awards, enriched_at: new Date().toISOString() }
