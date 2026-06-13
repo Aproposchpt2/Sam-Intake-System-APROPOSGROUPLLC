@@ -347,7 +347,7 @@ async function load() {
   try {
     // Load contractors + enrolled emails in parallel
     const [contractorRes, betaRes, subRes] = await Promise.all([
-      fetch(SUPA + '/rest/v1/contractors?sam_status=eq.Active&select=id,legal_name,primary_naics,naics_codes,address_city,address_state,uei,cage,total_award_value,award_count,last_award_date,top_agency,enriched_at&order=total_award_value.desc.nullslast&limit=1000',
+      fetch(SUPA + '/rest/v1/contractors?sam_status=eq.Active&select=id,legal_name,primary_naics,naics_codes,address_city,address_state,uei,cage,total_award_value,award_count,last_award_date,top_agency,enriched_at&order=total_award_value.desc&limit=1000',
         { headers: { apikey: ANON, Authorization: 'Bearer ' + ANON } }),
       fetch(SUPA + '/rest/v1/beta_testers?select=email&status=eq.active',
         { headers: { apikey: ANON, Authorization: 'Bearer ' + ANON } }),
