@@ -6,7 +6,7 @@
 <title>Capability Report — CapGen</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital@1&family=Jost:wght@400;600;700&display=swap" rel="stylesheet">
-<script>if(sessionStorage.getItem('capgen_session')){document.documentElement.style.setProperty('--sub-bar','none');}</script>
+<script>var _cs=sessionStorage.getItem('capgen_session');var _bt=new URLSearchParams(location.search).get('t')||localStorage.getItem('demo_view_token')||'';if(_cs||(_bt&&_bt.startsWith('beta_'))){document.documentElement.style.setProperty('--sub-bar','none');}</script>
 <style>
 .sub-bar{display:var(--sub-bar,flex)!important}
 :root{--sap:#0F2A6A;--sap2:#163472;--white:#fff;--green:#6EE7A8;--muted:rgba(255,255,255,.55);font-family:'Jost',sans-serif}
@@ -149,7 +149,9 @@ async function load() {
     return;
   }
   try {
-    const res  = await fetch('/.netlify/functions/demo-report?t=' + encodeURIComponent(token));
+    // Beta tokens use beta-report.js; demo/subscriber tokens use demo-report.js
+    const reportFn = token.startsWith('beta_') ? 'beta-report' : 'demo-report';
+    const res  = await fetch('/.netlify/functions/' + reportFn + '?t=' + encodeURIComponent(token));
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Report generation failed');
 

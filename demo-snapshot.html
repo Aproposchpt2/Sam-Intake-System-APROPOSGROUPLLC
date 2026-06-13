@@ -6,7 +6,7 @@
 <title>Contract Dashboard — CapGen</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital@1&family=Jost:wght@400;600;700&display=swap" rel="stylesheet">
-<script>if(sessionStorage.getItem('capgen_session')){document.documentElement.style.setProperty('--sub-bar','none');}</script>
+<script>var _cs=sessionStorage.getItem('capgen_session');var _bt=new URLSearchParams(location.search).get('t')||localStorage.getItem('demo_view_token')||'';if(_cs||(_bt&&_bt.startsWith('beta_'))){document.documentElement.style.setProperty('--sub-bar','none');}</script>
 <style>
 .sub-bar{display:var(--sub-bar,flex)!important}
 :root{
@@ -355,7 +355,7 @@ async function load() {
     }).join('');
     card.innerHTML = '<div class="entity-field"><div class="ef-label">Business</div><div class="ef-value">' + esc(clientData.name) + '</div></div>'
       + (clientData.uei ? '<div class="entity-field"><div class="ef-label">UEI</div><div class="ef-value">' + esc(clientData.uei) + '</div></div>' : '')
-      + '<div class="entity-field"><div class="ef-label">Location</div><div class="ef-value">' + esc([clientData.city, clientData.state].filter(Boolean).join(', ') || '—') + '</div></div>'
+      + ([clientData.city, clientData.state].filter(Boolean).length ? '<div class="entity-field"><div class="ef-label">Location</div><div class="ef-value">' + esc([clientData.city, clientData.state].filter(Boolean).join(', ')) + '</div></div>' : '')
       + '<div class="entity-field"><div class="ef-label">Registration</div><div class="ef-value active">● Active</div></div>'
       + (naicsChips ? '<div class="entity-field" style="min-width:200px"><div class="ef-label">NAICS</div><div class="naics-chips">' + naicsChips + '</div></div>' : '')
       + (certHtml ? '<div class="entity-field"><div class="ef-label">Certifications</div><div class="naics-chips">' + certHtml + '</div></div>' : '');
