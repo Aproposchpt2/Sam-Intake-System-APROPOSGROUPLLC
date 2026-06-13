@@ -182,9 +182,29 @@ const sessionTok = sessionStorage.getItem('pipeline_session') || '';
 const opp        = JSON.parse(sessionStorage.getItem('analyze_opp') || 'null');
 
 document.getElementById('backBtn').href = token ? '/opportunity?t=' + encodeURIComponent(token) : '/opportunity';
-if (opp) document.getElementById('bannerTitle').textContent = (opp.title || 'Analyze Fit').slice(0, 60);
+if (opp && opp.title) document.getElementById('bannerTitle').textContent = opp.title.slice(0, 70);
 
 if (!sessionTok) { window.location.href = '/onboarding'; }
+
+const SUPA     = 'https://judislfknmhofcgzyozc.supabase.co';
+const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp1ZGlzbGZrbm1ob2ZjZ3p5b3pjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMDI3ODAsImV4cCI6MjA5Mjc3ODc4MH0.Kxpe0kJt0k7ZchYu70BOwm4KdT0C5aSsyeR1ov6NlQ0';
+
+// Fetch opp metadata directly from sam_opportunities if title is missing
+var oppMeta = (opp && opp.title) ? opp : null;
+(async function fetchOppMeta() {
+  if (oppMeta) return;
+  try {
+    var res  = await fetch(SUPA + '/rest/v1/sam_opportunities?notice_id=eq.' + encodeURIComponent(noticeId)
+      + '&select=title,agency,naics_code,set_aside,response_deadline&limit=1',
+      { headers: { apikey: ANON_KEY, Authorization: 'Bearer ' + ANON_KEY } });
+    var rows = await res.json();
+    if (Array.isArray(rows) && rows[0] && rows[0].title) {
+      oppMeta = { title: rows[0].title, agency: rows[0].agency, naics: rows[0].naics_code,
+                  set_aside: rows[0].set_aside, response_deadline: rows[0].response_deadline };
+      document.getElementById('bannerTitle').textContent = rows[0].title.slice(0, 70);
+    }
+  } catch(e) { /* non-fatal */ }
+})();
 
 const progressBar = document.getElementById('progress-bar');
 
@@ -251,12 +271,13 @@ function renderReport(row) {
   const rec = row.recommendation || 'PENDING';
   const cls = recClass(rec);
 
-  // Use sessionStorage opp if available, fall back to metadata stored in stage1 by the backend
-  const oppTitle    = (opp && opp.title)        || s1._title    || noticeId;
-  const oppAgency   = (opp && opp.agency)       || s1._agency   || '—';
-  const oppNaics    = (opp && opp.naics)        || s1._naics    || '—';
-  const oppSetAside = (opp && opp.set_aside)    || s1._set_aside|| '';
-  const oppDeadline = (opp && (opp.response_deadline || opp.deadline)) || s1._deadline || null;
+  // Use oppMeta (sam_opportunities lookup) → sessionStorage opp → stage1 stored metadata → noticeId
+  const src         = oppMeta || opp || {};
+  const oppTitle    = src.title        || s1._title     || noticeId;
+  const oppAgency   = src.agency       || s1._agency    || '—';
+  const oppNaics    = src.naics        || s1._naics     || '—';
+  const oppSetAside = src.set_aside    || s1._set_aside || '';
+  const oppDeadline = src.response_deadline || src.deadline || s1._deadline || null;
 
   // Update banner title now that we have it
   document.getElementById('bannerTitle').textContent = oppTitle.slice(0, 70);
@@ -426,7 +447,8 @@ async function runAnalysis(force = false) {
 
     if (!res.ok) {
       document.getElementById('loadingEl').innerHTML =
-        `<p style="color:var(--red);text-align:center">${esc(data.error || 'Analysis failed. Please try again.')}</p>`;
+        `<p style="color:var(--red);text-align:center;padding:40px">Error ${res.status}: ${esc(data.error || 'Analysis failed.')} — Please go back and try again.</p>`;
+      completeProgress();
       return;
     }
 
