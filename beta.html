@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CapGen Beta — Free Full Access</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,700;1,400&family=Cormorant+Garamond:ital@1&family=Jost:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--sap:#0F2A6A;--sap2:#163472;--white:#fff;--off:#e8edf8;
+  --green:#6EE7A8;--cyan:#5BD3FF;--muted:rgba(255,255,255,.55);--err:#F87171;
+  font-family:'Jost',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--sap);color:var(--white);min-height:100vh;display:flex;flex-direction:column;align-items:center}
+.topbar{width:100%;background:rgba(0,0,0,.2);border-bottom:1px solid rgba(255,255,255,.08);
+  padding:14px 5vw;display:flex;align-items:center;justify-content:space-between}
+.brand{font-family:'Bodoni Moda',serif;font-size:1.25rem;color:var(--white);text-decoration:none}
+.beta-pill{background:rgba(110,231,168,.15);border:1px solid rgba(110,231,168,.3);color:var(--green);
+  font-size:.7rem;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:.06em}
+
+.hero{text-align:center;padding:48px 5vw 32px;max-width:740px}
+.hero h1{font-family:'Bodoni Moda',serif;font-size:2.4rem;line-height:1.15;margin-bottom:16px}
+.hero-sub{font-size:1rem;color:var(--muted);line-height:1.7;margin-bottom:24px;max-width:560px;margin-left:auto;margin-right:auto}
+.bullets{display:flex;flex-direction:column;gap:10px;margin-bottom:24px;text-align:left;max-width:440px;margin-left:auto;margin-right:auto}
+.bullet{display:flex;align-items:flex-start;gap:12px;font-size:.9rem;color:rgba(255,255,255,.85)}
+.bullet-dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0;margin-top:6px}
+.hero-rule{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.88rem;color:rgba(255,255,255,.35);margin-bottom:6px}
+.hero-note{font-size:.82rem;color:rgba(255,255,255,.45)}
+
+.form-wrap{max-width:620px;width:100%;padding:0 16px 60px}
+.form-card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:20px;padding:36px 40px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.form-full{margin-bottom:16px}
+label{display:block;font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.5);margin-bottom:6px}
+label span{color:rgba(255,255,255,.25);font-weight:400;text-transform:none;letter-spacing:0}
+input,select{width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:10px;color:var(--white);padding:13px 16px;font-size:.92rem;outline:none;font-family:'Jost',sans-serif;transition:.15s}
+input:focus,select:focus{border-color:var(--green);background:rgba(255,255,255,.11)}
+input::placeholder{color:rgba(255,255,255,.28)}
+select option{background:#0F2A6A;color:var(--white)}
+.form-btn{width:100%;background:var(--green);color:#0F2A6A;font-family:'Jost',sans-serif;font-weight:700;font-size:1rem;padding:16px;border:none;border-radius:12px;cursor:pointer;transition:.15s;margin-top:8px}
+.form-btn:hover{opacity:.9}
+.form-btn:disabled{opacity:.55;cursor:wait}
+.err-msg{color:var(--err);font-size:.84rem;margin-top:10px;min-height:22px;text-align:center}
+.form-rule{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.82rem;color:rgba(255,255,255,.28);text-align:center;margin-top:14px}
+
+@media(max-width:600px){
+  .form-row{grid-template-columns:1fr}.form-card{padding:24px 20px}
+  .hero h1{font-size:1.8rem}.form-wrap{padding:0 12px 60px}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="/" class="brand">CapGen</a>
+  <span class="beta-pill">BETA</span>
+</div>
+
+<div class="hero">
+  <h1>CapGen Beta —<br>Free Full Access for Volunteer Testers</h1>
+  <p class="hero-sub">Intelligent federal contract search, filtered to your NAICS codes. Your best-fit opportunities, automatically.</p>
+  <div class="bullets">
+    <div class="bullet"><div class="bullet-dot"></div><div>Matches open contracts to YOUR NAICS codes — live from official federal records</div></div>
+    <div class="bullet"><div class="bullet-dot"></div><div>Filter by deadline window — 60, 30, or 7 days</div></div>
+    <div class="bullet"><div class="bullet-dot"></div><div>AI-scored Best Matches surfaced from every open opportunity in your codes</div></div>
+    <div class="bullet"><div class="bullet-dot"></div><div>Analyze Fit Engine — bid/no-bid recommendation on any contract in 30 seconds</div></div>
+  </div>
+  <p class="hero-rule">Built on official public federal records.</p>
+  <p class="hero-note">Limited beta cohort. Full access is free — all we ask is your honest feedback.</p>
+</div>
+
+<div class="form-wrap">
+  <div class="form-card">
+    <div class="form-row">
+      <div>
+        <label>Full Name *</label>
+        <input type="text" id="fullName" placeholder="Jane Smith" autocomplete="name"/>
+      </div>
+      <div>
+        <label>Company Name *</label>
+        <input type="text" id="companyName" placeholder="Acme Federal LLC" autocomplete="organization"/>
+      </div>
+    </div>
+    <div class="form-full">
+      <label>Email Address *</label>
+      <input type="email" id="email" placeholder="jane@acmefederal.com" autocomplete="email"/>
+    </div>
+    <div class="form-row">
+      <div>
+        <label>Primary NAICS Code *</label>
+        <input type="text" id="primaryNaics" placeholder="541511" maxlength="6" inputmode="numeric"/>
+      </div>
+      <div>
+        <label>Additional NAICS <span>(optional, comma-separated)</span></label>
+        <input type="text" id="additionalNaics" placeholder="541512, 541519"/>
+      </div>
+    </div>
+    <div class="form-row">
+      <div>
+        <label>CAGE Code <span>(optional)</span></label>
+        <input type="text" id="cageCode" placeholder="A1B2C"/>
+      </div>
+      <div>
+        <label>How did you hear about CapGen?</label>
+        <select id="referralSource">
+          <option value="">Select…</option>
+          <option value="LinkedIn">LinkedIn</option>
+          <option value="Referral">Referral</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-full">
+      <label>LinkedIn Profile URL <span>(optional — helps us identify advocates)</span></label>
+      <input type="url" id="linkedinUrl" placeholder="https://linkedin.com/in/yourprofile"/>
+    </div>
+    <button class="form-btn" id="submitBtn" onclick="submitBeta()">Get My Free Beta Access →</button>
+    <div class="err-msg" id="errMsg"></div>
+    <p class="form-rule">Your information is used only to configure your personalized dashboard.</p>
+  </div>
+</div>
+
+<script>
+'use strict';
+function v(id){ return (document.getElementById(id)||{value:''}).value.trim(); }
+function setErr(msg){ document.getElementById('errMsg').textContent = msg || ''; }
+
+async function submitBeta() {
+  setErr('');
+  const full_name       = v('fullName');
+  const company_name    = v('companyName');
+  const email           = v('email');
+  const primary_naics   = v('primaryNaics');
+  const additional_naics= v('additionalNaics');
+  const cage_code       = v('cageCode');
+  const referral_source = v('referralSource');
+  const linkedin_url    = v('linkedinUrl');
+
+  if (!full_name)    return setErr('Full name is required.');
+  if (!company_name) return setErr('Company name is required.');
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return setErr('Please enter a valid email address.');
+  if (!/^\d{6}$/.test(primary_naics)) return setErr('Primary NAICS must be a 6-digit code (e.g. 541511).');
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true; btn.textContent = 'Submitting…';
+
+  try {
+    const res  = await fetch('/.netlify/functions/beta-signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ full_name, company_name, email, primary_naics, additional_naics, cage_code, referral_source, linkedin_url }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Signup failed. Please try again.');
+    window.location.href = '/beta/welcome?t=' + encodeURIComponent(data.access_token);
+  } catch(e) {
+    setErr(e.message);
+    btn.disabled = false; btn.textContent = 'Get My Free Beta Access →';
+  }
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Enter') submitBeta(); });
+document.getElementById('fullName').focus();
+</script>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>You're In — CapGen Beta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,700;1,400&family=Cormorant+Garamond:ital@1&family=Jost:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--sap:#0F2A6A;--white:#fff;--green:#6EE7A8;--cyan:#5BD3FF;
+  --muted:rgba(255,255,255,.55);font-family:'Jost',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--sap);color:var(--white);min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 20px}
+.card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:24px;
+  padding:48px 44px;max-width:540px;width:100%;text-align:center}
+.check{font-size:3rem;margin-bottom:20px;display:block}
+h1{font-family:'Bodoni Moda',serif;font-size:2rem;margin-bottom:12px}
+.sub{font-size:.9rem;color:var(--muted);line-height:1.7;margin-bottom:32px}
+.steps{text-align:left;display:flex;flex-direction:column;gap:14px;margin-bottom:32px}
+.step{display:flex;gap:14px;align-items:flex-start}
+.step-num{width:28px;height:28px;border-radius:50%;background:rgba(110,231,168,.15);border:1px solid rgba(110,231,168,.3);
+  color:var(--green);font-size:.78rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.step-text{font-size:.88rem;color:rgba(255,255,255,.8);line-height:1.6;padding-top:4px}
+
+.url-box{background:rgba(0,0,0,.25);border:1px solid rgba(91,211,255,.25);border-radius:10px;
+  padding:14px 16px;margin-bottom:28px;word-break:break-all}
+.url-label{font-size:.62rem;text-transform:uppercase;letter-spacing:.12em;color:var(--cyan);font-weight:700;margin-bottom:6px}
+.url-text{font-size:.82rem;color:rgba(255,255,255,.75);font-family:monospace}
+
+.btn-primary{display:block;width:100%;background:var(--green);color:#0F2A6A;font-family:'Jost',sans-serif;
+  font-weight:700;font-size:1rem;padding:16px;border-radius:12px;text-decoration:none;
+  text-align:center;transition:.15s;margin-bottom:12px}
+.btn-primary:hover{opacity:.9}
+.btn-copy{display:block;width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);
+  color:var(--white);font-family:'Jost',sans-serif;font-weight:600;font-size:.88rem;padding:12px;
+  border-radius:10px;cursor:pointer;transition:.15s}
+.btn-copy:hover{background:rgba(255,255,255,.12)}
+.rule{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.8rem;
+  color:rgba(255,255,255,.3);margin-top:20px}
+
+@media(max-width:480px){.card{padding:32px 20px}}
+</style>
+</head>
+<body>
+<div class="card">
+  <span class="check">✅</span>
+  <h1>You're in. Welcome to the CapGen Beta.</h1>
+  <p class="sub">Your dashboard is configured and ready. Here's what to do next.</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-text">Your dashboard is live — your contracts are already filtered to your NAICS codes and scored for fit.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-text">Bookmark your personal dashboard link below — it's your access for the full 30-day beta period.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-text">We'll check in around day 10 for your feedback. Your honest take is what we're here for.</div>
+    </div>
+  </div>
+
+  <div class="url-box">
+    <div class="url-label">Your Personal Dashboard Link</div>
+    <div class="url-text" id="dashboardUrl">Loading…</div>
+  </div>
+
+  <a href="#" class="btn-primary" id="dashboardBtn">Open My Dashboard →</a>
+  <button class="btn-copy" onclick="copyUrl()">Copy Dashboard Link</button>
+  <p class="rule">CapGen intelligence is sourced from official public records.</p>
+</div>
+
+<script>
+'use strict';
+const token = new URLSearchParams(location.search).get('t') || '';
+const dashUrl = token ? (location.origin + '/demo/snapshot?t=' + encodeURIComponent(token)) : '/beta';
+
+document.getElementById('dashboardUrl').textContent = dashUrl;
+document.getElementById('dashboardBtn').href = token ? '/demo/snapshot?t=' + encodeURIComponent(token) : '/beta';
+
+function copyUrl() {
+  navigator.clipboard.writeText(dashUrl).then(function() {
+    const btn = document.querySelector('.btn-copy');
+    btn.textContent = 'Copied ✓';
+    setTimeout(() => { btn.textContent = 'Copy Dashboard Link'; }, 2500);
+  }).catch(function() {
+    // Fallback: select the text
+    const el = document.getElementById('dashboardUrl');
+    const range = document.createRange();
+    range.selectNode(el);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+  });
+}
+</script>
+</body>
+</html>

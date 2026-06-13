@@ -57,7 +57,7 @@ async function sbDelete(table, filter) {
   if (!res.ok) throw new Error(`Supabase DELETE ${table}: ${(await res.text()).slice(0,200)}`);
 }
 
-// ── Auth — validates session_token against client_sessions table ──────────────
+// ── Auth ──────────────────────────────────────────────────────────────────────
 
 async function verifySession(authHeader) {
   if (!authHeader?.startsWith('Bearer ')) return null;
@@ -75,13 +75,34 @@ async function verifySession(authHeader) {
   } catch { return null; }
 }
 
+// Beta: validates beta_testers row — active + not expired
+async function verifyBetaToken(betaToken) {
+  if (!betaToken || !betaToken.startsWith('beta_')) return null;
+  try {
+    const res  = await fetch(
+      `${SUPABASE_URL}/rest/v1/beta_testers?access_token=eq.${encodeURIComponent(betaToken)}&status=eq.active&limit=1`,
+      { headers: sbH() }
+    );
+    const rows = await res.json();
+    if (!Array.isArray(rows) || !rows[0]) return null;
+    if (rows[0].token_expires_at && new Date(rows[0].token_expires_at) < new Date()) return null;
+    return rows[0].email.toLowerCase().trim();
+  } catch { return null; }
+}
+
 // ── Handler ──────────────────────────────────────────────────────────────────
 
 export const handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: CORS, body: '' };
   if (event.httpMethod !== 'POST')    return { statusCode: 405, headers: CORS, body: JSON.stringify({ error: 'POST only' }) };
 
-  const accountEmail = await verifySession(event.headers?.authorization || event.headers?.Authorization || '');
+  // Auth: subscriber session first, then beta token
+  let accountEmail = await verifySession(event.headers?.authorization || event.headers?.Authorization || '');
+  let isBetaUser   = false;
+  if (!accountEmail && body.beta_token) {
+    accountEmail = await verifyBetaToken(body.beta_token);
+    if (accountEmail) isBetaUser = true;
+  }
   if (!accountEmail) return { statusCode: 401, headers: CORS, body: JSON.stringify({ error: 'UNAUTHORIZED' }) };
 
   let body;
@@ -116,15 +137,16 @@ export const handler = async (event) => {
     return { statusCode: 200, headers: CORS, body: JSON.stringify({ ...row, cached: true }) };
   }
 
-  // Daily limit check (50 fresh analyses per rolling 24 h)
+  // Daily limit: subscribers = 50, beta testers = 10 fresh analyses per rolling 24h
+  const DAILY_LIMIT = isBetaUser ? 10 : 50;
   const since  = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
   const recent = await sbGet(
     `opportunity_analyses?account_email=eq.${aeEnc}&created_at=gte.${encodeURIComponent(since)}&select=id,created_at`
   );
-  if (recent.length >= 50) {
+  if (recent.length >= DAILY_LIMIT) {
     const resetAt   = new Date(new Date(recent[0]?.created_at || since).getTime() + 24 * 60 * 60 * 1000);
     const hoursLeft = Math.ceil((resetAt - Date.now()) / 3600000);
-    return { statusCode: 429, headers: CORS, body: JSON.stringify({ error: 'DAILY_LIMIT', hoursLeft }) };
+    return { statusCode: 429, headers: CORS, body: JSON.stringify({ error: isBetaUser ? 'BETA_LIMIT' : 'DAILY_LIMIT', hoursLeft }) };
   }
 
   // Delete existing row if force=true

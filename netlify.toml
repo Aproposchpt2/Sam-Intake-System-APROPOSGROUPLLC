@@ -123,6 +123,16 @@
   to = "/analyze-fit.html"
   status = 200
 
+[[redirects]]
+  from = "/beta"
+  to = "/beta.html"
+  status = 200
+
+[[redirects]]
+  from = "/beta/welcome"
+  to = "/beta-welcome.html"
+  status = 200
+
 [[headers]]
   for = "/*"
   [headers.values]
