@@ -45,7 +45,7 @@ async function getAwardTotals(cage, legalName) {
           ...filters,
           time_period: [{ start_date: '2022-01-01', end_date: '2026-12-31' }],
         },
-        fields: ['Award ID', 'Recipient Name', 'Award Amount', 'Awarding Agency', 'Period of Performance Start Date'],
+        fields: ['Award ID', 'Recipient Name', 'Award Amount', 'Awarding Agency', 'Action Date'],
         sort: 'Award Amount',
         order: 'desc',
         limit: 100,
@@ -66,7 +66,7 @@ async function getAwardTotals(cage, legalName) {
 
     const total       = awards.reduce((sum, a) => sum + (a['Award Amount'] || 0), 0);
     const lastDate    = awards.reduce((latest, a) => {
-      const d = a['Period of Performance Start Date'];
+      const d = a['Action Date'] || a['Period of Performance Start Date'] || '';
       return d && d > latest ? d : latest;
     }, '');
     const agencyCounts = {};
