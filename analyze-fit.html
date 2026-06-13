@@ -441,7 +441,6 @@ async function runAnalysis(force = false) {
   document.getElementById('loadingEl').style.display = 'block';
   document.getElementById('reportEl').style.display  = 'none';
 
-  const betaToken = (token && token.startsWith('beta_')) ? token : undefined;
   const payload = {
     opportunityId: noticeId,
     force,
