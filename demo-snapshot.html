@@ -222,7 +222,7 @@ if (token) {
   oppBtn.style.display    = 'inline-block';
   reportBtn.style.display = 'inline-block';
   localStorage.setItem('demo_view_token', token);
-  if (localStorage.getItem('is_subscriber')) {
+  if (localStorage.getItem('is_subscriber') || sessionStorage.getItem('pipeline_session')) {
     const bar = document.querySelector('.sub-bar');
     if (bar) bar.style.display = 'none';
     const so = document.getElementById('signOutBtn');

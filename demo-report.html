@@ -117,7 +117,7 @@ const token = q.get('t') || localStorage.getItem('demo_view_token') || '';
 document.getElementById('backBtn').href = token ? '/demo/snapshot?t=' + encodeURIComponent(token) : '/demo';
 document.getElementById('subCta').href  = STRIPE_OFFER;
 if (token) localStorage.setItem('demo_view_token', token);
-if (localStorage.getItem('is_subscriber')) {
+if (localStorage.getItem('is_subscriber') || sessionStorage.getItem('pipeline_session')) {
   const bar = document.querySelector('.sub-bar');
   if (bar) bar.style.display = 'none';
   const so = document.getElementById('signOutBtn');
