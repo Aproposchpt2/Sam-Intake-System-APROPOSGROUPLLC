@@ -93,13 +93,12 @@ exports.handler = async (event) => {
       method: 'POST',
       headers: { apikey: lookupKey, Authorization: `Bearer ${lookupKey}`, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
       body: JSON.stringify({
-        session_token:    sessionToken,
+        session_token: sessionToken,
         email,
         uei,
-        business_name:    bizName,
-        onboarding_state: 'complete',
-        account_type:     accountType,
-        expires_at:       expiresAt,
+        business_name: bizName,
+        account_type:  accountType,
+        expires_at:    expiresAt,
       }),
     });
   } catch(e) { console.error('[verify] session insert failed:', e.message); }
